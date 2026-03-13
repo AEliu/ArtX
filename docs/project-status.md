@@ -13,6 +13,8 @@ The project currently supports:
 - request-level retries with backoff
 - batch-level failed task reruns via `--rerun-failures`
 - skip-existing behavior by default, with `--no-skip-existing` override
+- single-artwork tile cache reuse across reruns
+- conservative memory guard before stitching extremely large images
 - optional JPEG EXIF metadata writing via `--write-metadata`
 - optional JSON sidecar metadata output via `--write-sidecar`
 - batch task state tracking: pending, running, skipped, succeeded, failed
@@ -64,7 +66,6 @@ Metadata domain:
 - add queue persistence so task state survives process exit
 - add targeted rerun support for previously failed tasks
 - add output conflict policies beyond skip and force-redownload
-- add tile cache and resume support for large artworks
 - improve large-job observability:
   - ETA
   - tile rate
