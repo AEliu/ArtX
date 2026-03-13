@@ -12,3 +12,6 @@ wheels/
 # Local outputs
 downloads*/
 logs/
+
+# Local project guidance
+AGENTS.md
