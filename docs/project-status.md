@@ -69,11 +69,15 @@ Metadata domain:
 - add queue persistence so task state survives process exit
 - add targeted rerun support for previously failed tasks
 - add output conflict policies beyond skip and force-redownload
+- fix stitching-stage progress semantics so "tiles downloaded" and "image stitched" are reported separately
 - improve large-job observability:
   - ETA
   - tile rate
   - retry counters
   - phase display
+- enrich `--list-sizes` output with:
+  - raw canvas memory estimates
+  - optional rough output-size estimates
 - refine size preset thresholds if real-world usage suggests better defaults
 - expand test coverage for:
   - download flow integration
@@ -89,6 +93,7 @@ Metadata domain:
 - improve log and event verbosity controls
 - move HTTP transport to `httpx`
 - add EXIF support for the `pyvips` stitch backend
+- validate and document a complete `pyvips + libvips` runtime path for very large artworks
 
 ### Low priority
 

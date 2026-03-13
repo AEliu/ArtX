@@ -7,7 +7,11 @@ from tempfile import TemporaryDirectory
 from PIL import Image
 
 from googleart_download.download.cache import ensure_cache_layout
-from googleart_download.download.image_writer import choose_stitch_backend, ensure_stitch_memory_budget
+from googleart_download.download.image_writer import (
+    choose_stitch_backend,
+    ensure_stitch_memory_budget,
+    resolve_output_path,
+)
 from googleart_download.download.size_selection import list_size_options, select_download_level
 from googleart_download.download.tiles import download_tiles
 from googleart_download.errors import DownloadError
@@ -132,6 +136,36 @@ class TileCacheTests(unittest.TestCase):
         self.assertEqual([option.level.z for option in options], [0, 1])
         self.assertEqual(options[0].width, 512)
         self.assertEqual(options[1].tile_count, 12)
+
+    def test_resolve_output_path_adds_size_suffix_for_non_max(self) -> None:
+        path = resolve_output_path(
+            Path("/tmp"),
+            None,
+            "The Starry Night",
+            download_size=DownloadSize.MEDIUM,
+            max_dimension=None,
+        )
+        self.assertEqual(path.name, "The Starry Night.medium.jpg")
+
+    def test_resolve_output_path_keeps_max_without_suffix(self) -> None:
+        path = resolve_output_path(
+            Path("/tmp"),
+            None,
+            "The Starry Night",
+            download_size=DownloadSize.MAX,
+            max_dimension=None,
+        )
+        self.assertEqual(path.name, "The Starry Night.jpg")
+
+    def test_resolve_output_path_uses_max_dimension_suffix(self) -> None:
+        path = resolve_output_path(
+            Path("/tmp"),
+            None,
+            "The Starry Night",
+            download_size=DownloadSize.MAX,
+            max_dimension=8000,
+        )
+        self.assertEqual(path.name, "The Starry Night.maxdim-8000.jpg")
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ from types import ModuleType
 from PIL import Image
 
 from ..errors import DownloadError
-from ..models import ArtworkMetadata, StitchBackend, TileInfo
+from ..models import ArtworkMetadata, DownloadSize, StitchBackend, TileInfo
 from ..metadata.output import build_exif_bytes
 
 
@@ -18,10 +18,26 @@ def sanitize_filename(name: str) -> str:
     return name[:180] or "google-art"
 
 
-def resolve_output_path(output_dir: Path, filename: str | None, title: str) -> Path:
+def build_output_suffix(download_size: DownloadSize, max_dimension: int | None) -> str:
+    if max_dimension is not None:
+        return f".maxdim-{max_dimension}"
+    if download_size is DownloadSize.MAX:
+        return ""
+    return f".{download_size.value}"
+
+
+def resolve_output_path(
+    output_dir: Path,
+    filename: str | None,
+    title: str,
+    *,
+    download_size: DownloadSize,
+    max_dimension: int | None,
+) -> Path:
     if filename:
         return output_dir / filename
-    return output_dir / f"{sanitize_filename(title)}.jpg"
+    suffix = build_output_suffix(download_size, max_dimension)
+    return output_dir / f"{sanitize_filename(title)}{suffix}.jpg"
 
 
 def _read_available_memory_bytes() -> int | None:

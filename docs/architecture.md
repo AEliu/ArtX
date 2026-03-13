@@ -149,6 +149,7 @@ Preferred UX:
 - semantic size presets such as `preview`, `medium`, `large`, and `max`
 - an explicit longest-edge cap for users who want more control
 - a lightweight inspection mode to show available levels before downloading
+- size inspection should grow to include memory-risk information, not only pixel size and tile count
 
 The CLI should stay user-friendly and avoid exposing raw pyramid levels as the primary interface.
 
@@ -232,6 +233,14 @@ For large jobs, the user should be able to see:
 - rolling ETA for the download phase
 - retry counters
 - current phase
+
+The progress model should also distinguish between:
+
+- tile download completion
+- stitch start
+- stitch completion
+
+so that a failure before actual image assembly does not appear as a completed stitching phase.
 
 ### HTTP evolution
 

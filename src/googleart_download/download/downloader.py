@@ -5,7 +5,7 @@ from pathlib import Path
 from ..logging_utils import get_logger
 from ..metadata.output import write_metadata_sidecar
 from ..metadata.parsers import normalize_asset_url, parse_page_info, parse_tile_info
-from ..models import ArtworkContext, DownloadResult, DownloadSize, RetryConfig, SizeOption, StitchBackend
+from ..models import ArtworkContext, DownloadResult, DownloadSize, RetryConfig, SizeOption, StitchBackend, TileInfo
 from ..reporters import Reporter
 from .cache import clear_cache_dir, ensure_cache_layout, resolve_artwork_cache_dir, tile_cache_path, write_cache_state
 from .http_client import HttpClient
@@ -46,7 +46,13 @@ def download_artwork(
     reporter.log(f"Fetching artwork page: {asset_url}")
     html = http_client.fetch_text(asset_url, description="artwork page")
     page = parse_page_info(html)
-    output_path = resolve_output_path(output_dir, filename, page.title)
+    output_path = resolve_output_path(
+        output_dir,
+        filename,
+        page.title,
+        download_size=download_size,
+        max_dimension=max_dimension,
+    )
 
     if skip_existing and output_path.exists():
         sidecar_path = output_path.with_suffix(output_path.suffix + ".json") if write_sidecar else None
