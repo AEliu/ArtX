@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+from typing import Sequence
 
 from rich.console import Console
 from rich.table import Table
@@ -17,7 +18,7 @@ from .models import BatchRunResult, DownloadSize, RetryConfig, SizeOption, Stitc
 from .reporters import build_reporter
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Download high-resolution Google Arts & Culture images by stitching tiles.",
     )
@@ -114,7 +115,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--tui", action="store_true", help="show a richer live terminal dashboard")
     parser.add_argument("--log-file", help="write logs to a file")
     parser.add_argument("-v", "--verbose", action="store_true", help="enable debug logging")
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def collect_urls(args: argparse.Namespace) -> list[str]:
@@ -149,6 +150,17 @@ def collect_urls(args: argparse.Namespace) -> list[str]:
     return urls
 
 
+def validate_cli_args(args: argparse.Namespace, urls: list[str]) -> None:
+    if args.metadata_output and not args.metadata_only:
+        raise DownloadError("--metadata-output requires --metadata-only")
+
+    if args.metadata_only and args.list_sizes:
+        raise DownloadError("--metadata-only cannot be used together with --list-sizes")
+
+    if args.list_sizes and len(urls) != 1:
+        raise DownloadError("--list-sizes requires exactly one artwork URL")
+
+
 def render_size_options(title: str, options: list[SizeOption]) -> None:
     console = Console()
     table = Table(title=f"Available Sizes: {title}", header_style="bold cyan")
@@ -168,11 +180,20 @@ def render_size_options(title: str, options: list[SizeOption]) -> None:
     console.print(table)
 
 
-def render_metadata_output(results: list[dict[str, str]], output_path: str | None) -> None:
+def write_metadata_output_file(output_path: Path, payload: str) -> None:
+    try:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(payload, encoding="utf-8")
+    except OSError as exc:
+        raise DownloadError(f"failed to write metadata output file: {output_path}: {exc}") from exc
+
+
+def render_metadata_output(results: list[dict[str, object]], output_path: str | None) -> None:
     payload = json.dumps(results, ensure_ascii=False, indent=2) + "\n"
     if output_path:
-        Path(output_path).write_text(payload, encoding="utf-8")
-        Console(stderr=True).print(f"[cyan]•[/cyan] Metadata saved: {output_path}")
+        output_file = Path(output_path)
+        write_metadata_output_file(output_file, payload)
+        Console(stderr=True).print(f"[cyan]•[/cyan] Metadata saved: {output_file}")
     else:
         Console().print_json(payload)
 
@@ -193,6 +214,32 @@ def resolve_default_metadata_output_path(
         max_dimension=max_dimension,
     )
     return image_path.with_suffix(".metadata.json")
+
+
+def run_metadata_only(args: argparse.Namespace, urls: list[str], retry_config: RetryConfig) -> int:
+    results = [inspect_artwork_metadata(url, retry_config) for url in urls]
+    metadata_output = args.metadata_output
+
+    if metadata_output is None and len(urls) == 1:
+        title = results[0].get("title")
+        resolved_title = title if isinstance(title, str) and title else "google-art"
+        metadata_output = str(
+            resolve_default_metadata_output_path(
+                output_dir=args.output_dir,
+                filename=args.filename,
+                title=resolved_title,
+                download_size=DownloadSize(args.size),
+                max_dimension=args.max_dimension,
+            )
+        )
+    elif metadata_output is None and len(urls) > 1:
+        Console(stderr=True).print(
+            "[cyan]•[/cyan] Multiple URLs with --metadata-only default to a JSON array on stdout. "
+            "Use --metadata-output to save to a file."
+        )
+
+    render_metadata_output(results, metadata_output)
+    return 0
 
 
 def render_summary(run_result: BatchRunResult) -> None:
@@ -225,8 +272,8 @@ def render_summary(run_result: BatchRunResult) -> None:
     console.print(table)
 
 
-def main() -> int:
-    args = parse_args()
+def main(argv: Sequence[str] | None = None) -> int:
+    args = parse_args(argv)
     configure_logging(verbose=args.verbose, log_file=args.log_file)
 
     reporter = build_reporter(args.tui)
@@ -238,27 +285,13 @@ def main() -> int:
 
     try:
         urls = collect_urls(args)
+        validate_cli_args(args, urls)
         if args.list_sizes:
-            if len(urls) != 1:
-                raise DownloadError("--list-sizes requires exactly one artwork URL")
             title, options = inspect_artwork_sizes(urls[0], retry_config)
             render_size_options(title, options)
             return 0
         if args.metadata_only:
-            results = [inspect_artwork_metadata(url, retry_config) for url in urls]
-            metadata_output = args.metadata_output
-            if metadata_output is None and len(urls) == 1:
-                metadata_output = str(
-                    resolve_default_metadata_output_path(
-                        output_dir=args.output_dir,
-                        filename=args.filename,
-                        title=results[0]["title"],
-                        download_size=DownloadSize(args.size),
-                        max_dimension=args.max_dimension,
-                    )
-                )
-            render_metadata_output(results, metadata_output)
-            return 0
+            return run_metadata_only(args, urls, retry_config)
         manager = BatchDownloadManager(
             urls=urls,
             output_dir=Path(args.output_dir),

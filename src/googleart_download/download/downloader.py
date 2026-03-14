@@ -23,12 +23,12 @@ def inspect_artwork_sizes(url: str, retry_config: RetryConfig) -> tuple[str, lis
     return page.title, list_size_options(tile_info)
 
 
-def inspect_artwork_metadata(url: str, retry_config: RetryConfig) -> dict[str, str]:
+def inspect_artwork_metadata(url: str, retry_config: RetryConfig) -> dict[str, object]:
     http_client = HttpClient(retry_config=retry_config)
     asset_url = normalize_asset_url(url)
     html = http_client.fetch_text(asset_url, description="artwork page")
     page = parse_page_info(html)
-    payload = metadata_to_dict(page.metadata) if page.metadata is not None else {}
+    payload: dict[str, object] = metadata_to_dict(page.metadata) if page.metadata is not None else {}
     payload["asset_url"] = asset_url
     payload.setdefault("title", page.title)
     return payload
