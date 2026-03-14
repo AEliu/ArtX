@@ -208,21 +208,32 @@ This avoids corrupted or partial final outputs.
 
 ### Stitch backend strategy
 
-The project now supports two stitch backends:
+The project now supports three stitch backends:
 
 - `pillow`
   - simpler
   - supports current EXIF writing path
   - not suitable for extremely large images because it builds a full in-memory canvas
-- `pyvips`
+- `bigtiff`
   - intended for very large images
-  - lower-memory execution path
+  - writes a BigTIFF result incrementally on disk
+  - avoids automatic JPEG conversion for large images by default
+  - currently does not support the existing EXIF writing path
+- `pyvips`
+  - still available as an explicit alternative backend
+  - may be useful for direct large-image conversion experiments
   - currently does not support the existing EXIF writing path
 
 The default strategy is `auto`:
 
 - use Pillow when the image is small enough for conservative in-memory stitching
-- use `pyvips` when the image is too large for safe Pillow stitching
+- use `bigtiff` when the image is too large for safe Pillow stitching
+
+For extremely large artworks, the safer product behavior is now:
+
+- complete the stitch as a TIFF result first
+- let the user decide whether to convert that TIFF to JPEG later
+- avoid treating large JPEG conversion as part of the default success path
 
 ### Better observability
 
@@ -274,6 +285,7 @@ Preferred path:
 
 - Is in-memory stitching still acceptable for extreme image sizes?
 - Should the project eventually support lower-memory stitching strategies?
+- Should the project add a separate, explicit TIFF-to-JPEG conversion command?
 
 ## Recommended documentation split
 

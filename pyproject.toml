@@ -19,7 +19,9 @@ googleart-download = "googleart_download.cli:main"
 
 [project.optional-dependencies]
 large-images = [
+    "numpy>=2.4.3",
     "pyvips>=3.1.1",
+    "tifffile>=2026.3.3",
 ]
 
 [tool.hatch.build.targets.wheel]

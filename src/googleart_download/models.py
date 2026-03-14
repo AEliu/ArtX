@@ -132,6 +132,7 @@ class TaskState(str, Enum):
 class StitchBackend(str, Enum):
     AUTO = "auto"
     PILLOW = "pillow"
+    BIGTIFF = "bigtiff"
     PYVIPS = "pyvips"
 
 
