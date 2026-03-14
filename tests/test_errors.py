@@ -23,7 +23,7 @@ class ErrorGuidanceTests(unittest.TestCase):
         )
         self.assertTrue(any("memory safety guard" in line for line in guidance))
         self.assertTrue(any("--size large" in line for line in guidance))
-        self.assertTrue(any("pyvips" in line for line in guidance))
+        self.assertTrue(any("bigtiff" in line for line in guidance))
 
 
 if __name__ == "__main__":

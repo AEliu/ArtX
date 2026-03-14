@@ -96,7 +96,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "--stitch-backend",
         choices=[backend.value for backend in StitchBackend],
         default=StitchBackend.AUTO.value,
-        help="image stitch backend: auto, pillow, or pyvips (default: auto)",
+        help="image stitch backend: auto, pillow, bigtiff, or pyvips (default: auto)",
     )
     parser.add_argument(
         "--list-sizes",

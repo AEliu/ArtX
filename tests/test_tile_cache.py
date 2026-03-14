@@ -10,9 +10,11 @@ import json
 
 from googleart_download.download.cache import ensure_cache_layout, resolve_artwork_cache_dir
 from googleart_download.download.image_writer import (
+    build_bigtiff_temp_path,
     build_temp_output_path,
     choose_stitch_backend,
     ensure_stitch_memory_budget,
+    resolve_backend_output_path,
     resolve_output_path,
 )
 from googleart_download.download.size_selection import list_size_options, select_download_level
@@ -83,7 +85,7 @@ class TileCacheTests(unittest.TestCase):
             with self.assertRaises(DownloadError):
                 ensure_stitch_memory_budget(tile_info)
 
-    def test_auto_backend_prefers_pyvips_when_memory_is_not_safe(self) -> None:
+    def test_auto_backend_prefers_bigtiff_when_memory_is_not_safe(self) -> None:
         tile_info = TileInfo(
             tile_width=256,
             tile_height=256,
@@ -93,7 +95,7 @@ class TileCacheTests(unittest.TestCase):
         from unittest.mock import patch
 
         with patch("googleart_download.download.image_writer._read_available_memory_bytes", return_value=1024):
-            self.assertEqual(choose_stitch_backend(tile_info, StitchBackend.AUTO), StitchBackend.PYVIPS)
+            self.assertEqual(choose_stitch_backend(tile_info, StitchBackend.AUTO), StitchBackend.BIGTIFF)
 
     def test_select_download_level_uses_size_presets(self) -> None:
         tile_info = TileInfo(
@@ -173,6 +175,18 @@ class TileCacheTests(unittest.TestCase):
     def test_build_temp_output_path_preserves_image_extension(self) -> None:
         path = build_temp_output_path(Path("/tmp/The Starry Night.preview.jpg"))
         self.assertEqual(path.name, "The Starry Night.preview.part.jpg")
+
+    def test_build_bigtiff_temp_path_uses_tiff_extension(self) -> None:
+        path = build_bigtiff_temp_path(Path("/tmp/The Starry Night.preview.jpg"))
+        self.assertEqual(path.name, "The Starry Night.preview.part.bigtiff.tif")
+
+    def test_resolve_backend_output_path_uses_tiff_for_bigtiff_backend(self) -> None:
+        path = resolve_backend_output_path(Path("/tmp/The Starry Night.jpg"), StitchBackend.BIGTIFF)
+        self.assertEqual(path.name, "The Starry Night.tif")
+
+    def test_resolve_backend_output_path_keeps_existing_tiff_extension(self) -> None:
+        path = resolve_backend_output_path(Path("/tmp/The Starry Night.tiff"), StitchBackend.BIGTIFF)
+        self.assertEqual(path.name, "The Starry Night.tiff")
 
     def test_resolve_artwork_cache_dir_uses_stable_asset_url(self) -> None:
         with TemporaryDirectory() as tmpdir:

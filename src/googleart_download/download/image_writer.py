@@ -32,6 +32,18 @@ def build_temp_output_path(output_path: Path) -> Path:
     return output_path.with_name(f"{output_path.name}.part")
 
 
+def build_bigtiff_temp_path(output_path: Path) -> Path:
+    return output_path.with_name(f"{output_path.stem}.part.bigtiff.tif")
+
+
+def resolve_backend_output_path(output_path: Path, backend: StitchBackend) -> Path:
+    if backend is not StitchBackend.BIGTIFF:
+        return output_path
+    if output_path.suffix.lower() in {".tif", ".tiff"}:
+        return output_path
+    return output_path.with_suffix(".tif")
+
+
 def resolve_output_path(
     output_dir: Path,
     filename: str | None,
@@ -110,8 +122,20 @@ def _load_pyvips() -> ModuleType:
 
 def choose_stitch_backend(tile_info: TileInfo, requested_backend: StitchBackend) -> StitchBackend:
     if requested_backend is StitchBackend.AUTO:
-        return StitchBackend.PILLOW if has_safe_pillow_memory_budget(tile_info) else StitchBackend.PYVIPS
+        return StitchBackend.PILLOW if has_safe_pillow_memory_budget(tile_info) else StitchBackend.BIGTIFF
     return requested_backend
+
+
+def _load_streaming_tiff_modules() -> tuple[ModuleType, ModuleType]:
+    try:
+        import numpy  # type: ignore[import-not-found]
+        import tifffile  # type: ignore[import-not-found]
+    except Exception as exc:
+        raise DownloadError(
+            "bigtiff backend is not available. Install the optional dependency set with "
+            "`uv sync --extra large-images`."
+        ) from exc
+    return numpy, tifffile
 
 
 def _save_with_pillow(
@@ -158,6 +182,54 @@ def _stitch_with_pillow(
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     _save_with_pillow(image, output_path, metadata, write_metadata)
+
+
+def _stitch_with_bigtiff(
+    tile_info: TileInfo,
+    tiles: dict[tuple[int, int], Path],
+    output_path: Path,
+    metadata: ArtworkMetadata | None,
+    write_metadata: bool,
+) -> None:
+    if write_metadata and metadata is not None:
+        raise DownloadError(
+            "EXIF writing is not supported with the bigtiff stitch backend yet. "
+            "Use `--write-sidecar`, disable `--write-metadata`, or force `--stitch-backend pillow` for smaller images."
+        )
+
+    numpy, tifffile = _load_streaming_tiff_modules()
+    level = tile_info.highest_level
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    intermediate_path = build_bigtiff_temp_path(output_path)
+    canvas = tifffile.memmap(
+        str(intermediate_path),
+        shape=(tile_info.image_height, tile_info.image_width, 3),
+        dtype=numpy.uint8,
+        bigtiff=True,
+        photometric="rgb",
+    )
+
+    try:
+        for y in range(level.num_tiles_y):
+            top = y * tile_info.tile_height
+            for x in range(level.num_tiles_x):
+                left = x * tile_info.tile_width
+                with Image.open(tiles[(x, y)]) as tile:
+                    rgb_tile = tile.convert("RGB")
+                    width = min(rgb_tile.width, tile_info.image_width - left)
+                    height = min(rgb_tile.height, tile_info.image_height - top)
+                    if width != rgb_tile.width or height != rgb_tile.height:
+                        rgb_tile = rgb_tile.crop((0, 0, width, height))
+                    canvas[top : top + height, left : left + width, :] = numpy.asarray(rgb_tile, dtype=numpy.uint8)
+            canvas.flush()
+    except Exception:
+        del canvas
+        if intermediate_path.exists():
+            intermediate_path.unlink()
+        raise
+
+    del canvas
+    intermediate_path.replace(output_path)
 
 
 def _stitch_with_pyvips(
@@ -213,6 +285,8 @@ def stitch_tiles(
     selected_backend = choose_stitch_backend(tile_info, backend)
     if selected_backend is StitchBackend.PILLOW:
         _stitch_with_pillow(tile_info, tiles, output_path, metadata, write_metadata)
+    elif selected_backend is StitchBackend.BIGTIFF:
+        _stitch_with_bigtiff(tile_info, tiles, output_path, metadata, write_metadata)
     else:
         _stitch_with_pyvips(tile_info, tiles, output_path, metadata, write_metadata)
     return selected_backend

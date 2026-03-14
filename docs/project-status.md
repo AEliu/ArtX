@@ -19,7 +19,8 @@ The project currently supports:
 - skip-existing behavior by default, with `--no-skip-existing` override
 - single-artwork tile cache reuse across reruns
 - conservative memory guard before stitching extremely large images
-- optional `pyvips` stitch backend for large images
+- optional `bigtiff` streaming stitch backend for very large images
+- optional `pyvips` direct stitch backend for experiments and explicit use
 - optional JPEG EXIF metadata writing via `--write-metadata`
 - optional JSON sidecar metadata output via `--write-sidecar`
 - batch task state tracking: pending, running, skipped, succeeded, failed
@@ -71,7 +72,6 @@ Metadata domain:
 - add queue persistence so task state survives process exit
 - add targeted rerun support for previously failed tasks
 - add output conflict policies beyond skip and force-redownload
-- fix stitching-stage progress semantics so "tiles downloaded" and "image stitched" are reported separately
 - improve large-job observability:
   - ETA
   - tile rate
@@ -94,8 +94,8 @@ Metadata domain:
 - support richer batch input formats such as CSV or JSONL
 - improve log and event verbosity controls
 - move HTTP transport to `httpx`
-- add EXIF support for the `pyvips` stitch backend
-- validate and document a complete `pyvips + libvips` runtime path for very large artworks
+- add EXIF support for the `bigtiff` and `pyvips` stitch backends
+- decide whether a separate explicit "convert TIFF to JPEG" command belongs in this project
 
 ### Low priority
 
