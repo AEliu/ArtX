@@ -1,0 +1,60 @@
+name: Smoke Download
+
+on:
+  workflow_dispatch:
+    inputs:
+      artwork_input:
+        description: "Artwork URL, g.co short link, or bare asset id"
+        required: false
+        default: "3QFHLJgXCmQm2Q"
+
+jobs:
+  smoke-download:
+    runs-on: ubuntu-latest
+
+    env:
+      ARTWORK_INPUT: ${{ inputs.artwork_input || '3QFHLJgXCmQm2Q' }}
+      OUTPUT_DIR: /tmp/googleart-smoke
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Sync dependencies
+        run: uv sync --dev
+
+      - name: Run lightweight smoke download
+        run: |
+          uv run googleart-download "$ARTWORK_INPUT" \
+            -o "$OUTPUT_DIR" \
+            --max-dimension 1024 \
+            --jpeg-preset web
+
+      - name: Verify smoke output
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          output_dir = Path("/tmp/googleart-smoke")
+          files = sorted(path for path in output_dir.iterdir() if path.is_file())
+          if len(files) != 1:
+              raise SystemExit(f"expected exactly one output file, found {len(files)}: {[p.name for p in files]}")
+
+          output = files[0]
+          print(f"smoke_output={output}")
+          print(f"smoke_size_bytes={output.stat().st_size}")
+          PY
+
+      - name: Upload smoke artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-download-output
+          path: /tmp/googleart-smoke/*

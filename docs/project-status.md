@@ -64,6 +64,7 @@ Repo quality and automation:
 
 - `pyproject.toml` now configures `ruff`
 - `.github/workflows/ci.yml` runs format, lint, type-check, tests, and README asset freshness checks
+- `.github/workflows/smoke-download.yml` provides a manual GitHub Actions smoke download using a conservative lightweight download profile
 - `scripts/generate_readme_assets.py` is treated as a generated-doc asset source rather than a hand-maintained file
 
 ## Recent completed work
