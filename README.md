@@ -2,8 +2,9 @@
 
 [![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-3776AB.svg)](#install)
 [![Version 0.2.0](https://img.shields.io/badge/version-0.2.0-0f766e.svg)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-0f766e.svg)](LICENSE)
 
-[中文说明](README.zh-CN.md)
+[中文说明](docs/README.zh-CN.md)
 
 Download high-resolution images from Google Arts & Culture artwork pages.
 
@@ -140,6 +141,8 @@ _Screenshot generated from the current TUI output._
 - [Usage Guide](docs/usage.md): CLI usage, batch workflows, resume, rerun, conflict handling
 - [Large Images](docs/large-images.md): large artwork behavior, TIFF/BigTIFF path, cache reuse, size inspection
 - [Metadata Guide](docs/metadata.md): metadata-only export, sidecars, EXIF behavior
+- [Testing Guide](docs/testing.md): local checks, test layers, and manual smoke workflow
+- [Development Guide](docs/development.md): local workflow, tooling, CI, and generated assets
 - [Architecture Notes](docs/architecture.md): internal architecture and implementation notes
 - [Project Status](docs/project-status.md): current status and planned work
 
@@ -148,3 +151,4 @@ _Screenshot generated from the current TUI output._
 - Works on artwork pages, not full collections or story pages.
 - Large-image TIFF output is supported; automatic TIFF-to-JPEG conversion is intentionally not in the default flow.
 - Some richer metadata export ideas are planned, but the current metadata features remain intentionally conservative.
+- Released under the MIT License.

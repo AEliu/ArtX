@@ -65,6 +65,9 @@ Repo quality and automation:
 - `pyproject.toml` now configures `ruff`
 - `.github/workflows/ci.yml` runs format, lint, type-check, tests, and README asset freshness checks
 - `.github/workflows/smoke-download.yml` provides a manual GitHub Actions smoke download using a conservative lightweight download profile
+- `tests/fixtures/smoke_assets.json` tracks a small set of real-world smoke artwork inputs for manual workflow use:
+  - built-in named cases cover bare asset ids, query-string URLs, and `g.co` short links
+  - the workflow still supports a manual custom artwork input override when needed
 - `scripts/generate_readme_assets.py` is treated as a generated-doc asset source rather than a hand-maintained file
 
 ## Recent completed work
@@ -139,6 +142,8 @@ Repo quality and automation:
 - revisit README screenshot presentation:
   - current generated TUI and large-image previews are accurate but still not readable enough in some web and mobile layouts
   - refine the documentation visual strategy later instead of continuing ad hoc tweaks now
+- consider adding a minimal `SECURITY.md` if the project starts receiving broader public usage or vulnerability reports
+- consider adding a short release/versioning process note once release cadence becomes more regular
 
 ### Low priority
 

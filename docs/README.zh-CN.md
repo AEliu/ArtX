@@ -1,9 +1,10 @@
 # googleart-download
 
 [![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-3776AB.svg)](#安装)
-[![Version 0.1.0](https://img.shields.io/badge/version-0.1.0-0f766e.svg)](pyproject.toml)
+[![Version 0.2.0](https://img.shields.io/badge/version-0.2.0-0f766e.svg)](../pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-0f766e.svg)](../LICENSE)
 
-[English README](README.md)
+[English README](../README.md)
 
 下载 Google Arts & Culture 作品页中的高清图像。
 
@@ -80,8 +81,8 @@ uv run googleart-download "3QFHLJgXCmQm2Q" --list-sizes
 uv run googleart-download "3QFHLJgXCmQm2Q" --metadata-only
 ```
 
-<a href="docs/assets/tui-preview.svg">
-  <img src="docs/assets/tui-overview.svg" alt="Terminal preview" />
+<a href="assets/tui-preview.svg">
+  <img src="assets/tui-overview.svg" alt="Terminal preview" />
 </a>
 
 _截图来自当前 TUI 的真实渲染输出。_
@@ -131,22 +132,24 @@ uv run googleart-download "3QFHLJgXCmQm2Q" --jpeg-preset balanced
 
 大图自动转 JPEG 不属于默认下载路径。如果你最终仍然需要 JPEG，建议把生成的 TIFF 作为后处理再转换。
 
-<a href="docs/assets/large-image-tiff.svg">
-  <img src="docs/assets/large-image-overview.svg" alt="Large artwork TIFF path" />
+<a href="assets/large-image-tiff.svg">
+  <img src="assets/large-image-overview.svg" alt="Large artwork TIFF path" />
 </a>
 
 _截图来自当前 TUI 的真实渲染输出。_
 
 ## 更多文档
 
-- [用法说明](docs/usage.md)：CLI 用法、批量下载、恢复、重跑、冲突策略
-- [大图说明](docs/large-images.md)：大图行为、TIFF/BigTIFF、安全拼接、缓存复用
-- [元数据说明](docs/metadata.md)：`metadata-only`、sidecar、EXIF
-- [架构说明](docs/architecture.md)：内部结构与实现说明
-- [项目状态](docs/project-status.md)：当前状态与后续计划
+- [用法说明](usage.md)：CLI 用法、批量下载、恢复、重跑、冲突策略
+- [大图说明](large-images.md)：大图行为、TIFF/BigTIFF、安全拼接、缓存复用
+- [元数据说明](metadata.md)：`metadata-only`、sidecar、EXIF
+- [测试说明](testing.md)：本地检查、测试分层、手动 smoke workflow
+- [架构说明](architecture.md)：内部结构与实现说明
+- [项目状态](project-status.md)：当前状态与后续计划
 
 ## 当前范围
 
 - 当前面向单张作品页，不处理合集页或故事页
 - 已支持大图 TIFF 输出，但默认链路不自动做 TIFF 到 JPEG 的转换
 - 更丰富的元数据导出仍在后续计划中，但当前功能保持克制和稳定
+- 项目采用 MIT 协议发布
