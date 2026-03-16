@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -7,15 +8,13 @@ from unittest.mock import patch
 
 from PIL import Image
 
-import json
-
 from googleart_download.download.cache import ensure_cache_layout, resolve_artwork_cache_dir
 from googleart_download.download.image_writer import (
     _save_with_pillow,
     build_bigtiff_temp_path,
     build_temp_output_path,
-    cleanup_stale_partial_outputs,
     choose_stitch_backend,
+    cleanup_stale_partial_outputs,
     ensure_stitch_memory_budget,
     resolve_backend_output_path,
     resolve_non_conflicting_output_path,

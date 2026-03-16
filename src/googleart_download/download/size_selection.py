@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from .image_writer import choose_stitch_backend, estimate_stitch_memory_bytes
 from ..errors import DownloadError
 from ..models import DownloadSize, PyramidLevel, SizeOption, StitchBackend, TileInfo
+from .image_writer import choose_stitch_backend, estimate_stitch_memory_bytes
 
 SIZE_TARGET_LONGEST_EDGE: dict[DownloadSize, int | None] = {
     DownloadSize.PREVIEW: 2_000,
@@ -13,10 +13,7 @@ SIZE_TARGET_LONGEST_EDGE: dict[DownloadSize, int | None] = {
 
 
 def list_size_options(tile_info: TileInfo) -> list[SizeOption]:
-    return [
-        _build_size_option(tile_info, level)
-        for level in tile_info.levels
-    ]
+    return [_build_size_option(tile_info, level) for level in tile_info.levels]
 
 
 def _build_size_option(tile_info: TileInfo, level: PyramidLevel) -> SizeOption:

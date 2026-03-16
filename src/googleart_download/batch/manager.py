@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import replace
 from pathlib import Path
 
-from .state import BatchStateStore, resolve_batch_state_path
 from ..errors import DownloadError
 from ..models import (
     BatchRunResult,
@@ -17,6 +16,7 @@ from ..models import (
     TaskState,
 )
 from ..reporting import Reporter
+from .state import BatchStateStore, resolve_batch_state_path
 
 
 class BatchDownloadManager:
@@ -59,8 +59,7 @@ class BatchDownloadManager:
         self.resume_batch = resume_batch
         self.state_store = BatchStateStore(resolve_batch_state_path(output_dir, batch_state_file))
         self.tasks = [
-            BatchTask(index=index, url=url, state=TaskState.PENDING)
-            for index, url in enumerate(urls, start=1)
+            BatchTask(index=index, url=url, state=TaskState.PENDING) for index, url in enumerate(urls, start=1)
         ]
         if self.resume_batch:
             load_result = self.state_store.load(urls=urls)
@@ -87,7 +86,9 @@ class BatchDownloadManager:
 
             if round_number > 1:
                 rerun_rounds_used += 1
-                self.reporter.log(f"Rerun round {rerun_rounds_used}: retrying {len(rerun_candidates)} failed artwork(s)")
+                self.reporter.log(
+                    f"Rerun round {rerun_rounds_used}: retrying {len(rerun_candidates)} failed artwork(s)"
+                )
 
             stop_batch = False
             for task in rerun_candidates:

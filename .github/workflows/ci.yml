@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - "feat/**"
+      - "fix/**"
+      - "refactor/**"
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Sync dependencies
+        run: uv sync --dev
+
+      - name: Ruff format check
+        run: uv run ruff format --check .
+
+      - name: Ruff lint
+        run: uv run ruff check .
+
+      - name: Type check
+        run: uv run python -m mypy src tests scripts/generate_readme_assets.py
+
+      - name: Test
+        run: uv run python -m unittest discover -s tests -v
+
+      - name: Regenerate README assets
+        run: uv run python scripts/generate_readme_assets.py
+
+      - name: Verify generated assets are up to date
+        run: git diff --exit-code -- docs/assets

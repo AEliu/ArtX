@@ -7,8 +7,7 @@ from pathlib import Path
 
 from rich.console import Console
 
-from googleart_download.reporters import RichTuiReporter
-
+from googleart_download.reporting import RichTuiReporter
 
 ASSETS_DIR = Path("docs/assets")
 

@@ -5,10 +5,10 @@ from collections.abc import Callable
 
 import httpx
 
-from ..constants import REQUEST_TIMEOUT, USER_AGENT
 from ..errors import DownloadError
 from ..logging_utils import get_logger
 from ..models import RetryConfig
+from .constants import REQUEST_TIMEOUT, USER_AGENT
 
 
 class HttpClient:

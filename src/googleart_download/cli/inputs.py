@@ -62,7 +62,9 @@ def validate_cli_args(args: argparse.Namespace, urls: list[str]) -> None:
         raise DownloadError("--rerun-failed cannot be used together with --list-sizes")
 
     if args.rerun_failed and urls:
-        raise DownloadError("--rerun-failed loads failed URLs from the batch state file and cannot be combined with direct batch URLs")
+        raise DownloadError(
+            "--rerun-failed loads failed URLs from the batch state file and cannot be combined with direct batch URLs"
+        )
 
     if args.metadata_only and args.filename and len(urls) > 1:
         raise DownloadError("--filename cannot be used with multiple URLs in --metadata-only mode")

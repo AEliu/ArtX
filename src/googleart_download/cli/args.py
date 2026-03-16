@@ -8,7 +8,6 @@ from typing import Sequence
 
 from ..models import DownloadSize, OutputConflictPolicy, StitchBackend
 
-
 BARE_ASSET_ID_PATTERN = re.compile(r"^-?[A-Za-z0-9_][A-Za-z0-9_-]{9,}$")
 JPEG_PRESET_QUALITIES = {
     "web": 75,

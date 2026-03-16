@@ -20,8 +20,8 @@ from ..reporting import Reporter
 from .cache import clear_cache_dir, ensure_cache_layout, resolve_artwork_cache_dir, tile_cache_path, write_cache_state
 from .http_client import HttpClient
 from .image_writer import (
-    cleanup_stale_partial_outputs,
     choose_stitch_backend,
+    cleanup_stale_partial_outputs,
     resolve_backend_output_path,
     resolve_non_conflicting_output_path,
     resolve_output_path,
@@ -92,7 +92,9 @@ def download_artwork(
 
         tile_info = parse_tile_info(http_client.fetch_bytes(page.tile_info_url, description="tile metadata"))
         selected_level = select_download_level(tile_info, size=download_size, max_dimension=max_dimension)
-        selected_tile_info = TileInfo(tile_width=tile_info.tile_width, tile_height=tile_info.tile_height, levels=[selected_level])
+        selected_tile_info = TileInfo(
+            tile_width=tile_info.tile_width, tile_height=tile_info.tile_height, levels=[selected_level]
+        )
         selected_backend = choose_stitch_backend(selected_tile_info, stitch_backend)
         output_path = resolve_backend_output_path(original_output_path, selected_backend)
         if output_conflict_policy is OutputConflictPolicy.RENAME and output_path.exists():
@@ -145,7 +147,8 @@ def download_artwork(
         )
         reporter.log(
             "Metadata ready: "
-            f"{page.title} | {tile_info.image_width_for(selected_level)}x{tile_info.image_height_for(selected_level)} | "
+            f"{page.title} | "
+            f"{tile_info.image_width_for(selected_level)}x{tile_info.image_height_for(selected_level)} | "
             f"{len(jobs)} tiles | level {selected_level.z}"
         )
         reporter.log(f"Output format: {output_path.suffix.lower().lstrip('.').upper()}")

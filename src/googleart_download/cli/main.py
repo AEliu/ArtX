@@ -9,10 +9,31 @@ from rich.console import Console
 from ..download.http_client import HttpClient
 from ..errors import DownloadError, build_error_guidance
 from ..logging_utils import configure_logging
-from ..models import BatchRunResult, DownloadSize, JsonObject, OutputConflictPolicy, RetryConfig, SizeOption, StitchBackend
+from ..models import (
+    BatchRunResult,
+    DownloadSize,
+    JsonObject,
+    OutputConflictPolicy,
+    RetryConfig,
+    SizeOption,
+    StitchBackend,
+)
 from ..reporting import Reporter
-from .args import BARE_ASSET_ID_PATTERN, JPEG_PRESET_QUALITIES, _preprocess_argv, parse_args, parse_jpeg_quality, resolve_jpeg_quality
-from .inputs import _needs_url_resolution, canonicalize_batch_urls, collect_urls, load_failed_batch_urls, validate_cli_args
+from .args import (
+    BARE_ASSET_ID_PATTERN,
+    JPEG_PRESET_QUALITIES,
+    _preprocess_argv,
+    parse_args,
+    parse_jpeg_quality,
+    resolve_jpeg_quality,
+)
+from .inputs import (
+    _needs_url_resolution,
+    canonicalize_batch_urls,
+    collect_urls,
+    load_failed_batch_urls,
+    validate_cli_args,
+)
 from .output import (
     emit_metadata_output,
     render_size_options,
@@ -122,7 +143,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.metadata_only:
             return run_metadata_only(args, urls, retry_config, reporter=reporter)
         if args.rerun_failed:
-            failed_urls, source_state_path, rerun_state_path = load_failed_batch_urls(Path(args.output_dir), args.batch_state_file)
+            failed_urls, source_state_path, rerun_state_path = load_failed_batch_urls(
+                Path(args.output_dir), args.batch_state_file
+            )
             if not failed_urls:
                 reporter.log(f"No failed tasks found in batch state file: {source_state_path}")
                 return 0
@@ -136,7 +159,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             for message in duplicate_messages:
                 reporter.log(message)
             if len(canonical_urls) != len(urls):
-                reporter.log(f"Batch input normalized from {len(urls)} URL(s) to {len(canonical_urls)} unique artwork(s)")
+                reporter.log(
+                    f"Batch input normalized from {len(urls)} URL(s) to {len(canonical_urls)} unique artwork(s)"
+                )
         from . import BatchDownloadManager
 
         manager = BatchDownloadManager(

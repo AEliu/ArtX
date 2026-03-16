@@ -27,3 +27,16 @@ large-images = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/googleart_download"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "ruff>=0.15.6",
+]
