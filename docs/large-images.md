@@ -20,6 +20,10 @@ For very large outputs:
 
 This is intentional product behavior, not a fallback accident.
 
+<a href="assets/large-image-tiff.svg">
+  <img src="assets/large-image-overview.svg" alt="Large artwork TIFF path" />
+</a>
+
 ## Tile Cache Reuse
 
 Artwork tiles are cached per artwork identity. If a download is interrupted, already downloaded tiles are reused on the next run.

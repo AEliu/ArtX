@@ -112,6 +112,9 @@ Metadata domain:
 - improve log and event verbosity controls
 - add EXIF support for the `bigtiff` and `pyvips` stitch backends
 - decide whether a separate explicit "convert TIFF to JPEG" command belongs in this project
+- revisit README screenshot presentation:
+  - current generated TUI and large-image previews are accurate but still not readable enough in some web and mobile layouts
+  - refine the documentation visual strategy later instead of continuing ad hoc tweaks now
 
 ### Low priority
 

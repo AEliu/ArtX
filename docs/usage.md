@@ -64,6 +64,22 @@ uv run googleart-download "3QFHLJgXCmQm2Q" --workers 32
 
 `--workers` controls tile download concurrency inside one artwork. Higher values can help on good networks, but may also increase rate limiting or retry pressure.
 
+Adjust JPEG quality for JPEG outputs:
+
+```bash
+uv run googleart-download "3QFHLJgXCmQm2Q" --jpeg-quality 85
+uv run googleart-download "3QFHLJgXCmQm2Q" --jpeg-preset balanced
+```
+
+`--jpeg-quality` applies to JPEG writes only. It does not force large artworks back to JPEG if the safe default path has switched them to TIFF/BigTIFF.
+`--jpeg-preset` is a friendlier alias layer:
+
+- `web` -> `75`
+- `balanced` -> `85`
+- `archive` -> `95`
+
+`--jpeg-quality` and `--jpeg-preset` cannot be used together.
+
 ## Output Naming
 
 By default:
@@ -114,6 +130,10 @@ Size inspection reports:
 ```bash
 uv run googleart-download --url-file urls.txt --tui --log-file logs/run.log -v
 ```
+
+<a href="assets/tui-preview.svg">
+  <img src="assets/tui-overview.svg" alt="TUI overview" />
+</a>
 
 The CLI can show:
 

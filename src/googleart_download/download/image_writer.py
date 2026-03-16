@@ -171,14 +171,15 @@ def _save_with_pillow(
     output_path: Path,
     metadata: ArtworkMetadata | None,
     write_metadata: bool,
+    jpeg_quality: int,
 ) -> None:
     temp_output_path = build_temp_output_path(output_path)
     try:
         if write_metadata and metadata is not None:
             exif_bytes = build_exif_bytes(metadata)
-            image.save(temp_output_path, quality=95, exif=exif_bytes)
+            image.save(temp_output_path, quality=jpeg_quality, exif=exif_bytes)
         else:
-            image.save(temp_output_path, quality=95)
+            image.save(temp_output_path, quality=jpeg_quality)
         temp_output_path.replace(output_path)
     except Exception:
         if temp_output_path.exists():
@@ -192,6 +193,7 @@ def _stitch_with_pillow(
     output_path: Path,
     metadata: ArtworkMetadata | None,
     write_metadata: bool,
+    jpeg_quality: int,
 ) -> None:
     ensure_stitch_memory_budget(tile_info)
     image = Image.new("RGB", (tile_info.image_width, tile_info.image_height))
@@ -209,7 +211,7 @@ def _stitch_with_pillow(
             image.paste(cropped, (left, top))
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    _save_with_pillow(image, output_path, metadata, write_metadata)
+    _save_with_pillow(image, output_path, metadata, write_metadata, jpeg_quality)
 
 
 def _stitch_with_bigtiff(
@@ -266,6 +268,7 @@ def _stitch_with_pyvips(
     output_path: Path,
     metadata: ArtworkMetadata | None,
     write_metadata: bool,
+    jpeg_quality: int,
 ) -> None:
     if write_metadata and metadata is not None:
         raise DownloadError(
@@ -294,7 +297,7 @@ def _stitch_with_pyvips(
     final_image = pyvips.Image.arrayjoin(rows, across=1, shim=0)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     try:
-        final_image.write_to_file(str(temp_output_path), Q=95, optimize_coding=True, strip=False)
+        final_image.write_to_file(str(temp_output_path), Q=jpeg_quality, optimize_coding=True, strip=False)
         temp_output_path.replace(output_path)
     except Exception:
         if temp_output_path.exists():
@@ -308,13 +311,14 @@ def stitch_tiles(
     output_path: Path,
     metadata: ArtworkMetadata | None = None,
     write_metadata: bool = False,
+    jpeg_quality: int = 95,
     backend: StitchBackend = StitchBackend.AUTO,
 ) -> StitchBackend:
     selected_backend = choose_stitch_backend(tile_info, backend)
     if selected_backend is StitchBackend.PILLOW:
-        _stitch_with_pillow(tile_info, tiles, output_path, metadata, write_metadata)
+        _stitch_with_pillow(tile_info, tiles, output_path, metadata, write_metadata, jpeg_quality)
     elif selected_backend is StitchBackend.BIGTIFF:
         _stitch_with_bigtiff(tile_info, tiles, output_path, metadata, write_metadata)
     else:
-        _stitch_with_pyvips(tile_info, tiles, output_path, metadata, write_metadata)
+        _stitch_with_pyvips(tile_info, tiles, output_path, metadata, write_metadata, jpeg_quality)
     return selected_backend

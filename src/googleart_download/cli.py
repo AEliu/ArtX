@@ -24,6 +24,11 @@ from .reporters import Reporter, build_reporter
 
 
 BARE_ASSET_ID_PATTERN = re.compile(r"^-?[A-Za-z0-9_][A-Za-z0-9_-]{9,}$")
+JPEG_PRESET_QUALITIES = {
+    "web": 75,
+    "balanced": 85,
+    "archive": 95,
+}
 
 
 def _format_bytes(value: int) -> str:
@@ -33,6 +38,16 @@ def _format_bytes(value: int) -> str:
             return f"{size:.1f} {unit}"
         size /= 1024
     return f"{size:.1f} TiB"
+
+
+def parse_jpeg_quality(value: str) -> int:
+    try:
+        quality = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("jpeg quality must be an integer between 1 and 100") from exc
+    if not 1 <= quality <= 100:
+        raise argparse.ArgumentTypeError("jpeg quality must be between 1 and 100")
+    return quality
 
 
 def _preprocess_argv(argv: Sequence[str] | None) -> list[str]:
@@ -51,6 +66,14 @@ def _preprocess_argv(argv: Sequence[str] | None) -> list[str]:
                 continue
         processed.append(token)
     return processed
+
+
+def resolve_jpeg_quality(args: argparse.Namespace) -> int:
+    if args.jpeg_preset is not None:
+        return JPEG_PRESET_QUALITIES[args.jpeg_preset]
+    if args.jpeg_quality is not None:
+        return args.jpeg_quality
+    return 95
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -77,6 +100,18 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         type=int,
         default=min(16, (os.cpu_count() or 4) * 2),
         help="concurrent tile downloads (default: auto)",
+    )
+    jpeg_group = parser.add_mutually_exclusive_group()
+    jpeg_group.add_argument(
+        "--jpeg-quality",
+        type=parse_jpeg_quality,
+        default=None,
+        help="jpeg output quality for jpeg writes (1-100, default: 95)",
+    )
+    jpeg_group.add_argument(
+        "--jpeg-preset",
+        choices=sorted(JPEG_PRESET_QUALITIES),
+        help="human-readable jpeg quality preset: web, balanced, or archive",
     )
     parser.add_argument(
         "--retries",
@@ -402,7 +437,7 @@ def render_summary(run_result: BatchRunResult) -> None:
     console = Console()
     table = Table(title="Download Summary", header_style="bold cyan")
     table.add_column("Status")
-    table.add_column("Title / URL")
+    table.add_column("Artwork")
     table.add_column("Format", justify="right")
     table.add_column("Backend", justify="right")
     table.add_column("Size", justify="right")
@@ -476,6 +511,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             output_dir=Path(args.output_dir),
             filename=args.filename,
             workers=max(1, args.workers),
+            jpeg_quality=resolve_jpeg_quality(args),
             retry_config=retry_config,
             reporter=reporter,
             fail_fast=args.fail_fast,

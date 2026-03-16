@@ -127,6 +127,30 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("--metadata-output requires --metadata-only", stderr.getvalue())
 
+    def test_jpeg_quality_rejects_values_above_100(self) -> None:
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            with self.assertRaises(SystemExit) as exc:
+                cli.parse_args(["3QFHLJgXCmQm2Q", "--jpeg-quality", "101"])
+        self.assertEqual(exc.exception.code, 2)
+        self.assertIn("jpeg quality must be between 1 and 100", stderr.getvalue())
+
+    def test_jpeg_quality_accepts_valid_value(self) -> None:
+        args = cli.parse_args(["3QFHLJgXCmQm2Q", "--jpeg-quality", "82"])
+        self.assertEqual(cli.resolve_jpeg_quality(args), 82)
+
+    def test_jpeg_preset_balanced_maps_to_expected_quality(self) -> None:
+        args = cli.parse_args(["3QFHLJgXCmQm2Q", "--jpeg-preset", "balanced"])
+        self.assertEqual(cli.resolve_jpeg_quality(args), 85)
+
+    def test_jpeg_preset_conflicts_with_explicit_quality(self) -> None:
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            with self.assertRaises(SystemExit) as exc:
+                cli.parse_args(["3QFHLJgXCmQm2Q", "--jpeg-quality", "82", "--jpeg-preset", "balanced"])
+        self.assertEqual(exc.exception.code, 2)
+        self.assertIn("not allowed with argument --jpeg-quality", stderr.getvalue())
+
     def test_metadata_only_conflicts_with_list_sizes(self) -> None:
         stderr = io.StringIO()
         with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
@@ -419,6 +443,8 @@ class CliTests(unittest.TestCase):
 
         output = stdout.getvalue()
         self.assertIn("Format", output)
+        self.assertIn("The", output)
+        self.assertIn("Night", output)
         self.assertIn("TIF", output)
         self.assertIn("bigti", output)
 

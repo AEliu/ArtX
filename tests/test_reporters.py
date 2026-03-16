@@ -14,7 +14,7 @@ from googleart_download.models import (
     TaskState,
     TileInfo,
 )
-from googleart_download.reporters import RichCliReporter
+from googleart_download.reporters import RichCliReporter, RichTuiReporter
 
 
 class ReporterTests(unittest.TestCase):
@@ -90,6 +90,30 @@ class ReporterTests(unittest.TestCase):
         self.assertIn("ETA", task.description)
         self.assertIn("Finish ~", task.description)
         self.assertIn("retries 1", task.description)
+
+    def test_tui_reporter_skipped_task_updates_current_artwork_fields(self) -> None:
+        reporter = RichTuiReporter()
+        try:
+            reporter.task_skipped(
+                BatchTask(
+                    index=1,
+                    url="https://example.com/art",
+                    state=TaskState.SKIPPED,
+                    result=DownloadResult(
+                        url="https://example.com/art",
+                        output_path=Path("downloads/art.jpg"),
+                        title="Artwork",
+                        size=None,
+                        tile_count=None,
+                        skipped=True,
+                    ),
+                )
+            )
+            self.assertEqual(reporter.current_title, "Artwork")
+            self.assertEqual(reporter.current_output, "downloads/art.jpg")
+            self.assertEqual(reporter.current_phase, "skipped")
+        finally:
+            reporter.close()
 
 
 if __name__ == "__main__":

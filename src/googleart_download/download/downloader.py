@@ -46,7 +46,9 @@ def inspect_artwork_metadata(url: str, retry_config: RetryConfig) -> JsonObject:
         html, fetched_url = http_client.fetch_text_with_url(asset_url, description="artwork page")
         page = parse_page_info(html, fetched_url=fetched_url)
         canonical_asset_url = page.asset_url or normalize_asset_url(fetched_url)
-        payload: JsonObject = metadata_to_dict(page.metadata) if page.metadata is not None else {}
+        payload: JsonObject = {}
+        if page.metadata is not None:
+            payload.update(metadata_to_dict(page.metadata))
         payload["asset_url"] = canonical_asset_url
         payload.setdefault("title", page.title)
         return payload
@@ -57,6 +59,7 @@ def download_artwork(
     output_dir: Path,
     filename: str | None,
     workers: int,
+    jpeg_quality: int,
     retry_config: RetryConfig,
     download_size: DownloadSize,
     max_dimension: int | None,
@@ -177,6 +180,7 @@ def download_artwork(
             output_path,
             metadata=page.metadata,
             write_metadata=write_metadata,
+            jpeg_quality=jpeg_quality,
             backend=stitch_backend,
         )
         reporter.log(f"Stitch backend: {selected_backend.value}")
