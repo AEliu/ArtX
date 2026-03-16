@@ -26,7 +26,6 @@ from ..models import (
 from ..reporting import Reporter
 from .cache import (
     cache_has_complete_tiles,
-    cache_matches_asset,
     clear_cache_dir,
     ensure_cache_layout,
     resolve_artwork_cache_dir,
@@ -228,9 +227,7 @@ def _handle_existing_output(
                 write_sidecar=write_sidecar,
                 tile_only=False,
             )
-        if not cache_matches_asset(workspace.output_path, data.canonical_asset_url) or cache_has_complete_tiles(
-            workspace.output_path, data.canonical_asset_url, data.jobs
-        ):
+        if cache_has_complete_tiles(workspace.output_path, data.canonical_asset_url, data.jobs):
             return _existing_output_result(
                 data=data,
                 workspace=workspace,
