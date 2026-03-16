@@ -9,7 +9,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, patch
 
 from googleart_download import cli
-from googleart_download.models import BatchRunResult, BatchSnapshot
+from googleart_download.models import BatchRunResult, BatchSnapshot, DownloadResult, StitchBackend
 
 
 class DummyReporter:
@@ -333,6 +333,31 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 0)
         manager_cls.assert_not_called()
         reporter.log.assert_any_call("No failed tasks found in batch state file: downloads/.googleart-batch-state.json")
+
+    def test_render_summary_shows_output_format_and_backend(self) -> None:
+        stdout = io.StringIO()
+        run_result = BatchRunResult(
+            snapshot=BatchSnapshot(tasks=[]),
+            succeeded=[
+                DownloadResult(
+                    url="https://artsandculture.google.com/asset/example/id",
+                    output_path=Path("downloads/The Starry Night.tif"),
+                    title="The Starry Night",
+                    size=(44567, 35291),
+                    tile_count=6072,
+                    backend_used=StitchBackend.BIGTIFF,
+                )
+            ],
+            failed=[],
+        )
+
+        with redirect_stdout(stdout):
+            cli.render_summary(run_result)
+
+        output = stdout.getvalue()
+        self.assertIn("Format", output)
+        self.assertIn("TIF", output)
+        self.assertIn("bigti", output)
 
 
 if __name__ == "__main__":

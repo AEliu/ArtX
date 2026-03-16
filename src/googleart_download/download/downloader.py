@@ -108,6 +108,7 @@ def download_artwork(
                 tile_count=None,
                 skipped=True,
                 sidecar_path=sidecar_path if sidecar_path and sidecar_path.exists() else None,
+                backend_used=selected_backend,
             )
         if output_conflict_policy is OutputConflictPolicy.OVERWRITE and output_path.exists():
             reporter.log(f"Overwriting existing output: {output_path}")
@@ -191,4 +192,5 @@ def download_artwork(
             size=(tile_info.image_width_for(selected_level), tile_info.image_height_for(selected_level)),
             tile_count=len(jobs),
             sidecar_path=sidecar_path,
+            backend_used=selected_backend,
         )

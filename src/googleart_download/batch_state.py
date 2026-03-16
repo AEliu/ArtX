@@ -7,7 +7,7 @@ from pathlib import Path
 
 from .errors import DownloadError
 from .metadata.parsers import normalize_asset_url
-from .models import BatchStateLoadResult, BatchTask, DownloadResult, JsonObject, TaskState
+from .models import BatchStateLoadResult, BatchTask, DownloadResult, JsonObject, StitchBackend, TaskState
 
 DEFAULT_BATCH_STATE_FILENAME = ".googleart-batch-state.json"
 FAILED_RERUN_BATCH_STATE_FILENAME = ".googleart-batch-rerun-state.json"
@@ -44,6 +44,8 @@ def _serialize_result(result: DownloadResult) -> JsonObject:
         payload["tile_count"] = result.tile_count
     if result.sidecar_path is not None:
         payload["sidecar_path"] = str(result.sidecar_path)
+    if result.backend_used is not None:
+        payload["backend_used"] = result.backend_used.value
     return payload
 
 
@@ -79,6 +81,13 @@ def _parse_result(raw: object) -> DownloadResult | None:
     tile_count = raw.get("tile_count")
     sidecar_path = raw.get("sidecar_path")
     skipped = raw.get("skipped", False)
+    backend_used = raw.get("backend_used")
+    parsed_backend: StitchBackend | None = None
+    if isinstance(backend_used, str):
+        try:
+            parsed_backend = StitchBackend(backend_used)
+        except ValueError:
+            parsed_backend = None
 
     return DownloadResult(
         url=url,
@@ -88,6 +97,7 @@ def _parse_result(raw: object) -> DownloadResult | None:
         tile_count=tile_count if isinstance(tile_count, int) else None,
         skipped=bool(skipped),
         sidecar_path=Path(sidecar_path) if isinstance(sidecar_path, str) else None,
+        backend_used=parsed_backend,
     )
 
 

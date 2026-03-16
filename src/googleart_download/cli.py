@@ -362,6 +362,8 @@ def render_summary(run_result: BatchRunResult) -> None:
     table = Table(title="Download Summary", header_style="bold cyan")
     table.add_column("Status")
     table.add_column("Title / URL")
+    table.add_column("Format", justify="right")
+    table.add_column("Backend", justify="right")
     table.add_column("Size", justify="right")
     table.add_column("Tiles", justify="right")
     table.add_column("Attempts", justify="right")
@@ -370,12 +372,16 @@ def render_summary(run_result: BatchRunResult) -> None:
 
     for result in run_result.succeeded:
         status = "skipped" if result.skipped else "ok"
+        image_format = result.output_path.suffix.lower().lstrip(".").upper() or "-"
+        backend = result.backend_used.value if result.backend_used is not None else "-"
         size = "-" if result.size is None else f"{result.size[0]}x{result.size[1]}"
         tiles = "-" if result.tile_count is None else str(result.tile_count)
         attempts = next((str(task.attempts) for task in run_result.snapshot.tasks if task.result == result), "-")
         table.add_row(
             status,
             result.title,
+            image_format,
+            backend,
             size,
             tiles,
             attempts,
@@ -383,7 +389,7 @@ def render_summary(run_result: BatchRunResult) -> None:
             str(result.sidecar_path) if result.sidecar_path else "-",
         )
     for task in run_result.failed:
-        table.add_row("failed", task.url, "-", "-", str(task.attempts), task.error or "unknown error", "-")
+        table.add_row("failed", task.url, "-", "-", "-", "-", str(task.attempts), task.error or "unknown error", "-")
     console.print(table)
 
 

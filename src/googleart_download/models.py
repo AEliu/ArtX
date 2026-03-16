@@ -100,6 +100,7 @@ class DownloadResult:
     tile_count: int | None
     skipped: bool = False
     sidecar_path: Path | None = None
+    backend_used: "StitchBackend | None" = None
 
 
 @dataclass(frozen=True)
