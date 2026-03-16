@@ -138,6 +138,9 @@ Repo quality and automation:
 - extend GitHub Actions download workflows beyond local artifacts:
   - keep the current artifact-based workflow as the default safe path
   - evaluate optional external storage backends for downloaded outputs, such as Cloudflare R2
+- consider optional proxy-pool / multi-proxy support for heavily restricted networks or rate-limited IPs:
+  - keep it as an explicit advanced feature, not default behavior
+  - design it only after the current single-proxy path remains stable
   - avoid committing downloaded artworks back into the main repository by default
   - keep any remote-storage integration opt-in and secret-driven
 - revisit README screenshot presentation:
