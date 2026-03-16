@@ -93,7 +93,6 @@ Metadata domain:
 - enrich sidecar JSON with more operational metadata
 - support richer batch input formats such as CSV or JSONL
 - improve log and event verbosity controls
-- move HTTP transport to `httpx`
 - add EXIF support for the `bigtiff` and `pyvips` stitch backends
 - decide whether a separate explicit "convert TIFF to JPEG" command belongs in this project
 

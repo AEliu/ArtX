@@ -24,23 +24,23 @@ from .tiles import build_jobs, download_tiles
 
 
 def inspect_artwork_sizes(url: str, retry_config: RetryConfig) -> tuple[str, list[SizeOption]]:
-    http_client = HttpClient(retry_config=retry_config)
-    asset_url = normalize_asset_url(url)
-    html = http_client.fetch_text(asset_url, description="artwork page")
-    page = parse_page_info(html)
-    tile_info = parse_tile_info(http_client.fetch_bytes(page.tile_info_url, description="tile metadata"))
-    return page.title, list_size_options(tile_info)
+    with HttpClient(retry_config=retry_config) as http_client:
+        asset_url = normalize_asset_url(url)
+        html = http_client.fetch_text(asset_url, description="artwork page")
+        page = parse_page_info(html)
+        tile_info = parse_tile_info(http_client.fetch_bytes(page.tile_info_url, description="tile metadata"))
+        return page.title, list_size_options(tile_info)
 
 
 def inspect_artwork_metadata(url: str, retry_config: RetryConfig) -> JsonObject:
-    http_client = HttpClient(retry_config=retry_config)
-    asset_url = normalize_asset_url(url)
-    html = http_client.fetch_text(asset_url, description="artwork page")
-    page = parse_page_info(html)
-    payload: JsonObject = metadata_to_dict(page.metadata) if page.metadata is not None else {}
-    payload["asset_url"] = asset_url
-    payload.setdefault("title", page.title)
-    return payload
+    with HttpClient(retry_config=retry_config) as http_client:
+        asset_url = normalize_asset_url(url)
+        html = http_client.fetch_text(asset_url, description="artwork page")
+        page = parse_page_info(html)
+        payload: JsonObject = metadata_to_dict(page.metadata) if page.metadata is not None else {}
+        payload["asset_url"] = asset_url
+        payload.setdefault("title", page.title)
+        return payload
 
 
 def download_artwork(
@@ -60,116 +60,116 @@ def download_artwork(
     total: int,
 ) -> DownloadResult:
     logger = get_logger()
-    http_client = HttpClient(retry_config=retry_config)
-    asset_url = normalize_asset_url(url)
-    logger.info("Fetching artwork page: %s", asset_url)
-    reporter.log(f"Fetching artwork page: {asset_url}")
-    html = http_client.fetch_text(asset_url, description="artwork page")
-    page = parse_page_info(html)
-    original_output_path = resolve_output_path(
-        output_dir,
-        filename,
-        page.title,
-        download_size=download_size,
-        max_dimension=max_dimension,
-    )
+    with HttpClient(retry_config=retry_config) as http_client:
+        asset_url = normalize_asset_url(url)
+        logger.info("Fetching artwork page: %s", asset_url)
+        reporter.log(f"Fetching artwork page: {asset_url}")
+        html = http_client.fetch_text(asset_url, description="artwork page")
+        page = parse_page_info(html)
+        original_output_path = resolve_output_path(
+            output_dir,
+            filename,
+            page.title,
+            download_size=download_size,
+            max_dimension=max_dimension,
+        )
 
-    tile_info = parse_tile_info(http_client.fetch_bytes(page.tile_info_url, description="tile metadata"))
-    selected_level = select_download_level(tile_info, size=download_size, max_dimension=max_dimension)
-    selected_tile_info = TileInfo(tile_width=tile_info.tile_width, tile_height=tile_info.tile_height, levels=[selected_level])
-    selected_backend = choose_stitch_backend(selected_tile_info, stitch_backend)
-    output_path = resolve_backend_output_path(original_output_path, selected_backend)
-    removed_partials = cleanup_stale_partial_outputs(original_output_path, output_path, selected_backend)
+        tile_info = parse_tile_info(http_client.fetch_bytes(page.tile_info_url, description="tile metadata"))
+        selected_level = select_download_level(tile_info, size=download_size, max_dimension=max_dimension)
+        selected_tile_info = TileInfo(tile_width=tile_info.tile_width, tile_height=tile_info.tile_height, levels=[selected_level])
+        selected_backend = choose_stitch_backend(selected_tile_info, stitch_backend)
+        output_path = resolve_backend_output_path(original_output_path, selected_backend)
+        removed_partials = cleanup_stale_partial_outputs(original_output_path, output_path, selected_backend)
 
-    if skip_existing and output_path.exists():
-        sidecar_path = output_path.with_suffix(output_path.suffix + ".json") if write_sidecar else None
+        if skip_existing and output_path.exists():
+            sidecar_path = output_path.with_suffix(output_path.suffix + ".json") if write_sidecar else None
+            return DownloadResult(
+                url=asset_url,
+                output_path=output_path,
+                title=page.title,
+                size=None,
+                tile_count=None,
+                skipped=True,
+                sidecar_path=sidecar_path if sidecar_path and sidecar_path.exists() else None,
+            )
+
+        cache_dir = resolve_artwork_cache_dir(output_dir, asset_url, output_path)
+        tiles_dir = ensure_cache_layout(cache_dir)
+
+        context = ArtworkContext(
+            index=index,
+            total=total,
+            url=asset_url,
+            page=page,
+            tile_info=tile_info,
+            selected_level=selected_level,
+            output_path=output_path,
+        )
+        reporter.artwork_started(context)
+
+        jobs = build_jobs(page, tile_info, selected_level)
+        cached_tiles = sum(1 for job in jobs if tile_cache_path(tiles_dir, job).exists())
+        if cached_tiles:
+            reporter.log(f"Cache directory: {cache_dir}")
+            reporter.log(f"Cached tiles available: {cached_tiles}/{len(jobs)}")
+        logger.info(
+            "Artwork metadata: title=%s size=%sx%s tiles=%s level=%s",
+            page.title,
+            tile_info.image_width_for(selected_level),
+            tile_info.image_height_for(selected_level),
+            len(jobs),
+            selected_level.z,
+        )
+        reporter.log(
+            "Metadata ready: "
+            f"{page.title} | {tile_info.image_width_for(selected_level)}x{tile_info.image_height_for(selected_level)} | "
+            f"{len(jobs)} tiles | level {selected_level.z}"
+        )
+        reporter.log(f"Output format: {output_path.suffix.lower().lstrip('.').upper()}")
+        if selected_backend is StitchBackend.BIGTIFF:
+            reporter.log(f"Large artwork output adjusted to TIFF for streaming stitch safety: {output_path}")
+        for stale_partial in removed_partials:
+            reporter.log(f"Removed stale partial output from older JPEG attempt: {stale_partial}")
+        write_cache_state(
+            cache_dir,
+            page=page,
+            tile_info=selected_tile_info,
+            output_path=output_path,
+            completed_tiles=cached_tiles,
+            total_tiles=len(jobs),
+            stage="downloading",
+        )
+        tiles = download_tiles(jobs, workers=workers, reporter=reporter, http_client=http_client, tiles_dir=tiles_dir)
+        write_cache_state(
+            cache_dir,
+            page=page,
+            tile_info=selected_tile_info,
+            output_path=output_path,
+            completed_tiles=len(tiles),
+            total_tiles=len(jobs),
+            stage="stitching",
+        )
+        reporter.log(f"Stitch backend selected: {selected_backend.value}")
+        reporter.stitching_started()
+        selected_backend = stitch_tiles(
+            selected_tile_info,
+            tiles,
+            output_path,
+            metadata=page.metadata,
+            write_metadata=write_metadata,
+            backend=stitch_backend,
+        )
+        reporter.log(f"Stitch backend: {selected_backend.value}")
+        sidecar_path = None
+        if write_sidecar and page.metadata is not None:
+            sidecar_path = write_metadata_sidecar(output_path, page.metadata)
+        clear_cache_dir(cache_dir)
+
         return DownloadResult(
             url=asset_url,
             output_path=output_path,
             title=page.title,
-            size=None,
-            tile_count=None,
-            skipped=True,
-            sidecar_path=sidecar_path if sidecar_path and sidecar_path.exists() else None,
+            size=(tile_info.image_width_for(selected_level), tile_info.image_height_for(selected_level)),
+            tile_count=len(jobs),
+            sidecar_path=sidecar_path,
         )
-
-    cache_dir = resolve_artwork_cache_dir(output_dir, asset_url, output_path)
-    tiles_dir = ensure_cache_layout(cache_dir)
-
-    context = ArtworkContext(
-        index=index,
-        total=total,
-        url=asset_url,
-        page=page,
-        tile_info=tile_info,
-        selected_level=selected_level,
-        output_path=output_path,
-    )
-    reporter.artwork_started(context)
-
-    jobs = build_jobs(page, tile_info, selected_level)
-    cached_tiles = sum(1 for job in jobs if tile_cache_path(tiles_dir, job).exists())
-    if cached_tiles:
-        reporter.log(f"Cache directory: {cache_dir}")
-        reporter.log(f"Cached tiles available: {cached_tiles}/{len(jobs)}")
-    logger.info(
-        "Artwork metadata: title=%s size=%sx%s tiles=%s level=%s",
-        page.title,
-        tile_info.image_width_for(selected_level),
-        tile_info.image_height_for(selected_level),
-        len(jobs),
-        selected_level.z,
-    )
-    reporter.log(
-        "Metadata ready: "
-        f"{page.title} | {tile_info.image_width_for(selected_level)}x{tile_info.image_height_for(selected_level)} | "
-        f"{len(jobs)} tiles | level {selected_level.z}"
-    )
-    reporter.log(f"Output format: {output_path.suffix.lower().lstrip('.').upper()}")
-    if selected_backend is StitchBackend.BIGTIFF:
-        reporter.log(f"Large artwork output adjusted to TIFF for streaming stitch safety: {output_path}")
-    for stale_partial in removed_partials:
-        reporter.log(f"Removed stale partial output from older JPEG attempt: {stale_partial}")
-    write_cache_state(
-        cache_dir,
-        page=page,
-        tile_info=selected_tile_info,
-        output_path=output_path,
-        completed_tiles=cached_tiles,
-        total_tiles=len(jobs),
-        stage="downloading",
-    )
-    tiles = download_tiles(jobs, workers=workers, reporter=reporter, http_client=http_client, tiles_dir=tiles_dir)
-    write_cache_state(
-        cache_dir,
-        page=page,
-        tile_info=selected_tile_info,
-        output_path=output_path,
-        completed_tiles=len(tiles),
-        total_tiles=len(jobs),
-        stage="stitching",
-    )
-    reporter.log(f"Stitch backend selected: {selected_backend.value}")
-    reporter.stitching_started()
-    selected_backend = stitch_tiles(
-        selected_tile_info,
-        tiles,
-        output_path,
-        metadata=page.metadata,
-        write_metadata=write_metadata,
-        backend=stitch_backend,
-    )
-    reporter.log(f"Stitch backend: {selected_backend.value}")
-    sidecar_path = None
-    if write_sidecar and page.metadata is not None:
-        sidecar_path = write_metadata_sidecar(output_path, page.metadata)
-    clear_cache_dir(cache_dir)
-
-    return DownloadResult(
-        url=asset_url,
-        output_path=output_path,
-        title=page.title,
-        size=(tile_info.image_width_for(selected_level), tile_info.image_height_for(selected_level)),
-        tile_count=len(jobs),
-        sidecar_path=sidecar_path,
-    )

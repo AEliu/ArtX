@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import time
-import urllib.error
-import urllib.request
+
+import httpx
 
 from ..constants import REQUEST_TIMEOUT, USER_AGENT
 from ..errors import DownloadError
@@ -11,29 +11,52 @@ from ..models import RetryConfig
 
 
 class HttpClient:
-    def __init__(self, retry_config: RetryConfig, timeout: int = REQUEST_TIMEOUT) -> None:
+    def __init__(
+        self,
+        retry_config: RetryConfig,
+        timeout: int = REQUEST_TIMEOUT,
+        client: httpx.Client | None = None,
+    ) -> None:
         self.retry_config = retry_config
         self.timeout = timeout
         self.logger = get_logger()
+        self._owns_client = client is None
+        self.client = client or httpx.Client(
+            headers={"User-Agent": USER_AGENT},
+            timeout=timeout,
+            follow_redirects=True,
+        )
+
+    def close(self) -> None:
+        if self._owns_client:
+            self.client.close()
+
+    def __enter__(self) -> HttpClient:
+        return self
+
+    def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
+        self.close()
 
     def fetch_bytes(self, url: str, *, description: str) -> bytes:
         last_error: Exception | None = None
 
         for attempt in range(1, self.retry_config.attempts + 1):
-            request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
             try:
-                with urllib.request.urlopen(request, timeout=self.timeout) as response:
-                    return response.read()
-            except urllib.error.HTTPError as exc:
+                response = self.client.get(url)
+                response.raise_for_status()
+                return response.content
+            except httpx.HTTPStatusError as exc:
                 last_error = exc
-                if not self._should_retry_http(exc.code, attempt):
-                    raise DownloadError(f"{description} failed: {url} -> HTTP {exc.code}") from exc
-                self._sleep_before_retry(description, url, attempt, f"HTTP {exc.code}")
-            except urllib.error.URLError as exc:
+                status_code = exc.response.status_code
+                if not self._should_retry_http(status_code, attempt):
+                    raise DownloadError(f"{description} failed: {url} -> HTTP {status_code}") from exc
+                self._sleep_before_retry(description, url, attempt, f"HTTP {status_code}")
+            except httpx.RequestError as exc:
                 last_error = exc
+                reason = str(exc) or exc.__class__.__name__
                 if attempt >= self.retry_config.attempts:
-                    raise DownloadError(f"{description} failed: {url} -> {exc.reason}") from exc
-                self._sleep_before_retry(description, url, attempt, str(exc.reason))
+                    raise DownloadError(f"{description} failed: {url} -> {reason}") from exc
+                self._sleep_before_retry(description, url, attempt, reason)
 
         raise DownloadError(f"{description} failed after retries: {url} -> {last_error}")
 

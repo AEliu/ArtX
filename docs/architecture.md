@@ -73,9 +73,9 @@ Metadata domain:
 
 ### HTTP layer
 
-The current transport works, but it should move toward a more maintainable `httpx`-based abstraction.
+The downloader now uses a small `httpx.Client` wrapper instead of the earlier `urllib` transport path.
 
-Why:
+Why this direction stays important:
 
 - better connection reuse support
 - cleaner API surface
@@ -255,11 +255,11 @@ so that a failure before actual image assembly does not appear as a completed st
 
 ### HTTP evolution
 
-Preferred path:
+Current path:
 
-1. replace `urllib` transport usage with a small `httpx.Client` wrapper
-2. keep the sync interface stable first
-3. improve transport testability
+1. keep the sync `HttpClient` interface stable on top of `httpx.Client`
+2. preserve transport injection for tests
+3. improve observability and connection behavior before adding complexity
 4. only then evaluate async migration
 
 ## Design questions that still need deliberate answers
