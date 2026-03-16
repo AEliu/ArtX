@@ -89,6 +89,11 @@ Metadata domain:
 
 ### Medium priority
 
+- tune the `httpx` transport for better throughput without changing the sync model:
+  - explicit connection-pool/session reuse settings
+  - `--workers` and connection-pool sizing alignment
+  - finer timeout controls
+  - better transport-level observability
 - unify metadata output options into a clearer mode-based CLI design
 - enrich sidecar JSON with more operational metadata
 - support richer batch input formats such as CSV or JSONL
