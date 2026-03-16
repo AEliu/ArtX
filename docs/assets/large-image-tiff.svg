@@ -1,30 +1,160 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620" role="img" aria-labelledby="title desc">
-  <title id="title">Large image TIFF output preview</title>
-  <desc id="desc">Terminal-style preview showing a large artwork switching to TIFF BigTIFF output with cached tile reuse.</desc>
-  <rect width="1100" height="620" rx="20" fill="#111827"/>
-  <rect x="24" y="24" width="1052" height="572" rx="16" fill="#0b1020" stroke="#334155"/>
-  <circle cx="54" cy="54" r="8" fill="#ef4444"/>
-  <circle cx="78" cy="54" r="8" fill="#f59e0b"/>
-  <circle cx="102" cy="54" r="8" fill="#22c55e"/>
-  <text x="130" y="60" fill="#cbd5e1" font-size="22" font-family="SFMono-Regular, Consolas, monospace">large artwork safety path</text>
+<svg class="rich-terminal" viewBox="0 0 1970 660.0" xmlns="http://www.w3.org/2000/svg">
+    <!-- Generated with Rich https://www.textualize.io -->
+    <style>
 
-  <g font-family="SFMono-Regular, Consolas, monospace" font-size="20" fill="#e2e8f0">
-    <text x="48" y="110">$ uv run googleart-download "bgEuwDxel93-Pg" -o downloads --workers 32</text>
-    <text x="48" y="150" fill="#93c5fd">• Output: downloads/The Starry Night - Vincent van Gogh.tif</text>
-    <text x="48" y="186" fill="#93c5fd">• Image: 44567x35291, tiles: 88x69</text>
-    <text x="48" y="222" fill="#93c5fd">• Cache directory: downloads/.googleart-cache/bgEuwDxel93-Pg-078291bb70f6</text>
-    <text x="48" y="258" fill="#93c5fd">• Cached tiles available: 6072/6072</text>
-    <text x="48" y="294" fill="#fbbf24">• Large artwork output adjusted to TIFF for streaming stitch safety</text>
-    <text x="48" y="330" fill="#93c5fd">• Reusing 6072 cached tile(s)</text>
-    <text x="48" y="366" fill="#93c5fd">• Stitch backend selected: bigtiff</text>
-  </g>
+    @font-face {
+        font-family: "Fira Code";
+        src: local("FiraCode-Regular"),
+                url("https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/woff2/FiraCode-Regular.woff2") format("woff2"),
+                url("https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/woff/FiraCode-Regular.woff") format("woff");
+        font-style: normal;
+        font-weight: 400;
+    }
+    @font-face {
+        font-family: "Fira Code";
+        src: local("FiraCode-Bold"),
+                url("https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/woff2/FiraCode-Bold.woff2") format("woff2"),
+                url("https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/woff/FiraCode-Bold.woff") format("woff");
+        font-style: bold;
+        font-weight: 700;
+    }
 
-  <rect x="48" y="402" width="1004" height="70" rx="10" fill="#111827" stroke="#1f2937"/>
-  <text x="66" y="432" fill="#f8fafc" font-size="19" font-family="SFMono-Regular, Consolas, monospace">Phase: stitching  |  Output format: TIFF  |  Backend: bigtiff</text>
-  <rect x="66" y="444" width="968" height="12" rx="6" fill="#1f2937"/>
-  <rect x="66" y="444" width="968" height="12" rx="6" fill="#38bdf8"/>
-  <text x="66" y="492" fill="#cbd5e1" font-size="19" font-family="SFMono-Regular, Consolas, monospace">Stitching image ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100%</text>
+    .terminal-2413410712-matrix {
+        font-family: Fira Code, monospace;
+        font-size: 20px;
+        line-height: 24.4px;
+        font-variant-east-asian: full-width;
+    }
 
-  <rect x="48" y="516" width="1004" height="56" rx="10" fill="#111827" stroke="#1f2937"/>
-  <text x="66" y="550" fill="#93c5fd" font-size="18" font-family="SFMono-Regular, Consolas, monospace">Saved: downloads/The Starry Night - Vincent van Gogh.tif</text>
+    .terminal-2413410712-title {
+        font-size: 18px;
+        font-weight: bold;
+        font-family: arial;
+    }
+
+    .terminal-2413410712-r1 { fill: #98a84b }
+.terminal-2413410712-r2 { fill: #c5c8c6 }
+.terminal-2413410712-r3 { fill: #c5c8c6;font-weight: bold }
+.terminal-2413410712-r4 { fill: #68a0b3 }
+.terminal-2413410712-r5 { fill: #98729f }
+.terminal-2413410712-r6 { fill: #68a0b3;font-weight: bold }
+.terminal-2413410712-r7 { fill: #d0b344 }
+    </style>
+
+    <defs>
+    <clipPath id="terminal-2413410712-clip-terminal">
+      <rect x="0" y="0" width="1951.0" height="609.0" />
+    </clipPath>
+    <clipPath id="terminal-2413410712-line-0">
+    <rect x="0" y="1.5" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-1">
+    <rect x="0" y="25.9" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-2">
+    <rect x="0" y="50.3" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-3">
+    <rect x="0" y="74.7" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-4">
+    <rect x="0" y="99.1" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-5">
+    <rect x="0" y="123.5" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-6">
+    <rect x="0" y="147.9" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-7">
+    <rect x="0" y="172.3" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-8">
+    <rect x="0" y="196.7" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-9">
+    <rect x="0" y="221.1" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-10">
+    <rect x="0" y="245.5" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-11">
+    <rect x="0" y="269.9" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-12">
+    <rect x="0" y="294.3" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-13">
+    <rect x="0" y="318.7" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-14">
+    <rect x="0" y="343.1" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-15">
+    <rect x="0" y="367.5" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-16">
+    <rect x="0" y="391.9" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-17">
+    <rect x="0" y="416.3" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-18">
+    <rect x="0" y="440.7" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-19">
+    <rect x="0" y="465.1" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-20">
+    <rect x="0" y="489.5" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-21">
+    <rect x="0" y="513.9" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-22">
+    <rect x="0" y="538.3" width="1952" height="24.65"/>
+            </clipPath>
+<clipPath id="terminal-2413410712-line-23">
+    <rect x="0" y="562.7" width="1952" height="24.65"/>
+            </clipPath>
+    </defs>
+
+    <rect fill="#292929" stroke="rgba(255,255,255,0.35)" stroke-width="1" x="1" y="1" width="1968" height="658" rx="8"/><text class="terminal-2413410712-title" fill="#c5c8c6" text-anchor="middle" x="984" y="27">googleart-download</text>
+            <g transform="translate(26,22)">
+            <circle cx="0" cy="0" r="7" fill="#ff5f57"/>
+            <circle cx="22" cy="0" r="7" fill="#febc2e"/>
+            <circle cx="44" cy="0" r="7" fill="#28c840"/>
+            </g>
+        
+    <g transform="translate(9, 41)" clip-path="url(#terminal-2413410712-clip-terminal)">
+    <rect fill="#005f00" x="24.4" y="25.9" width="427" height="24.65" shape-rendering="crispEdges"/>
+    <g class="terminal-2413410712-matrix">
+    <text class="terminal-2413410712-r1" x="0" y="20" textLength="1952" clip-path="url(#terminal-2413410712-line-0)">╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</text><text class="terminal-2413410712-r2" x="1952" y="20" textLength="12.2" clip-path="url(#terminal-2413410712-line-0)">
+</text><text class="terminal-2413410712-r1" x="0" y="44.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-1)">│</text><text class="terminal-2413410712-r3" x="24.4" y="44.4" textLength="427" clip-path="url(#terminal-2413410712-line-1)">Google&#160;Art&#160;Downloader&#160;&#160;|&#160;&#160;Completed</text><text class="terminal-2413410712-r1" x="1939.8" y="44.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-1)">│</text><text class="terminal-2413410712-r2" x="1952" y="44.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-1)">
+</text><text class="terminal-2413410712-r1" x="0" y="68.8" textLength="1952" clip-path="url(#terminal-2413410712-line-2)">╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</text><text class="terminal-2413410712-r2" x="1952" y="68.8" textLength="12.2" clip-path="url(#terminal-2413410712-line-2)">
+</text><text class="terminal-2413410712-r4" x="0" y="93.2" textLength="24.4" clip-path="url(#terminal-2413410712-line-3)">╭─</text><text class="terminal-2413410712-r4" x="24.4" y="93.2" textLength="451.4" clip-path="url(#terminal-2413410712-line-3)">─────────────────────────────────────</text><text class="terminal-2413410712-r4" x="475.8" y="93.2" textLength="207.4" clip-path="url(#terminal-2413410712-line-3)">&#160;Current&#160;Artwork&#160;</text><text class="terminal-2413410712-r4" x="683.2" y="93.2" textLength="463.6" clip-path="url(#terminal-2413410712-line-3)">──────────────────────────────────────</text><text class="terminal-2413410712-r4" x="1146.8" y="93.2" textLength="24.4" clip-path="url(#terminal-2413410712-line-3)">─╮</text><text class="terminal-2413410712-r5" x="1171.2" y="93.2" textLength="24.4" clip-path="url(#terminal-2413410712-line-3)">╭─</text><text class="terminal-2413410712-r5" x="1195.6" y="93.2" textLength="305" clip-path="url(#terminal-2413410712-line-3)">─────────────────────────</text><text class="terminal-2413410712-r5" x="1500.6" y="93.2" textLength="122" clip-path="url(#terminal-2413410712-line-3)">&#160;Progress&#160;</text><text class="terminal-2413410712-r5" x="1622.6" y="93.2" textLength="305" clip-path="url(#terminal-2413410712-line-3)">─────────────────────────</text><text class="terminal-2413410712-r5" x="1927.6" y="93.2" textLength="24.4" clip-path="url(#terminal-2413410712-line-3)">─╮</text><text class="terminal-2413410712-r2" x="1952" y="93.2" textLength="12.2" clip-path="url(#terminal-2413410712-line-3)">
+</text><text class="terminal-2413410712-r4" x="0" y="117.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-4)">│</text><text class="terminal-2413410712-r6" x="24.4" y="117.6" textLength="146.4" clip-path="url(#terminal-2413410712-line-4)">Title&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2413410712-r2" x="183" y="117.6" textLength="597.8" clip-path="url(#terminal-2413410712-line-4)">The&#160;Starry&#160;Night&#160;-&#160;Vincent&#160;van&#160;Gogh&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2413410712-r4" x="1159" y="117.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-4)">│</text><text class="terminal-2413410712-r5" x="1171.2" y="117.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-4)">│</text><text class="terminal-2413410712-r3" x="1220" y="117.6" textLength="97.6" clip-path="url(#terminal-2413410712-line-4)">Artworks</text><text class="terminal-2413410712-r1" x="1342" y="117.6" textLength="427" clip-path="url(#terminal-2413410712-line-4)">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</text><text class="terminal-2413410712-r5" x="1781.2" y="117.6" textLength="48.8" clip-path="url(#terminal-2413410712-line-4)">100%</text><text class="terminal-2413410712-r7" x="1842.2" y="117.6" textLength="85.4" clip-path="url(#terminal-2413410712-line-4)">0:00:00</text><text class="terminal-2413410712-r5" x="1939.8" y="117.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-4)">│</text><text class="terminal-2413410712-r2" x="1952" y="117.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-4)">
+</text><text class="terminal-2413410712-r4" x="0" y="142" textLength="12.2" clip-path="url(#terminal-2413410712-line-5)">│</text><text class="terminal-2413410712-r6" x="24.4" y="142" textLength="146.4" clip-path="url(#terminal-2413410712-line-5)">Output&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2413410712-r2" x="183" y="142" textLength="597.8" clip-path="url(#terminal-2413410712-line-5)">downloads/The&#160;Starry&#160;Night&#160;-&#160;Vincent&#160;van&#160;Gogh.tif</text><text class="terminal-2413410712-r4" x="1159" y="142" textLength="12.2" clip-path="url(#terminal-2413410712-line-5)">│</text><text class="terminal-2413410712-r5" x="1171.2" y="142" textLength="12.2" clip-path="url(#terminal-2413410712-line-5)">│</text><text class="terminal-2413410712-r3" x="1220" y="142" textLength="109.8" clip-path="url(#terminal-2413410712-line-5)">Stitching</text><text class="terminal-2413410712-r1" x="1342" y="142" textLength="427" clip-path="url(#terminal-2413410712-line-5)">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</text><text class="terminal-2413410712-r5" x="1781.2" y="142" textLength="48.8" clip-path="url(#terminal-2413410712-line-5)">100%</text><text class="terminal-2413410712-r7" x="1842.2" y="142" textLength="85.4" clip-path="url(#terminal-2413410712-line-5)">0:00:00</text><text class="terminal-2413410712-r5" x="1939.8" y="142" textLength="12.2" clip-path="url(#terminal-2413410712-line-5)">│</text><text class="terminal-2413410712-r2" x="1952" y="142" textLength="12.2" clip-path="url(#terminal-2413410712-line-5)">
+</text><text class="terminal-2413410712-r4" x="0" y="166.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-6)">│</text><text class="terminal-2413410712-r6" x="24.4" y="166.4" textLength="146.4" clip-path="url(#terminal-2413410712-line-6)">Image&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2413410712-r2" x="183" y="166.4" textLength="597.8" clip-path="url(#terminal-2413410712-line-6)">44567x35291&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2413410712-r4" x="1159" y="166.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-6)">│</text><text class="terminal-2413410712-r5" x="1171.2" y="166.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-6)">│</text><text class="terminal-2413410712-r5" x="1939.8" y="166.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-6)">│</text><text class="terminal-2413410712-r2" x="1952" y="166.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-6)">
+</text><text class="terminal-2413410712-r4" x="0" y="190.8" textLength="12.2" clip-path="url(#terminal-2413410712-line-7)">│</text><text class="terminal-2413410712-r6" x="24.4" y="190.8" textLength="146.4" clip-path="url(#terminal-2413410712-line-7)">Tiles&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2413410712-r2" x="183" y="190.8" textLength="597.8" clip-path="url(#terminal-2413410712-line-7)">6072/6072&#160;(6072&#160;total)&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2413410712-r4" x="1159" y="190.8" textLength="12.2" clip-path="url(#terminal-2413410712-line-7)">│</text><text class="terminal-2413410712-r5" x="1171.2" y="190.8" textLength="12.2" clip-path="url(#terminal-2413410712-line-7)">│</text><text class="terminal-2413410712-r5" x="1939.8" y="190.8" textLength="12.2" clip-path="url(#terminal-2413410712-line-7)">│</text><text class="terminal-2413410712-r2" x="1952" y="190.8" textLength="12.2" clip-path="url(#terminal-2413410712-line-7)">
+</text><text class="terminal-2413410712-r4" x="0" y="215.2" textLength="12.2" clip-path="url(#terminal-2413410712-line-8)">│</text><text class="terminal-2413410712-r6" x="24.4" y="215.2" textLength="146.4" clip-path="url(#terminal-2413410712-line-8)">Phase&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2413410712-r2" x="183" y="215.2" textLength="597.8" clip-path="url(#terminal-2413410712-line-8)">done&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2413410712-r4" x="1159" y="215.2" textLength="12.2" clip-path="url(#terminal-2413410712-line-8)">│</text><text class="terminal-2413410712-r5" x="1171.2" y="215.2" textLength="12.2" clip-path="url(#terminal-2413410712-line-8)">│</text><text class="terminal-2413410712-r5" x="1939.8" y="215.2" textLength="12.2" clip-path="url(#terminal-2413410712-line-8)">│</text><text class="terminal-2413410712-r2" x="1952" y="215.2" textLength="12.2" clip-path="url(#terminal-2413410712-line-8)">
+</text><text class="terminal-2413410712-r4" x="0" y="239.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-9)">│</text><text class="terminal-2413410712-r6" x="24.4" y="239.6" textLength="146.4" clip-path="url(#terminal-2413410712-line-9)">Rate&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2413410712-r2" x="183" y="239.6" textLength="597.8" clip-path="url(#terminal-2413410712-line-9)">-&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2413410712-r4" x="1159" y="239.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-9)">│</text><text class="terminal-2413410712-r5" x="1171.2" y="239.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-9)">│</text><text class="terminal-2413410712-r5" x="1939.8" y="239.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-9)">│</text><text class="terminal-2413410712-r2" x="1952" y="239.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-9)">
+</text><text class="terminal-2413410712-r4" x="0" y="264" textLength="12.2" clip-path="url(#terminal-2413410712-line-10)">│</text><text class="terminal-2413410712-r6" x="24.4" y="264" textLength="146.4" clip-path="url(#terminal-2413410712-line-10)">ETA&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2413410712-r2" x="183" y="264" textLength="597.8" clip-path="url(#terminal-2413410712-line-10)">-&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2413410712-r4" x="1159" y="264" textLength="12.2" clip-path="url(#terminal-2413410712-line-10)">│</text><text class="terminal-2413410712-r5" x="1171.2" y="264" textLength="12.2" clip-path="url(#terminal-2413410712-line-10)">│</text><text class="terminal-2413410712-r5" x="1939.8" y="264" textLength="12.2" clip-path="url(#terminal-2413410712-line-10)">│</text><text class="terminal-2413410712-r2" x="1952" y="264" textLength="12.2" clip-path="url(#terminal-2413410712-line-10)">
+</text><text class="terminal-2413410712-r4" x="0" y="288.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-11)">│</text><text class="terminal-2413410712-r6" x="24.4" y="288.4" textLength="146.4" clip-path="url(#terminal-2413410712-line-11)">Finish&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2413410712-r2" x="183" y="288.4" textLength="597.8" clip-path="url(#terminal-2413410712-line-11)">-&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</text><text class="terminal-2413410712-r4" x="1159" y="288.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-11)">│</text><text class="terminal-2413410712-r5" x="1171.2" y="288.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-11)">│</text><text class="terminal-2413410712-r5" x="1939.8" y="288.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-11)">│</text><text class="terminal-2413410712-r2" x="1952" y="288.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-11)">
+</text><text class="terminal-2413410712-r4" x="0" y="312.8" textLength="1171.2" clip-path="url(#terminal-2413410712-line-12)">╰──────────────────────────────────────────────────────────────────────────────────────────────╯</text><text class="terminal-2413410712-r5" x="1171.2" y="312.8" textLength="780.8" clip-path="url(#terminal-2413410712-line-12)">╰──────────────────────────────────────────────────────────────╯</text><text class="terminal-2413410712-r2" x="1952" y="312.8" textLength="12.2" clip-path="url(#terminal-2413410712-line-12)">
+</text><text class="terminal-2413410712-r7" x="0" y="337.2" textLength="24.4" clip-path="url(#terminal-2413410712-line-13)">╭─</text><text class="terminal-2413410712-r7" x="24.4" y="337.2" textLength="915" clip-path="url(#terminal-2413410712-line-13)">───────────────────────────────────────────────────────────────────────────</text><text class="terminal-2413410712-r7" x="939.4" y="337.2" textLength="73.2" clip-path="url(#terminal-2413410712-line-13)">&#160;Logs&#160;</text><text class="terminal-2413410712-r7" x="1012.6" y="337.2" textLength="915" clip-path="url(#terminal-2413410712-line-13)">───────────────────────────────────────────────────────────────────────────</text><text class="terminal-2413410712-r7" x="1927.6" y="337.2" textLength="24.4" clip-path="url(#terminal-2413410712-line-13)">─╮</text><text class="terminal-2413410712-r2" x="1952" y="337.2" textLength="12.2" clip-path="url(#terminal-2413410712-line-13)">
+</text><text class="terminal-2413410712-r7" x="0" y="361.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-14)">│</text><text class="terminal-2413410712-r2" x="24.4" y="361.6" textLength="231.8" clip-path="url(#terminal-2413410712-line-14)">Output&#160;format:&#160;TIFF</text><text class="terminal-2413410712-r7" x="1939.8" y="361.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-14)">│</text><text class="terminal-2413410712-r2" x="1952" y="361.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-14)">
+</text><text class="terminal-2413410712-r7" x="0" y="386" textLength="12.2" clip-path="url(#terminal-2413410712-line-15)">│</text><text class="terminal-2413410712-r2" x="24.4" y="386" textLength="280.6" clip-path="url(#terminal-2413410712-line-15)">Stitch&#160;backend:&#160;bigtiff</text><text class="terminal-2413410712-r7" x="1939.8" y="386" textLength="12.2" clip-path="url(#terminal-2413410712-line-15)">│</text><text class="terminal-2413410712-r2" x="1952" y="386" textLength="12.2" clip-path="url(#terminal-2413410712-line-15)">
+</text><text class="terminal-2413410712-r7" x="0" y="410.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-16)">│</text><text class="terminal-2413410712-r2" x="24.4" y="410.4" textLength="683.2" clip-path="url(#terminal-2413410712-line-16)">Saved:&#160;downloads/The&#160;Starry&#160;Night&#160;-&#160;Vincent&#160;van&#160;Gogh.tif</text><text class="terminal-2413410712-r7" x="1939.8" y="410.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-16)">│</text><text class="terminal-2413410712-r2" x="1952" y="410.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-16)">
+</text><text class="terminal-2413410712-r7" x="0" y="434.8" textLength="12.2" clip-path="url(#terminal-2413410712-line-17)">│</text><text class="terminal-2413410712-r2" x="24.4" y="434.8" textLength="329.4" clip-path="url(#terminal-2413410712-line-17)">Batch&#160;started:&#160;1&#160;artwork(s)</text><text class="terminal-2413410712-r7" x="1939.8" y="434.8" textLength="12.2" clip-path="url(#terminal-2413410712-line-17)">│</text><text class="terminal-2413410712-r2" x="1952" y="434.8" textLength="12.2" clip-path="url(#terminal-2413410712-line-17)">
+</text><text class="terminal-2413410712-r7" x="0" y="459.2" textLength="12.2" clip-path="url(#terminal-2413410712-line-18)">│</text><text class="terminal-2413410712-r7" x="1939.8" y="459.2" textLength="12.2" clip-path="url(#terminal-2413410712-line-18)">│</text><text class="terminal-2413410712-r2" x="1952" y="459.2" textLength="12.2" clip-path="url(#terminal-2413410712-line-18)">
+</text><text class="terminal-2413410712-r7" x="0" y="483.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-19)">│</text><text class="terminal-2413410712-r7" x="1939.8" y="483.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-19)">│</text><text class="terminal-2413410712-r2" x="1952" y="483.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-19)">
+</text><text class="terminal-2413410712-r7" x="0" y="508" textLength="12.2" clip-path="url(#terminal-2413410712-line-20)">│</text><text class="terminal-2413410712-r7" x="1939.8" y="508" textLength="12.2" clip-path="url(#terminal-2413410712-line-20)">│</text><text class="terminal-2413410712-r2" x="1952" y="508" textLength="12.2" clip-path="url(#terminal-2413410712-line-20)">
+</text><text class="terminal-2413410712-r7" x="0" y="532.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-21)">│</text><text class="terminal-2413410712-r7" x="1939.8" y="532.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-21)">│</text><text class="terminal-2413410712-r2" x="1952" y="532.4" textLength="12.2" clip-path="url(#terminal-2413410712-line-21)">
+</text><text class="terminal-2413410712-r7" x="0" y="556.8" textLength="12.2" clip-path="url(#terminal-2413410712-line-22)">│</text><text class="terminal-2413410712-r7" x="1939.8" y="556.8" textLength="12.2" clip-path="url(#terminal-2413410712-line-22)">│</text><text class="terminal-2413410712-r2" x="1952" y="556.8" textLength="12.2" clip-path="url(#terminal-2413410712-line-22)">
+</text><text class="terminal-2413410712-r7" x="0" y="581.2" textLength="12.2" clip-path="url(#terminal-2413410712-line-23)">│</text><text class="terminal-2413410712-r7" x="1939.8" y="581.2" textLength="12.2" clip-path="url(#terminal-2413410712-line-23)">│</text><text class="terminal-2413410712-r2" x="1952" y="581.2" textLength="12.2" clip-path="url(#terminal-2413410712-line-23)">
+</text><text class="terminal-2413410712-r7" x="0" y="605.6" textLength="1952" clip-path="url(#terminal-2413410712-line-24)">╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</text><text class="terminal-2413410712-r2" x="1952" y="605.6" textLength="12.2" clip-path="url(#terminal-2413410712-line-24)">
+</text>
+    </g>
+    </g>
 </svg>

@@ -3,6 +3,8 @@
 [![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-3776AB.svg)](#install)
 [![Version 0.1.0](https://img.shields.io/badge/version-0.1.0-0f766e.svg)](pyproject.toml)
 
+[中文说明](README.zh-CN.md)
+
 Download high-resolution images from Google Arts & Culture artwork pages.
 
 `googleart-download` resolves the artwork page, downloads the tiled image pyramid, and stitches the final image locally. It is built for reliability first: batch runs, retry handling, tile-cache reuse, interrupted-run recovery, and safe handling for very large artworks.
@@ -78,6 +80,8 @@ uv run googleart-download "3QFHLJgXCmQm2Q" --metadata-only
 
 ![Terminal preview](docs/assets/tui-preview.svg)
 
+_Screenshot generated from the current TUI output._
+
 ## Common Tasks
 
 Choose a user-friendly download size:
@@ -125,13 +129,15 @@ Large-image JPEG conversion is not part of the default path. If you need a JPEG 
 
 ![Large artwork TIFF path](docs/assets/large-image-tiff.svg)
 
+_Screenshot generated from the current TUI output._
+
 ## More Documentation
 
-- `docs/usage.md`: CLI usage, batch workflows, resume, rerun, conflict handling
-- `docs/large-images.md`: large artwork behavior, TIFF/BigTIFF path, cache reuse, size inspection
-- `docs/metadata.md`: metadata-only export, sidecars, EXIF behavior
-- `docs/architecture.md`: internal architecture and implementation notes
-- `docs/project-status.md`: current status and planned work
+- [Usage Guide](docs/usage.md): CLI usage, batch workflows, resume, rerun, conflict handling
+- [Large Images](docs/large-images.md): large artwork behavior, TIFF/BigTIFF path, cache reuse, size inspection
+- [Metadata Guide](docs/metadata.md): metadata-only export, sidecars, EXIF behavior
+- [Architecture Notes](docs/architecture.md): internal architecture and implementation notes
+- [Project Status](docs/project-status.md): current status and planned work
 
 ## Current Scope
 

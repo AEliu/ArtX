@@ -443,6 +443,8 @@ class CliTests(unittest.TestCase):
 
         output = stdout.getvalue()
         self.assertIn("Format", output)
+        self.assertIn("The", output)
+        self.assertIn("Night", output)
         self.assertIn("TIF", output)
         self.assertIn("bigti", output)
 

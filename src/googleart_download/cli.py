@@ -437,7 +437,7 @@ def render_summary(run_result: BatchRunResult) -> None:
     console = Console()
     table = Table(title="Download Summary", header_style="bold cyan")
     table.add_column("Status")
-    table.add_column("Title / URL")
+    table.add_column("Artwork")
     table.add_column("Format", justify="right")
     table.add_column("Backend", justify="right")
     table.add_column("Size", justify="right")

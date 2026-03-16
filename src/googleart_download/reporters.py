@@ -442,6 +442,10 @@ class RichTuiReporter(Reporter):
         self.current_status = "Skipped"
         self.current_phase = "skipped"
         if task.result is not None:
+            self.current_title = task.result.title
+            self.current_output = str(task.result.output_path)
+            self.current_size = "-"
+            self.current_tiles = "-"
             self.log_line(f"Skipped existing: {task.result.output_path}")
             if task.result.sidecar_path is not None:
                 self.log_line(f"Existing sidecar: {task.result.sidecar_path}")
