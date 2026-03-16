@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from collections import deque
+from dataclasses import dataclass, field
+from threading import Lock
+from time import monotonic
 
 from rich.console import Console, Group
 from rich.layout import Layout
@@ -11,6 +14,75 @@ from rich.table import Table
 from rich.text import Text
 
 from .models import ArtworkContext, BatchRunResult, BatchSnapshot, BatchTask, DownloadResult
+
+
+@dataclass
+class ArtworkProgressTelemetry:
+    phase: str = "idle"
+    retries: int = 0
+    total_tiles: int = 0
+    completed_tiles: int = 0
+    started_at: float = 0.0
+    tile_timestamps: deque[float] = field(default_factory=deque)
+
+    def reset(self, total_tiles: int, *, preserve_retries: bool = False) -> None:
+        retries = self.retries if preserve_retries else 0
+        self.phase = "downloading"
+        self.retries = retries
+        self.total_tiles = total_tiles
+        self.completed_tiles = 0
+        self.started_at = monotonic()
+        self.tile_timestamps.clear()
+
+    def mark_phase(self, phase: str) -> None:
+        self.phase = phase
+
+    def record_tile_progress(self, completed: int) -> None:
+        now = monotonic()
+        delta = max(0, completed - self.completed_tiles)
+        for _ in range(delta):
+            self.tile_timestamps.append(now)
+        self.completed_tiles = completed
+        self._trim(now)
+
+    def record_retry(self) -> None:
+        self.retries += 1
+
+    def tile_rate(self) -> float:
+        if self.phase != "downloading":
+            return 0.0
+        now = monotonic()
+        self._trim(now)
+        if len(self.tile_timestamps) >= 2:
+            window_span = self.tile_timestamps[-1] - self.tile_timestamps[0]
+            if window_span > 0:
+                return (len(self.tile_timestamps) - 1) / window_span
+        elapsed = max(0.0, now - self.started_at)
+        if elapsed > 0 and self.completed_tiles > 0:
+            return self.completed_tiles / elapsed
+        return 0.0
+
+    def eta_seconds(self) -> float | None:
+        rate = self.tile_rate()
+        remaining = max(0, self.total_tiles - self.completed_tiles)
+        if rate <= 0 or remaining <= 0:
+            return None
+        return remaining / rate
+
+    def _trim(self, now: float) -> None:
+        while self.tile_timestamps and now - self.tile_timestamps[0] > 30:
+            self.tile_timestamps.popleft()
+
+
+def _format_eta(seconds: float | None) -> str:
+    if seconds is None:
+        return "--:--"
+    total_seconds = max(0, int(seconds))
+    minutes, remaining_seconds = divmod(total_seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    if hours:
+        return f"{hours:d}:{minutes:02d}:{remaining_seconds:02d}"
+    return f"{minutes:02d}:{remaining_seconds:02d}"
 
 
 class Reporter:
@@ -26,7 +98,13 @@ class Reporter:
     def artwork_started(self, context: ArtworkContext) -> None:
         pass
 
+    def phase_changed(self, phase: str) -> None:
+        pass
+
     def tile_advanced(self, completed: int, total: int) -> None:
+        pass
+
+    def retry_recorded(self, description: str, url: str, attempt: int, reason: str) -> None:
         pass
 
     def stitching_started(self) -> None:
@@ -65,6 +143,9 @@ class RichCliReporter(Reporter):
         self.current_tile_total = 0
         self.stitching_in_progress = False
         self.last_snapshot: BatchSnapshot | None = None
+        self.current_task_label = "Artwork"
+        self.telemetry = ArtworkProgressTelemetry()
+        self._lock = Lock()
 
     def log(self, message: str) -> None:
         self.console.print(f"[cyan]•[/cyan] {message}")
@@ -85,8 +166,11 @@ class RichCliReporter(Reporter):
     def artwork_started(self, context: ArtworkContext) -> None:
         description = f"[{context.index}/{context.total}] {context.page.title[:60]}"
         total_tiles = context.selected_level.tile_count
+        self.current_task_label = description
         self.current_tile_total = total_tiles
         self.stitching_in_progress = False
+        with self._lock:
+            self.telemetry.reset(total_tiles, preserve_retries=True)
         self.tile_task_id = self.progress.add_task(description, total=total_tiles)
         self.log(f"Output: {context.output_path}")
         self.log(
@@ -95,13 +179,38 @@ class RichCliReporter(Reporter):
             f"tiles: {context.selected_level.num_tiles_x}x{context.selected_level.num_tiles_y}"
         )
 
+    def phase_changed(self, phase: str) -> None:
+        with self._lock:
+            if phase == "fetching":
+                self.telemetry.retries = 0
+                self.telemetry.completed_tiles = 0
+                self.telemetry.total_tiles = 0
+                self.telemetry.tile_timestamps.clear()
+                self.telemetry.started_at = monotonic()
+            self.telemetry.mark_phase(phase)
+
     def tile_advanced(self, completed: int, total: int) -> None:
         if self.tile_task_id is not None:
-            self.progress.update(self.tile_task_id, completed=completed, total=total)
+            with self._lock:
+                self.telemetry.record_tile_progress(completed)
+                rate = self.telemetry.tile_rate()
+                eta = self.telemetry.eta_seconds()
+                retries = self.telemetry.retries
+            description = (
+                f"{self.current_task_label} | {completed}/{total} tiles | "
+                f"{rate:.1f} tiles/s | ETA {_format_eta(eta)} | retries {retries}"
+            )
+            self.progress.update(self.tile_task_id, completed=completed, total=total, description=description)
+
+    def retry_recorded(self, description: str, url: str, attempt: int, reason: str) -> None:
+        with self._lock:
+            self.telemetry.record_retry()
 
     def stitching_started(self) -> None:
         if self.tile_task_id is not None:
             self.stitching_in_progress = True
+            with self._lock:
+                self.telemetry.mark_phase("stitching")
             self.progress.update(self.tile_task_id, description="Stitching image", completed=0, total=1)
 
     def artwork_finished(self, result: DownloadResult) -> None:
@@ -154,6 +263,12 @@ class RichTuiReporter(Reporter):
         self.pending_artworks = 0
         self.current_tile_total = 0
         self.stitching_in_progress = False
+        self.current_rate = "-"
+        self.current_eta = "-"
+        self.current_phase = "idle"
+        self.current_retries = 0
+        self.telemetry = ArtworkProgressTelemetry()
+        self._lock = Lock()
         self.progress = Progress(
             SpinnerColumn(style="cyan"),
             TextColumn("[bold]{task.description}"),
@@ -196,6 +311,10 @@ class RichTuiReporter(Reporter):
         summary.add_row("Output", self.current_output)
         summary.add_row("Image", self.current_size)
         summary.add_row("Tiles", self.current_tiles)
+        summary.add_row("Phase", self.current_phase)
+        summary.add_row("Rate", self.current_rate)
+        summary.add_row("ETA", self.current_eta)
+        summary.add_row("Retries", str(self.current_retries))
         summary.add_row("Batch", f"{self.completed_artworks}/{self.total_artworks}")
         summary.add_row("Skipped", str(self.skipped_artworks))
         summary.add_row("Failed", str(self.failed_artworks))
@@ -229,6 +348,7 @@ class RichTuiReporter(Reporter):
 
     def artwork_started(self, context: ArtworkContext) -> None:
         self.current_status = f"Downloading [{context.index}/{context.total}]"
+        self.current_phase = "downloading"
         self.current_title = context.page.title
         self.current_output = str(context.output_path)
         self.current_size = (
@@ -242,21 +362,62 @@ class RichTuiReporter(Reporter):
         total_tiles = context.selected_level.tile_count
         self.current_tile_total = total_tiles
         self.stitching_in_progress = False
+        self.current_rate = "-"
+        self.current_eta = "--:--"
+        with self._lock:
+            self.telemetry.reset(total_tiles, preserve_retries=True)
+            self.current_retries = self.telemetry.retries
         self.progress.update(self.tile_task_id, description="Tiles", total=total_tiles, completed=0)
         self.log_line(f"Start: {context.page.title}")
 
+    def phase_changed(self, phase: str) -> None:
+        if phase == "fetching":
+            with self._lock:
+                self.telemetry.retries = 0
+                self.telemetry.completed_tiles = 0
+                self.telemetry.total_tiles = 0
+                self.telemetry.tile_timestamps.clear()
+                self.telemetry.started_at = monotonic()
+            self.current_retries = 0
+        self.current_phase = phase
+        if phase == "fetching":
+            self.current_status = "Fetching"
+        self.live.update(self.render())
+
     def tile_advanced(self, completed: int, total: int) -> None:
-        self.progress.update(self.tile_task_id, completed=completed, total=total)
+        with self._lock:
+            self.telemetry.record_tile_progress(completed)
+            rate = self.telemetry.tile_rate()
+            eta = self.telemetry.eta_seconds()
+            retries = self.telemetry.retries
+        self.current_phase = "downloading"
+        self.current_rate = f"{rate:.1f} tiles/s" if rate > 0 else "-"
+        self.current_eta = _format_eta(eta)
+        self.current_retries = retries
+        self.current_tiles = f"{completed}/{total} ({self.current_tile_total} total)"
+        self.progress.update(self.tile_task_id, completed=completed, total=total, description="Tiles")
+        self.live.update(self.render())
+
+    def retry_recorded(self, description: str, url: str, attempt: int, reason: str) -> None:
+        with self._lock:
+            self.telemetry.record_retry()
+            self.current_retries = self.telemetry.retries
         self.live.update(self.render())
 
     def stitching_started(self) -> None:
         self.current_status = "Stitching"
+        self.current_phase = "stitching"
+        self.current_rate = "-"
+        self.current_eta = "--:--"
         self.stitching_in_progress = True
+        with self._lock:
+            self.telemetry.mark_phase("stitching")
         self.progress.update(self.tile_task_id, description="Stitching", completed=0, total=1)
         self.log_line("All tiles downloaded, stitching image")
 
     def artwork_finished(self, result: DownloadResult) -> None:
         self.current_status = "Saved"
+        self.current_phase = "done"
         if self.stitching_in_progress:
             self.progress.update(self.tile_task_id, description="Stitching", completed=1, total=1)
         self.log_line(f"Saved: {result.output_path}")
@@ -266,6 +427,7 @@ class RichTuiReporter(Reporter):
 
     def task_skipped(self, task: BatchTask) -> None:
         self.current_status = "Skipped"
+        self.current_phase = "skipped"
         if task.result is not None:
             self.log_line(f"Skipped existing: {task.result.output_path}")
             if task.result.sidecar_path is not None:
@@ -274,6 +436,7 @@ class RichTuiReporter(Reporter):
 
     def task_failed(self, task: BatchTask) -> None:
         self.current_status = "Failed"
+        self.current_phase = "failed"
         if self.stitching_in_progress:
             self.progress.update(self.tile_task_id, description="Stitching failed", completed=0, total=1)
         self.log_line(f"Failed: {task.url} | {task.error}")

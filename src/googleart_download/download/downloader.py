@@ -61,9 +61,10 @@ def download_artwork(
     total: int,
 ) -> DownloadResult:
     logger = get_logger()
-    with HttpClient(retry_config=retry_config) as http_client:
+    with HttpClient(retry_config=retry_config, on_retry=reporter.retry_recorded) as http_client:
         asset_url = normalize_asset_url(url)
         logger.info("Fetching artwork page: %s", asset_url)
+        reporter.phase_changed("fetching")
         reporter.log(f"Fetching artwork page: {asset_url}")
         html, fetched_url = http_client.fetch_text_with_url(asset_url, description="artwork page")
         page = parse_page_info(html, fetched_url=fetched_url)

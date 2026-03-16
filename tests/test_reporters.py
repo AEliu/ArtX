@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from googleart_download.models import (
     ArtworkContext,
@@ -70,6 +71,21 @@ class ReporterTests(unittest.TestCase):
         self.assertEqual(task.description, "Stitching failed")
         self.assertEqual(task.completed, 0)
         self.assertEqual(task.total, 1)
+
+    def test_cli_reporter_includes_rate_eta_and_retries_during_download(self) -> None:
+        reporter = RichCliReporter()
+        reporter.batch_started(1)
+        with patch("googleart_download.reporters.monotonic", side_effect=[0.0, 1.0, 2.0, 2.0]):
+            reporter.artwork_started(self.make_context())
+            reporter.retry_recorded("tile x=0 y=0", "https://example.com/tile", 2, "timeout")
+            reporter.tile_advanced(3, 6)
+
+        assert reporter.tile_task_id is not None
+        task = reporter.progress.tasks[reporter.tile_task_id]
+        self.assertIn("3/6 tiles", task.description)
+        self.assertIn("tiles/s", task.description)
+        self.assertIn("ETA", task.description)
+        self.assertIn("retries 1", task.description)
 
 
 if __name__ == "__main__":

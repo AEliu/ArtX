@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 
 import httpx
 
@@ -16,10 +17,12 @@ class HttpClient:
         retry_config: RetryConfig,
         timeout: int = REQUEST_TIMEOUT,
         client: httpx.Client | None = None,
+        on_retry: Callable[[str, str, int, str], None] | None = None,
     ) -> None:
         self.retry_config = retry_config
         self.timeout = timeout
         self.logger = get_logger()
+        self.on_retry = on_retry
         self._owns_client = client is None
         self.client = client or httpx.Client(
             headers={"User-Agent": USER_AGENT},
@@ -75,6 +78,8 @@ class HttpClient:
 
     def _sleep_before_retry(self, description: str, url: str, attempt: int, reason: str) -> None:
         delay = self.retry_config.backoff_base_seconds * (self.retry_config.backoff_multiplier ** (attempt - 1))
+        if self.on_retry is not None:
+            self.on_retry(description, url, attempt + 1, reason)
         self.logger.warning(
             "Retrying %s (attempt %s/%s) after %ss due to %s: %s",
             description,

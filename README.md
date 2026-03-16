@@ -7,6 +7,7 @@
 - 下载时日志输出
 - 瓦片和批次进度条
 - `--tui` 实时终端面板
+- 下载阶段速率、ETA、重试计数和阶段状态
 - 多个 URL 批量下载
 - `--url-file` 从文件读取 URL
 - 页面、元数据、瓦片请求自动重试
@@ -238,6 +239,7 @@ uv run googleart-download "https://artsandculture.google.com/asset/..." --log-fi
 - 多个 URL 使用 `--metadata-only` 时，`--filename` 不生效，会直接报错。
 - `--log-file` 会把日志写入文件，`-v` 会开启更详细的日志输出。
 - `--tui` 会启用 richer terminal dashboard；如果你更喜欢纯 CLI 输出，可以不加它。
+- CLI 和 TUI 现在都会显示当前下载阶段的更多运行信息，包括 tile 下载速率、下载阶段 ETA、重试计数，以及当前处于 fetching / downloading / stitching 等阶段。
 - 下载时会把单张作品的 tile 临时缓存到输出目录下的 `.googleart-cache/`。如果下载过程中中断，下次运行会自动复用已经完成的 tile。
 - 单张作品成功写出后，会默认清理对应的 tile 缓存；失败时缓存会保留，便于恢复。
 - 批量下载还会把任务状态写到输出目录下的 `.googleart-batch-state.json`。这和 tile 缓存是两层恢复能力：tile 缓存负责单作品内的瓦片复用，batch state 负责整批 URL 的任务状态恢复。

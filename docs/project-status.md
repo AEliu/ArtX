@@ -10,6 +10,7 @@ The project currently supports:
 - batch downloads from direct URLs or `--url-file`
 - rich CLI progress output
 - rich TUI dashboard via `--tui`
+- download-phase observability: tile rate, ETA, retry counters, and phase display
 - request-level retries with backoff
 - batch-level failed task reruns via `--rerun-failures`
 - batch state persistence and explicit resume via `--resume-batch`
