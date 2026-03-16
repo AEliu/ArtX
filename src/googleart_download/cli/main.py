@@ -7,16 +7,20 @@ from typing import Sequence
 from rich.console import Console
 
 from ..download.http_client import HttpClient
+from ..download.stitch_from_tiles import stitch_from_tile_directory
 from ..errors import DownloadError, build_error_guidance
 from ..logging_utils import configure_logging
 from ..models import (
     BatchRunResult,
+    BatchSnapshot,
+    BatchTask,
     DownloadSize,
     JsonObject,
     OutputConflictPolicy,
     RetryConfig,
     SizeOption,
     StitchBackend,
+    TaskState,
 )
 from ..reporting import Reporter
 from .args import (
@@ -142,6 +146,33 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 0
         if args.metadata_only:
             return run_metadata_only(args, urls, retry_config, reporter=reporter)
+        if args.stitch_from_tiles:
+            result = stitch_from_tile_directory(
+                tile_dir=Path(args.stitch_from_tiles),
+                output_dir=Path(args.output_dir),
+                filename=args.filename,
+                jpeg_quality=resolve_jpeg_quality(args),
+                output_conflict_policy=(
+                    OutputConflictPolicy.OVERWRITE
+                    if args.no_skip_existing
+                    else OutputConflictPolicy(args.output_conflict)
+                ),
+                stitch_backend=StitchBackend(args.stitch_backend),
+                reporter=reporter,
+            )
+            task_state = TaskState.SKIPPED if result.skipped else TaskState.SUCCEEDED
+            task = BatchTask(index=1, url=result.url, state=task_state, result=result, attempts=1)
+            run_result = BatchRunResult(
+                snapshot=BatchSnapshot(tasks=[task]),
+                succeeded=[result],
+                failed=[],
+            )
+            if result.skipped:
+                reporter.task_skipped(task)
+            else:
+                reporter.artwork_finished(result)
+            render_summary(run_result)
+            return 0
         if args.rerun_failed:
             failed_urls, source_state_path, rerun_state_path = load_failed_batch_urls(
                 Path(args.output_dir), args.batch_state_file

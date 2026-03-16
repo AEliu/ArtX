@@ -1,4 +1,4 @@
-# googleart-download
+# Google art download
 
 [![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-3776AB.svg)](#install)
 [![Version 0.2.0](https://img.shields.io/badge/version-0.2.0-0f766e.svg)](pyproject.toml)
@@ -22,6 +22,7 @@ Download high-resolution images from Google Arts & Culture artwork pages.
 - Supports batch resume and rerun of only failed tasks.
 - Lets you inspect available download sizes before downloading.
 - Supports `--tile-only` when you want raw downloaded tiles without stitching.
+- Supports `--stitch-from-tiles` when you want to assemble a final image later from an existing `.tiles` directory.
 - Automatically switches very large artworks to TIFF/BigTIFF output for safer streaming stitch.
 - Supports metadata-only export and optional sidecar / EXIF metadata output.
 
@@ -122,6 +123,12 @@ Download tiles only without stitching:
 uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
 ```
 
+Stitch a final image later from an existing tile directory:
+
+```bash
+uv run googleart-download --stitch-from-tiles "downloads/The Great Wave.tiles"
+```
+
 Adjust JPEG quality for JPEG outputs:
 
 ```bash
@@ -155,6 +162,8 @@ When `--tile-only` is used with `--output-conflict`:
 - `skip` reuses a complete existing tile directory for the same artwork and reports it as skipped
 - `overwrite` removes the existing tile directory before downloading again
 - `rename` writes a new sibling directory such as `The Great Wave.2.tiles`
+
+When `--stitch-from-tiles` is used, the CLI reads `state.json` and `tiles/*.tile` from the existing `.tiles` directory, then writes a final image using the selected stitch backend. In the current implementation this path does not restore metadata sidecars or EXIF from the earlier tile-only download.
 
 <a href="docs/assets/large-image-tiff.svg">
   <img src="docs/assets/large-image-overview.svg" alt="Large artwork TIFF path" />

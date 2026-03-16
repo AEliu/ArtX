@@ -21,7 +21,7 @@ def collect_urls(args: argparse.Namespace) -> list[str]:
         ]
         urls.extend(file_urls)
 
-    if not urls and not args.rerun_failed:
+    if not urls and not args.rerun_failed and not args.stitch_from_tiles:
         raise DownloadError("provide at least one URL or use --url-file")
 
     if args.retries < 1:
@@ -40,6 +40,33 @@ def collect_urls(args: argparse.Namespace) -> list[str]:
 
 
 def validate_cli_args(args: argparse.Namespace, urls: list[str]) -> None:
+    if args.stitch_from_tiles and urls:
+        raise DownloadError("--stitch-from-tiles cannot be used together with artwork URLs or --url-file")
+
+    if args.stitch_from_tiles and args.resume_batch:
+        raise DownloadError("--stitch-from-tiles cannot be used together with --resume-batch")
+
+    if args.stitch_from_tiles and args.rerun_failed:
+        raise DownloadError("--stitch-from-tiles cannot be used together with --rerun-failed")
+
+    if args.stitch_from_tiles and args.batch_state_file:
+        raise DownloadError("--stitch-from-tiles cannot be used together with --batch-state-file")
+
+    if args.stitch_from_tiles and args.list_sizes:
+        raise DownloadError("--stitch-from-tiles cannot be used together with --list-sizes")
+
+    if args.stitch_from_tiles and args.metadata_only:
+        raise DownloadError("--stitch-from-tiles cannot be used together with --metadata-only")
+
+    if args.stitch_from_tiles and args.tile_only:
+        raise DownloadError("--stitch-from-tiles cannot be used together with --tile-only")
+
+    if args.stitch_from_tiles and args.write_metadata:
+        raise DownloadError("--stitch-from-tiles does not support --write-metadata yet")
+
+    if args.stitch_from_tiles and args.write_sidecar:
+        raise DownloadError("--stitch-from-tiles does not support --write-sidecar yet")
+
     if args.resume_batch and args.rerun_failed:
         raise DownloadError("--resume-batch cannot be used together with --rerun-failed")
 

@@ -19,6 +19,12 @@ Download tiles only without stitching:
 uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
 ```
 
+Stitch a final image later from an existing tile directory:
+
+```bash
+uv run googleart-download --stitch-from-tiles "downloads/The Great Wave.tiles"
+```
+
 ## Input Files
 
 Read one URL per line:
@@ -157,6 +163,8 @@ For `--tile-only`, these policies apply to the `.tiles` directory:
 - `overwrite`: remove the existing `.tiles` directory and download again
 - `rename`: create a new sibling directory such as `The Starry Night.2.tiles`
 
+For `--stitch-from-tiles`, the same conflict policies apply to the final stitched image output path.
+
 `--no-skip-existing` is kept as a compatibility flag and is equivalent to `--output-conflict overwrite`.
 
 ## Inspect Sizes Before Download
@@ -196,3 +204,4 @@ The CLI can show:
 - `--resume-batch` and `--rerun-failed` cannot be combined.
 - `--metadata-only` cannot be combined with `--list-sizes`.
 - `--tile-only` cannot be combined with `--metadata-only`, `--list-sizes`, `--write-metadata`, `--write-sidecar`, or an explicit non-`auto` `--stitch-backend`.
+- `--stitch-from-tiles` cannot be combined with artwork URLs, `--url-file`, batch resume/rerun flags, `--metadata-only`, `--list-sizes`, `--tile-only`, `--write-metadata`, or `--write-sidecar`.

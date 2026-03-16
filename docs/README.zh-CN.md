@@ -22,6 +22,7 @@
 - 支持批量恢复和只重跑失败任务
 - 支持先查看可选尺寸再决定下载
 - 支持 `--tile-only`，只下载 tile 而不做拼接
+- 支持 `--stitch-from-tiles`，可从已有 `.tiles` 目录稍后再拼接最终图片
 - 对超大作品会自动切换到 TIFF/BigTIFF 安全输出路径
 - 支持 `metadata-only`、sidecar 和可选 JPEG EXIF 元数据写入
 
@@ -124,6 +125,12 @@ uv run googleart-download "3QFHLJgXCmQm2Q" --write-metadata
 uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
 ```
 
+从已有 tile 目录稍后再拼接最终图片：
+
+```bash
+uv run googleart-download --stitch-from-tiles "downloads/The Great Wave.tiles"
+```
+
 控制 JPEG 质量：
 
 ```bash
@@ -157,6 +164,8 @@ uv run googleart-download "3QFHLJgXCmQm2Q" --proxy http://127.0.0.1:7890
 - `skip`：如果现有 `.tiles` 目录已经是同一作品的完整 tile 集，会直接记为 skipped
 - `overwrite`：删除已有 `.tiles` 目录后重新下载
 - `rename`：写入新的同级目录，例如 `The Great Wave.2.tiles`
+
+当使用 `--stitch-from-tiles` 时，CLI 会直接读取现有 `.tiles` 目录里的 `state.json` 和 `tiles/*.tile`，并按所选 stitch backend 生成最终图片。当前实现暂不从这条路径恢复 sidecar 或 EXIF 元数据。
 
 <a href="assets/large-image-tiff.svg">
   <img src="assets/large-image-overview.svg" alt="Large artwork TIFF path" />

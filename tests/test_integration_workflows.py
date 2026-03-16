@@ -372,6 +372,41 @@ class CliIntegrationWorkflowTests(unittest.TestCase):
             self.assertEqual(result.output_path, visible_tiles_dir)
             self.assertEqual(tile_path.read_bytes(), b"ready-tile")
 
+    def test_stitch_from_tiles_via_cli_writes_final_image(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            output_dir = Path(tmpdir)
+            tile_dir = output_dir / "The Great Wave.tiles"
+            tiles_dir = tile_dir / "tiles"
+            tiles_dir.mkdir(parents=True, exist_ok=True)
+            tile_path = tiles_dir / "7-0-0.tile"
+            Image.new("RGB", (8, 8), (0, 128, 255)).save(tile_path, format="PNG")
+            (tile_dir / "state.json").write_text(
+                json.dumps(
+                    {
+                        "asset_url": "https://artsandculture.google.com/asset/example/id",
+                        "title": "The Great Wave",
+                        "output_path": str(tile_dir),
+                        "image_width": 8,
+                        "image_height": 8,
+                        "tile_width": 8,
+                        "tile_height": 8,
+                        "completed_tiles": 1,
+                        "total_tiles": 1,
+                        "stage": "downloaded",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with patch("googleart_download.cli.build_reporter", return_value=SilentReporter()):
+                code = cli.main(["--stitch-from-tiles", str(tile_dir), "-o", tmpdir])
+
+            self.assertEqual(code, 0)
+            stitched_path = output_dir / "The Great Wave.jpg"
+            self.assertTrue(stitched_path.exists())
+            with Image.open(stitched_path) as stitched_image:
+                self.assertEqual(stitched_image.size, (8, 8))
+
     def test_resume_batch_via_cli_reuses_saved_state(self) -> None:
         first_url = "https://artsandculture.google.com/asset/example/one"
         second_url = "https://artsandculture.google.com/asset/example/two"

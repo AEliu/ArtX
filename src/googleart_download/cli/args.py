@@ -62,6 +62,10 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("urls", nargs="*", help="one or more Google Arts & Culture asset URLs")
     parser.add_argument("--url-file", help="text file with one asset URL per line")
     parser.add_argument(
+        "--stitch-from-tiles",
+        help="stitch a final image from an existing .tiles directory instead of downloading artwork URLs",
+    )
+    parser.add_argument(
         "-o",
         "--output-dir",
         default="downloads",

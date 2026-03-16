@@ -193,6 +193,32 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("--tile-only cannot be used together with an explicit --stitch-backend", stderr.getvalue())
 
+    def test_stitch_from_tiles_conflicts_with_artwork_urls(self) -> None:
+        stderr = io.StringIO()
+        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+            code = cli.main(
+                [
+                    "https://artsandculture.google.com/asset/example/id",
+                    "--stitch-from-tiles",
+                    "downloads/example.tiles",
+                ]
+            )
+        self.assertEqual(code, 1)
+        self.assertIn("--stitch-from-tiles cannot be used together with artwork URLs", stderr.getvalue())
+
+    def test_stitch_from_tiles_rejects_metadata_flags(self) -> None:
+        stderr = io.StringIO()
+        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+            code = cli.main(
+                [
+                    "--stitch-from-tiles",
+                    "downloads/example.tiles",
+                    "--write-sidecar",
+                ]
+            )
+        self.assertEqual(code, 1)
+        self.assertIn("--stitch-from-tiles does not support --write-sidecar yet", stderr.getvalue())
+
     def test_list_sizes_passes_explicit_proxy_to_inspection(self) -> None:
         stdout = io.StringIO()
         with patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
