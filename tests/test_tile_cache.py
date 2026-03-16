@@ -25,7 +25,7 @@ from googleart_download.download.size_selection import list_size_options, select
 from googleart_download.download.tiles import download_tiles
 from googleart_download.errors import DownloadError
 from googleart_download.models import DownloadSize, PyramidLevel, StitchBackend, TileInfo, TileJob
-from googleart_download.reporters import Reporter
+from googleart_download.reporting import Reporter
 
 
 class SilentReporter(Reporter):

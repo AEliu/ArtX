@@ -14,7 +14,7 @@ from googleart_download.models import (
     TaskState,
     TileInfo,
 )
-from googleart_download.reporters import RichCliReporter, RichTuiReporter
+from googleart_download.reporting import RichCliReporter, RichTuiReporter
 
 
 class ReporterTests(unittest.TestCase):

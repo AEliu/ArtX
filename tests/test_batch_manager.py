@@ -6,11 +6,10 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from googleart_download.batch import BatchDownloadManager
-from googleart_download.batch_state import BatchStateStore
+from googleart_download.batch import BatchDownloadManager, BatchStateStore
 from googleart_download.errors import DownloadError
 from googleart_download.models import DownloadResult, DownloadSize, OutputConflictPolicy, RetryConfig, TaskState
-from googleart_download.reporters import Reporter
+from googleart_download.reporting import Reporter
 
 
 class SilentReporter(Reporter):

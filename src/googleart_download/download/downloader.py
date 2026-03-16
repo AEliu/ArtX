@@ -16,7 +16,7 @@ from ..models import (
     StitchBackend,
     TileInfo,
 )
-from ..reporters import Reporter
+from ..reporting import Reporter
 from .cache import clear_cache_dir, ensure_cache_layout, resolve_artwork_cache_dir, tile_cache_path, write_cache_state
 from .http_client import HttpClient
 from .image_writer import (

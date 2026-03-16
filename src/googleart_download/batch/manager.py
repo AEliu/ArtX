@@ -16,7 +16,7 @@ from ..models import (
     StitchBackend,
     TaskState,
 )
-from ..reporters import Reporter
+from ..reporting import Reporter
 
 
 class BatchDownloadManager:

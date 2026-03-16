@@ -10,7 +10,7 @@ from ..download.http_client import HttpClient
 from ..errors import DownloadError, build_error_guidance
 from ..logging_utils import configure_logging
 from ..models import BatchRunResult, DownloadSize, JsonObject, OutputConflictPolicy, RetryConfig, SizeOption, StitchBackend
-from ..reporters import Reporter
+from ..reporting import Reporter
 from .args import BARE_ASSET_ID_PATTERN, JPEG_PRESET_QUALITIES, _preprocess_argv, parse_args, parse_jpeg_quality, resolve_jpeg_quality
 from .inputs import _needs_url_resolution, canonicalize_batch_urls, collect_urls, load_failed_batch_urls, validate_cli_args
 from .output import (

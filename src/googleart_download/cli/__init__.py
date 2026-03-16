@@ -6,7 +6,7 @@ from ..batch import BatchDownloadManager
 from ..download.downloader import inspect_artwork_metadata, inspect_artwork_sizes
 from ..download.http_client import HttpClient
 from ..models import BatchRunResult, DownloadSize, JsonObject, OutputConflictPolicy, RetryConfig, SizeOption, StitchBackend
-from ..reporters import build_reporter
+from ..reporting import build_reporter
 
 
 def canonicalize_batch_urls(urls: list[str], retry_config: RetryConfig) -> tuple[list[str], list[str]]:

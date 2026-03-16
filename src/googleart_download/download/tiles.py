@@ -12,7 +12,7 @@ from Crypto.Cipher import AES
 from ..constants import AES_IV, AES_KEY, ENCRYPTION_MARKER, SIGNING_KEY
 from ..errors import DownloadError
 from ..models import PageInfo, PyramidLevel, TileInfo, TileJob
-from ..reporters import Reporter
+from ..reporting import Reporter
 from .cache import tile_cache_path
 from .http_client import HttpClient
 
