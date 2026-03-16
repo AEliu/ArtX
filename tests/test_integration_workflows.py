@@ -21,6 +21,7 @@ from googleart_download.models import (
     PyramidLevel,
     RetryConfig,
     StitchBackend,
+    TaskState,
     TileInfo,
     TileJob,
 )
@@ -498,6 +499,63 @@ class CliIntegrationWorkflowTests(unittest.TestCase):
             self.assertEqual(calls.count(flaky_url), 2)
             self.assertEqual(run_result.snapshot.skipped, 1)
             self.assertEqual(run_result.snapshot.succeeded, 1)
+
+    def test_tile_only_skipped_result_flows_through_batch_summary(self) -> None:
+        skipped_url = "https://artsandculture.google.com/asset/example/skipped-tiles"
+
+        with TemporaryDirectory() as tmpdir:
+            output_dir = Path(tmpdir)
+
+            def fake_download_artwork(**kwargs):  # type: ignore[no-untyped-def]
+                url = kwargs["url"]
+                self.assertTrue(kwargs["tile_only"])
+                return DownloadResult(
+                    url=url,
+                    output_path=output_dir / "skipped.tiles",
+                    title="skipped tiles",
+                    size=None,
+                    tile_count=None,
+                    skipped=True,
+                    tile_only=True,
+                )
+
+            with patch("googleart_download.batch.download_artwork", side_effect=fake_download_artwork):
+                from googleart_download.batch import BatchDownloadManager
+
+                manager = BatchDownloadManager(
+                    urls=[skipped_url],
+                    output_dir=output_dir,
+                    filename=None,
+                    workers=1,
+                    jpeg_quality=85,
+                    retry_config=RetryConfig(attempts=1),
+                    reporter=SilentReporter(),
+                    fail_fast=False,
+                    download_size=DownloadSize.MAX,
+                    max_dimension=None,
+                    output_conflict_policy=OutputConflictPolicy.SKIP,
+                    write_metadata=False,
+                    write_sidecar=False,
+                    tile_only=True,
+                )
+                run_result = manager.run()
+
+            self.assertEqual(run_result.snapshot.skipped, 1)
+            self.assertEqual(run_result.snapshot.succeeded, 0)
+            task = run_result.snapshot.tasks[0]
+            self.assertEqual(task.state, TaskState.SKIPPED)
+            assert task.result is not None
+            self.assertTrue(task.result.tile_only)
+            self.assertTrue(task.result.skipped)
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                cli.render_summary(run_result)
+
+            summary_output = stdout.getvalue()
+            self.assertIn("skipp", summary_output.lower())
+            self.assertIn("TILES", summary_output)
+            self.assertIn("tiles", summary_output.lower())
 
     def test_rerun_failed_via_cli_creates_rerun_state_and_runs_only_failed_tasks(self) -> None:
         failed_url = "https://artsandculture.google.com/asset/example/failed"
