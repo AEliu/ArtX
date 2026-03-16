@@ -12,6 +12,7 @@ The project currently supports:
 - rich TUI dashboard via `--tui`
 - request-level retries with backoff
 - batch-level failed task reruns via `--rerun-failures`
+- batch state persistence and explicit resume via `--resume-batch`
 - user-friendly size selection via `--size` and `--max-dimension`
 - size inspection via `--list-sizes`
 - metadata-only inspection via `--metadata-only`
@@ -24,6 +25,7 @@ The project currently supports:
 - optional JPEG EXIF metadata writing via `--write-metadata`
 - optional JSON sidecar metadata output via `--write-sidecar`
 - batch task state tracking: pending, running, skipped, succeeded, failed
+- atomic batch state file writes for cross-run recovery
 - unit tests for batch rerun behavior, metadata output, tile cache, size selection, and output naming
 
 ## Current code structure
@@ -69,7 +71,6 @@ Metadata domain:
 
 ### High priority
 
-- add queue persistence so task state survives process exit
 - add targeted rerun support for previously failed tasks
 - add output conflict policies beyond skip and force-redownload
 - improve large-job observability:

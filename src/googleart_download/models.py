@@ -197,3 +197,9 @@ class BatchRunResult:
     succeeded: list[DownloadResult]
     failed: list[BatchTask]
     rerun_rounds: int = 0
+
+
+@dataclass(frozen=True)
+class BatchStateLoadResult:
+    tasks: list[BatchTask]
+    reset_running_tasks: bool = False

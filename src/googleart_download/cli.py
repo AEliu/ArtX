@@ -66,6 +66,15 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="stop the batch immediately after the first failed artwork",
     )
     parser.add_argument(
+        "--resume-batch",
+        action="store_true",
+        help="resume batch task state from the state file instead of starting a fresh batch",
+    )
+    parser.add_argument(
+        "--batch-state-file",
+        help="custom path for the batch state JSON file (default: <output-dir>/.googleart-batch-state.json)",
+    )
+    parser.add_argument(
         "--no-skip-existing",
         action="store_true",
         help="download again even if the target file already exists",
@@ -148,6 +157,18 @@ def collect_urls(args: argparse.Namespace) -> list[str]:
 
 
 def validate_cli_args(args: argparse.Namespace, urls: list[str]) -> None:
+    if args.resume_batch and args.metadata_only:
+        raise DownloadError("--resume-batch cannot be used together with --metadata-only")
+
+    if args.resume_batch and args.list_sizes:
+        raise DownloadError("--resume-batch cannot be used together with --list-sizes")
+
+    if args.batch_state_file and args.metadata_only:
+        raise DownloadError("--batch-state-file cannot be used together with --metadata-only")
+
+    if args.batch_state_file and args.list_sizes:
+        raise DownloadError("--batch-state-file cannot be used together with --list-sizes")
+
     if args.metadata_only and args.filename and len(urls) > 1:
         raise DownloadError("--filename cannot be used with multiple URLs in --metadata-only mode")
 
@@ -310,6 +331,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             write_sidecar=args.write_sidecar,
             stitch_backend=StitchBackend(args.stitch_backend),
             rerun_failures=args.rerun_failures,
+            resume_batch=args.resume_batch,
+            batch_state_file=args.batch_state_file,
         )
         run_result = manager.run()
     except DownloadError as exc:

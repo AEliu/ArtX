@@ -17,6 +17,33 @@ class DummyReporter:
 
 
 class CliTests(unittest.TestCase):
+    def test_resume_batch_conflicts_with_metadata_only(self) -> None:
+        stderr = io.StringIO()
+        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+            code = cli.main(
+                [
+                    "https://artsandculture.google.com/asset/example/id",
+                    "--resume-batch",
+                    "--metadata-only",
+                ]
+            )
+        self.assertEqual(code, 1)
+        self.assertIn("--resume-batch cannot be used together with --metadata-only", stderr.getvalue())
+
+    def test_batch_state_file_conflicts_with_list_sizes(self) -> None:
+        stderr = io.StringIO()
+        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+            code = cli.main(
+                [
+                    "https://artsandculture.google.com/asset/example/id",
+                    "--batch-state-file",
+                    "state.json",
+                    "--list-sizes",
+                ]
+            )
+        self.assertEqual(code, 1)
+        self.assertIn("--batch-state-file cannot be used together with --list-sizes", stderr.getvalue())
+
     def test_metadata_only_with_multiple_urls_rejects_filename(self) -> None:
         stderr = io.StringIO()
         with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
