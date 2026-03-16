@@ -112,6 +112,8 @@ uv run googleart-download --url-file urls.txt --resume-batch
 uv run googleart-download --rerun-failed
 ```
 
+`--resume-batch` 适合“上一次批量任务中途中断，现在想接着跑”；`--rerun-failed` 适合“重新开一个新批次，只重跑上一次失败项”。
+
 写 sidecar 或 EXIF 元数据：
 
 ```bash
@@ -125,9 +127,16 @@ uv run googleart-download "3QFHLJgXCmQm2Q" --write-metadata
 uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
 ```
 
-从已有 tile 目录稍后再拼接最终图片：
+从已有 tile 目录稍后再生成最终图片：
 
 ```bash
+uv run googleart-download --stitch-from-tiles "downloads/The Great Wave.tiles"
+```
+
+推荐的 tile 工作流：
+
+```bash
+uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
 uv run googleart-download --stitch-from-tiles "downloads/The Great Wave.tiles"
 ```
 
@@ -150,7 +159,7 @@ uv run googleart-download "3QFHLJgXCmQm2Q" --proxy http://127.0.0.1:7890
 
 普通尺寸作品默认输出 JPEG。
 
-对于非常大的作品，程序会自动切换到 TIFF/BigTIFF 输出。这是刻意的设计，不是异常回退。原因是超大图更适合使用流式拼接，而不是整张图进内存后再写 JPEG。
+对于非常大的作品，程序可能会自动切换到 TIFF/BigTIFF 输出。这是刻意的设计，而且仍然属于正常成功路径，不是异常回退。原因是超大图更适合使用流式拼接，而不是整张图进内存后再写 JPEG。
 
 大图自动转 JPEG 不属于默认下载路径。如果你最终仍然需要 JPEG，建议把生成的 TIFF 作为后处理再转换。
 
@@ -165,11 +174,19 @@ uv run googleart-download "3QFHLJgXCmQm2Q" --proxy http://127.0.0.1:7890
 - 隐藏 cache 负责正确的 cache identity，避免不同作品仅因输出名相同而误复用 tile
 - tile-only 成功后，会把隐藏 cache 的内容同步到可见 `.tiles/` 目录，因此两处会有一份有意保留的重复 tile 数据
 
+`--output-conflict` 作用于当前命令准备写出的产物：
+
+- 普通下载：最终图片文件
+- `--tile-only`：可见 `.tiles/` 目录
+- `--stitch-from-tiles`：最终拼接后的图片
+
 当 `--tile-only` 与 `--output-conflict` 组合时：
 
 - `skip`：如果现有 `.tiles` 目录已经是同一作品的完整 tile 集，会直接记为 skipped
 - `overwrite`：删除已有 `.tiles` 目录后重新下载
 - `rename`：写入新的同级目录，例如 `The Great Wave.2.tiles`
+
+如果现有 `.tiles` 目录属于别的作品，tile-only 会继续下载，而不是直接记为 skipped。
 
 当使用 `--stitch-from-tiles` 时，CLI 会直接读取现有 `.tiles` 目录里的 `state.json` 和 `tiles/*.tile`，并按所选 stitch backend 生成最终图片。当前实现暂不从这条路径恢复 sidecar 或 EXIF 元数据。
 

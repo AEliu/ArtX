@@ -21,7 +21,11 @@ def build_error_guidance(message: str) -> list[str]:
             [
                 "This is a memory safety guard, not an out-of-memory crash.",
                 "Try a smaller size such as `--size large` or use `--max-dimension ...`.",
-                "For very large artworks, prefer the `bigtiff` backend and sidecar metadata instead of EXIF.",
+                (
+                    "For very large artworks, the `bigtiff` TIFF/BigTIFF "
+                    "path is the intended safe output path."
+                ),
+                "If you still need JPEG later, convert the TIFF result as a separate post-process step.",
             ]
         )
 

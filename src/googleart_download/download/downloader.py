@@ -294,7 +294,9 @@ def _report_artwork_ready(
         else f"Output format: {workspace.output_path.suffix.lower().lstrip('.').upper()}"
     )
     if data.selected_backend is StitchBackend.BIGTIFF:
-        reporter.log(f"Large artwork output adjusted to TIFF for streaming stitch safety: {workspace.output_path}")
+        reporter.log(
+            f"Large artwork will use the TIFF/BigTIFF success path for safer stitching: {workspace.output_path}"
+        )
     for stale_partial in workspace.removed_partials:
         reporter.log(f"Removed stale partial output from older JPEG attempt: {stale_partial}")
 

@@ -110,6 +110,8 @@ Rerun only failed tasks from the previous batch:
 uv run googleart-download --rerun-failed
 ```
 
+Use `--resume-batch` when a batch stopped partway through and you want to continue it. Use `--rerun-failed` when you want a fresh batch containing only the tasks that failed last time.
+
 Write metadata sidecars or EXIF:
 
 ```bash
@@ -123,9 +125,16 @@ Download tiles only without stitching:
 uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
 ```
 
-Stitch a final image later from an existing tile directory:
+Create the final image later from an existing tile directory:
 
 ```bash
+uv run googleart-download --stitch-from-tiles "downloads/The Great Wave.tiles"
+```
+
+Recommended tile workflow:
+
+```bash
+uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
 uv run googleart-download --stitch-from-tiles "downloads/The Great Wave.tiles"
 ```
 
@@ -148,7 +157,7 @@ If you prefer environment variables, standard proxy variables such as `HTTPS_PRO
 
 Normal-sized artworks default to JPEG output.
 
-Very large artworks automatically switch to TIFF/BigTIFF output. This is intentional. The project uses a safer streaming stitch path for large outputs instead of trying to build the full image in memory and then write a JPEG.
+Very large artworks may switch to TIFF/BigTIFF output automatically. This is intentional and still counts as the normal success path. The project uses a safer streaming stitch path for large outputs instead of trying to build the full image in memory and then write a JPEG.
 
 Large-image JPEG conversion is not part of the default path. If you need a JPEG from a very large TIFF result, convert it yourself as a separate post-process step.
 
@@ -163,11 +172,19 @@ Internally, tile-only downloads also keep a hidden stable cache under `.googlear
 - the hidden cache avoids accidental tile reuse between different artworks that would otherwise collide by output name
 - when tile-only finishes successfully, the visible `.tiles/` directory is materialized from the hidden cache, so tile data is intentionally duplicated in those two locations while the hidden cache is retained
 
+`--output-conflict` applies to the output that the current command would write:
+
+- normal download: the final image file
+- `--tile-only`: the visible `.tiles/` directory
+- `--stitch-from-tiles`: the final stitched image
+
 When `--tile-only` is used with `--output-conflict`:
 
-- `skip` reuses a complete existing tile directory for the same artwork and reports it as skipped
+- `skip` only reports skipped when the existing `.tiles` directory is already a complete result for the same artwork
 - `overwrite` removes the existing tile directory before downloading again
 - `rename` writes a new sibling directory such as `The Great Wave.2.tiles`
+
+When `--tile-only` sees an existing `.tiles` directory for a different artwork, it continues the download instead of reporting skipped.
 
 When `--stitch-from-tiles` is used, the CLI reads `state.json` and `tiles/*.tile` from the existing `.tiles` directory, then writes a final image using the selected stitch backend. In the current implementation this path does not restore metadata sidecars or EXIF from the earlier tile-only download.
 

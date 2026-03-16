@@ -19,9 +19,16 @@ Download tiles only without stitching:
 uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
 ```
 
-Stitch a final image later from an existing tile directory:
+Create the final image later from an existing tile directory:
 
 ```bash
+uv run googleart-download --stitch-from-tiles "downloads/The Great Wave.tiles"
+```
+
+Recommended tile workflow:
+
+```bash
+uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
 uv run googleart-download --stitch-from-tiles "downloads/The Great Wave.tiles"
 ```
 
@@ -53,6 +60,8 @@ Rerun only failed tasks from the previous batch state:
 ```bash
 uv run googleart-download --rerun-failed
 ```
+
+Use `--resume-batch` when a batch stopped partway through and you want to continue it. Use `--rerun-failed` when you want a fresh batch containing only the tasks that failed last time.
 
 Use a custom batch state file:
 
@@ -157,9 +166,15 @@ uv run googleart-download --url-file urls.txt --output-conflict overwrite
 uv run googleart-download --url-file urls.txt --output-conflict rename
 ```
 
+`--output-conflict` applies to the output that the current command would write:
+
+- normal download: the final image file
+- `--tile-only`: the visible `.tiles/` directory
+- `--stitch-from-tiles`: the final stitched image
+
 Behavior:
 
-- `skip`: default
+- `skip`: default, and only skip when that existing output is already the correct finished result
 - `overwrite`: replace existing output
 - `rename`: write `.2`, `.3`, and so on
 
@@ -168,6 +183,8 @@ For `--tile-only`, these policies apply to the `.tiles` directory:
 - `skip`: if the directory already contains a complete tile set for the same artwork, report it as skipped
 - `overwrite`: remove the existing `.tiles` directory and download again
 - `rename`: create a new sibling directory such as `The Starry Night.2.tiles`
+
+If an existing `.tiles` directory belongs to a different artwork, tile-only continues the download instead of reporting skipped.
 
 For `--stitch-from-tiles`, the same conflict policies apply to the final stitched image output path.
 
@@ -185,6 +202,8 @@ Size inspection reports:
 - tile count
 - raw canvas memory estimate
 - whether the selected backend path would remain JPEG or switch to TIFF
+
+If a row defaults to TIFF/BigTIFF, that is still the normal safe success path for large artwork stitching rather than an unexpected failure mode.
 
 ## TUI And Logging
 

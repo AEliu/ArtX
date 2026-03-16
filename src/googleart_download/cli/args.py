@@ -63,7 +63,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--url-file", help="text file with one asset URL per line")
     parser.add_argument(
         "--stitch-from-tiles",
-        help="stitch a final image from an existing .tiles directory instead of downloading artwork URLs",
+        help="create the final image later from an existing .tiles directory instead of downloading artwork URLs",
     )
     parser.add_argument(
         "-o",
@@ -125,12 +125,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--resume-batch",
         action="store_true",
-        help="resume an interrupted batch from the state file; succeeded and skipped tasks are not rerun",
+        help="continue an interrupted batch from the state file; succeeded and skipped tasks are not rerun",
     )
     parser.add_argument(
         "--rerun-failed",
         action="store_true",
-        help="start a new batch using only the failed tasks recorded in the state file",
+        help="start a new batch using only the tasks that failed in the previous state file",
     )
     parser.add_argument(
         "--batch-state-file",
@@ -145,7 +145,10 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "--output-conflict",
         choices=[policy.value for policy in OutputConflictPolicy],
         default=OutputConflictPolicy.SKIP.value,
-        help="when output already exists: skip it, overwrite it, or save as a renamed file (default: skip)",
+        help=(
+            "when the target output already exists: skip it, overwrite it, "
+            "or write to a renamed sibling path (default: skip)"
+        ),
     )
     size_group = parser.add_mutually_exclusive_group()
     size_group.add_argument(
@@ -172,7 +175,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--tile-only",
         action="store_true",
-        help="download artwork tiles into a local .tiles directory without stitching a final image",
+        help="download tiles and keep a visible .tiles directory without creating the final image",
     )
     parser.add_argument(
         "--stitch-backend",
