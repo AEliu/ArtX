@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "googleart-download"
-version = "0.1.0"
+version = "0.2.0"
 description = "Download high-resolution Google Arts & Culture images by stitching tiles"
 readme = "README.md"
 requires-python = ">=3.13"

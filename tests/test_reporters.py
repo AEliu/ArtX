@@ -75,8 +75,8 @@ class ReporterTests(unittest.TestCase):
     def test_cli_reporter_includes_rate_eta_and_retries_during_download(self) -> None:
         reporter = RichCliReporter()
         reporter.batch_started(1)
-        with patch("googleart_download.reporters.monotonic", side_effect=[0.0, 1.0, 2.0, 2.0]), patch(
-            "googleart_download.reporters.datetime"
+        with patch("googleart_download.reporting.telemetry.monotonic", side_effect=[0.0, 1.0, 2.0, 2.0]), patch(
+            "googleart_download.reporting.telemetry.datetime"
         ) as mock_datetime:
             mock_datetime.now.return_value = __import__("datetime").datetime(2026, 3, 16, 14, 30, 0)
             reporter.artwork_started(self.make_context())
