@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620" role="img" aria-labelledby="title desc">
+  <title id="title">Large image TIFF output preview</title>
+  <desc id="desc">Terminal-style preview showing a large artwork switching to TIFF BigTIFF output with cached tile reuse.</desc>
+  <rect width="1100" height="620" rx="20" fill="#111827"/>
+  <rect x="24" y="24" width="1052" height="572" rx="16" fill="#0b1020" stroke="#334155"/>
+  <circle cx="54" cy="54" r="8" fill="#ef4444"/>
+  <circle cx="78" cy="54" r="8" fill="#f59e0b"/>
+  <circle cx="102" cy="54" r="8" fill="#22c55e"/>
+  <text x="130" y="60" fill="#cbd5e1" font-size="22" font-family="SFMono-Regular, Consolas, monospace">large artwork safety path</text>
+
+  <g font-family="SFMono-Regular, Consolas, monospace" font-size="20" fill="#e2e8f0">
+    <text x="48" y="110">$ uv run googleart-download "bgEuwDxel93-Pg" -o downloads --workers 32</text>
+    <text x="48" y="150" fill="#93c5fd">• Output: downloads/The Starry Night - Vincent van Gogh.tif</text>
+    <text x="48" y="186" fill="#93c5fd">• Image: 44567x35291, tiles: 88x69</text>
+    <text x="48" y="222" fill="#93c5fd">• Cache directory: downloads/.googleart-cache/bgEuwDxel93-Pg-078291bb70f6</text>
+    <text x="48" y="258" fill="#93c5fd">• Cached tiles available: 6072/6072</text>
+    <text x="48" y="294" fill="#fbbf24">• Large artwork output adjusted to TIFF for streaming stitch safety</text>
+    <text x="48" y="330" fill="#93c5fd">• Reusing 6072 cached tile(s)</text>
+    <text x="48" y="366" fill="#93c5fd">• Stitch backend selected: bigtiff</text>
+  </g>
+
+  <rect x="48" y="402" width="1004" height="70" rx="10" fill="#111827" stroke="#1f2937"/>
+  <text x="66" y="432" fill="#f8fafc" font-size="19" font-family="SFMono-Regular, Consolas, monospace">Phase: stitching  |  Output format: TIFF  |  Backend: bigtiff</text>
+  <rect x="66" y="444" width="968" height="12" rx="6" fill="#1f2937"/>
+  <rect x="66" y="444" width="968" height="12" rx="6" fill="#38bdf8"/>
+  <text x="66" y="492" fill="#cbd5e1" font-size="19" font-family="SFMono-Regular, Consolas, monospace">Stitching image ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100%</text>
+
+  <rect x="48" y="516" width="1004" height="56" rx="10" fill="#111827" stroke="#1f2937"/>
+  <text x="66" y="550" fill="#93c5fd" font-size="18" font-family="SFMono-Regular, Consolas, monospace">Saved: downloads/The Starry Night - Vincent van Gogh.tif</text>
+</svg>

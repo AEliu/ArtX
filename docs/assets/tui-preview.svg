@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620" role="img" aria-labelledby="title desc">
+  <title id="title">googleart-download terminal preview</title>
+  <desc id="desc">Terminal-style preview showing size selection, cache reuse, progress, ETA, and summary output.</desc>
+  <rect width="1100" height="620" rx="20" fill="#111827"/>
+  <rect x="24" y="24" width="1052" height="572" rx="16" fill="#0b1020" stroke="#334155"/>
+  <circle cx="54" cy="54" r="8" fill="#ef4444"/>
+  <circle cx="78" cy="54" r="8" fill="#f59e0b"/>
+  <circle cx="102" cy="54" r="8" fill="#22c55e"/>
+  <text x="130" y="60" fill="#cbd5e1" font-size="22" font-family="SFMono-Regular, Consolas, monospace">googleart-download</text>
+
+  <g font-family="SFMono-Regular, Consolas, monospace" font-size="21" fill="#e2e8f0">
+    <text x="48" y="110">$ uv run googleart-download "3QFHLJgXCmQm2Q" --size large --tui</text>
+    <text x="48" y="154" fill="#93c5fd">• Fetching artwork page: https://artsandculture.google.com/asset/.../3QFHLJgXCmQm2Q</text>
+    <text x="48" y="190" fill="#93c5fd">• Output: downloads/Girl with a Pearl Earring.large.jpg</text>
+    <text x="48" y="226" fill="#93c5fd">• Image: 8483x5828, tiles: 18x12</text>
+    <text x="48" y="262" fill="#93c5fd">• Cache directory: downloads/.googleart-cache/3QFHLJgXCmQm2Q-8bb3d91a</text>
+    <text x="48" y="298" fill="#93c5fd">• Cached tiles available: 84/216</text>
+    <text x="48" y="334" fill="#93c5fd">• Reusing 84 cached tile(s)</text>
+  </g>
+
+  <rect x="48" y="372" width="1004" height="70" rx="10" fill="#111827" stroke="#1f2937"/>
+  <text x="66" y="402" fill="#f8fafc" font-size="19" font-family="SFMono-Regular, Consolas, monospace">Phase: downloading  |  Rate: 8.4 tiles/s  |  ETA: 00:16  |  Finish ~ 14:37  |  Retries: 1</text>
+  <rect x="66" y="414" width="968" height="12" rx="6" fill="#1f2937"/>
+  <rect x="66" y="414" width="632" height="12" rx="6" fill="#22c55e"/>
+  <text x="66" y="462" fill="#cbd5e1" font-size="19" font-family="SFMono-Regular, Consolas, monospace">[1/1] Girl with a Pearl Earring ━━━━━━━━━━━━━━━━━━━━━━━━━━━ 65%</text>
+
+  <rect x="48" y="486" width="1004" height="86" rx="10" fill="#111827" stroke="#1f2937"/>
+  <text x="66" y="516" fill="#f8fafc" font-size="19" font-family="SFMono-Regular, Consolas, monospace">Completed 1 succeeded, 0 skipped, 0 failed, 0 pending.</text>
+  <text x="66" y="548" fill="#93c5fd" font-size="18" font-family="SFMono-Regular, Consolas, monospace">Format: JPG  |  Backend: pillow  |  Path: downloads/Girl with a Pearl Earring.large.jpg</text>
+</svg>

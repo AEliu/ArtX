@@ -1,293 +1,133 @@
 # googleart-download
 
-下载 Google Arts & Culture 作品页里的高清图片。程序会解析页面里的瓦片元数据，下载所有瓦片并自动拼接成一张完整图片。
+[![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-3776AB.svg)](#install)
+[![Version 0.1.0](https://img.shields.io/badge/version-0.1.0-0f766e.svg)](pyproject.toml)
 
-现在支持：
+Download high-resolution images from Google Arts & Culture artwork pages.
 
-- 下载时日志输出
-- 瓦片和批次进度条
-- `--tui` 实时终端面板
-- 下载阶段速率、ETA、重试计数和阶段状态
-- 多个 URL 批量下载
-- `--url-file` 从文件读取 URL
-- 页面、元数据、瓦片请求自动重试
-- 批量任务状态跟踪和失败汇总
-- 批次状态持久化与显式恢复
-- 用户友好的尺寸选择：`--size` / `--max-dimension`
-- 先查看可选尺寸：`--list-sizes`
-- 已存在文件默认跳过
-- 单作品 tile 缓存和中断后自动复用
-- 超大图拼接前的内存风险保护
-- 可选 `pyvips` 大图转换后端
-- 可选 `bigtiff` 流式大图拼接后端
-- 可选将作品元数据写入 JPEG EXIF
-- 可选输出同名 JSON sidecar 元数据文件
-- 失败作品可按批次轮次重跑
+`googleart-download` resolves the artwork page, downloads the tiled image pyramid, and stitches the final image locally. It is built for reliability first: batch runs, retry handling, tile-cache reuse, interrupted-run recovery, and safe handling for very large artworks.
 
-## 安装
+## Highlights
+
+- Downloads a single artwork, a URL list, or a batch file.
+- Supports multiple input forms for the same artwork:
+  - full artwork URL
+  - artwork URL with viewer query params
+  - official `g.co/arts/...` short links
+  - bare asset id such as `3QFHLJgXCmQm2Q`
+- Reuses cached tiles after interruption instead of starting over.
+- Supports batch resume and rerun of only failed tasks.
+- Lets you inspect available download sizes before downloading.
+- Automatically switches very large artworks to TIFF/BigTIFF output for safer streaming stitch.
+- Supports metadata-only export and optional sidecar / EXIF metadata output.
+
+## Why This Project
+
+Google Arts & Culture artwork pages use image tiles. A simple “save image” workflow does not recover the full artwork.
+
+This project focuses on the practical problems that appear once you try to download real artwork pages at scale:
+
+- broken or retried tile requests
+- interrupted downloads
+- very large artworks that should not be stitched fully in memory
+- batch runs that need to be resumed instead of restarted
+
+## Install
 
 ```bash
 uv sync
 ```
 
-如果你需要更稳地处理超大图，安装大图拼接增强依赖：
-
-```bash
-uv sync --extra large-images
-```
-
-`pyvips` 还需要系统里的 `libvips`：
-
-- macOS: `brew install vips`
-- Debian/Ubuntu: `sudo apt install libvips libvips-dev`
-- Fedora: `sudo dnf install vips vips-devel`
-- Windows: 安装 `libvips` 发行包并把其 `bin` 目录加入 `PATH`
-
-推荐直接用项目脚本：
+Run the CLI:
 
 ```bash
 uv run googleart-download --help
 ```
 
-## 用法
+If you want optional large-image extras:
 
 ```bash
-uv run googleart-download "https://artsandculture.google.com/asset/recto-the-fetus-in-the-womb-verso-notes-on-reproduction-with-sketches-of-a-fetus-in-utero-etc-leonardo-da-vinci/qgFUAw5Zc1wsbw" -o downloads
+uv sync --extra large-images
 ```
 
-也可以指定输出文件名：
+## Quick Start
+
+Download one artwork:
 
 ```bash
-uv run googleart-download "https://artsandculture.google.com/asset/recto-the-fetus-in-the-womb-verso-notes-on-reproduction-with-sketches-of-a-fetus-in-utero-etc-leonardo-da-vinci/qgFUAw5Zc1wsbw" -o downloads -f fetus.jpg
+uv run googleart-download "https://artsandculture.google.com/asset/girl-with-a-pearl-earring/3QFHLJgXCmQm2Q" -o downloads
 ```
 
-如果你已经知道作品的 asset id，也可以直接传短一点的标识：
+Use a short asset id instead of a long URL:
 
 ```bash
 uv run googleart-download "3QFHLJgXCmQm2Q" --size preview
 ```
 
-提高 tile 下载并发：
+Inspect sizes before downloading:
 
 ```bash
-uv run googleart-download "https://artsandculture.google.com/asset/..." --workers 32
+uv run googleart-download "3QFHLJgXCmQm2Q" --list-sizes
 ```
 
-批量下载：
+Export artwork metadata only:
 
 ```bash
-uv run googleart-download \
-  "https://artsandculture.google.com/asset/recto-the-fetus-in-the-womb-verso-notes-on-reproduction-with-sketches-of-a-fetus-in-utero-etc-leonardo-da-vinci/qgFUAw5Zc1wsbw" \
-  "https://artsandculture.google.com/asset/taj-mahal/7QHkbH1IgneKLA" \
-  --tui \
-  --log-file logs/run.log
+uv run googleart-download "3QFHLJgXCmQm2Q" --metadata-only
 ```
 
-从文件读取：
+![Terminal preview](docs/assets/tui-preview.svg)
+
+## Common Tasks
+
+Choose a user-friendly download size:
 
 ```bash
-uv run googleart-download --url-file urls.txt --tui
+uv run googleart-download "3QFHLJgXCmQm2Q" --size preview
+uv run googleart-download "3QFHLJgXCmQm2Q" --size medium
+uv run googleart-download "3QFHLJgXCmQm2Q" --size large
+uv run googleart-download "3QFHLJgXCmQm2Q" --size max
 ```
 
-重试参数：
-
-```bash
-uv run googleart-download "https://artsandculture.google.com/asset/..." --retries 5 --retry-backoff 1.0
-```
-
-失败作品按批次再跑一轮：
-
-```bash
-uv run googleart-download --url-file urls.txt --rerun-failures 1
-```
-
-显式恢复上次批次状态：
+Resume an interrupted batch:
 
 ```bash
 uv run googleart-download --url-file urls.txt --resume-batch
 ```
 
-只重跑上次批次里失败的任务：
+Rerun only failed tasks from the previous batch:
 
 ```bash
 uv run googleart-download --rerun-failed
 ```
 
-自定义批次状态文件位置：
+Write metadata sidecars or EXIF:
 
 ```bash
-uv run googleart-download --url-file urls.txt --batch-state-file state/downloads.json
+uv run googleart-download "3QFHLJgXCmQm2Q" --write-sidecar
+uv run googleart-download "3QFHLJgXCmQm2Q" --write-metadata
 ```
 
-先查看这张作品有哪些可选尺寸：
+## Output Format Behavior
 
-```bash
-uv run googleart-download "https://artsandculture.google.com/asset/..." --list-sizes
-```
+Normal-sized artworks default to JPEG output.
 
-只抓作品元信息，不下载图片：
+Very large artworks automatically switch to TIFF/BigTIFF output. This is intentional. The project uses a safer streaming stitch path for large outputs instead of trying to build the full image in memory and then write a JPEG.
 
-```bash
-uv run googleart-download "https://artsandculture.google.com/asset/..." --metadata-only
-```
+Large-image JPEG conversion is not part of the default path. If you need a JPEG from a very large TIFF result, convert it yourself as a separate post-process step.
 
-把元信息写到 JSON 文件：
+![Large artwork TIFF path](docs/assets/large-image-tiff.svg)
 
-```bash
-uv run googleart-download "https://artsandculture.google.com/asset/..." --metadata-only --metadata-output metadata.json
-```
+## More Documentation
 
-多个 URL 一次抓取元信息：
+- `docs/usage.md`: CLI usage, batch workflows, resume, rerun, conflict handling
+- `docs/large-images.md`: large artwork behavior, TIFF/BigTIFF path, cache reuse, size inspection
+- `docs/metadata.md`: metadata-only export, sidecars, EXIF behavior
+- `docs/architecture.md`: internal architecture and implementation notes
+- `docs/project-status.md`: current status and planned work
 
-```bash
-uv run googleart-download \
-  "https://artsandculture.google.com/asset/..." \
-  "https://artsandculture.google.com/asset/..." \
-  --metadata-only
-```
+## Current Scope
 
-多个 URL 的元信息抓取如果要直接写文件：
-
-```bash
-uv run googleart-download \
-  "https://artsandculture.google.com/asset/..." \
-  "https://artsandculture.google.com/asset/..." \
-  --metadata-only \
-  --metadata-output metadata/batch.json
-```
-
-按用户友好的预设尺寸下载：
-
-```bash
-uv run googleart-download "https://artsandculture.google.com/asset/..." --size preview
-uv run googleart-download "https://artsandculture.google.com/asset/..." --size medium
-uv run googleart-download "https://artsandculture.google.com/asset/..." --size large
-uv run googleart-download "https://artsandculture.google.com/asset/..." --size max
-```
-
-按最长边限制下载：
-
-```bash
-uv run googleart-download "https://artsandculture.google.com/asset/..." --max-dimension 8000
-```
-
-批量失败时继续处理后续任务：
-
-```bash
-uv run googleart-download --url-file urls.txt
-```
-
-批量失败时立刻停止：
-
-```bash
-uv run googleart-download --url-file urls.txt --fail-fast
-```
-
-默认会跳过已经存在的目标文件。如果你需要显式控制冲突策略：
-
-```bash
-uv run googleart-download --url-file urls.txt --output-conflict skip
-uv run googleart-download --url-file urls.txt --output-conflict overwrite
-uv run googleart-download --url-file urls.txt --output-conflict rename
-```
-
-如果你需要兼容旧写法并强制重新下载：
-
-```bash
-uv run googleart-download --url-file urls.txt --no-skip-existing
-```
-
-默认不会修改图片 EXIF。如果你需要把作品信息写入输出 JPEG：
-
-```bash
-uv run googleart-download "https://artsandculture.google.com/asset/..." --write-metadata
-```
-
-如果你需要结构化元数据文件：
-
-```bash
-uv run googleart-download "https://artsandculture.google.com/asset/..." --write-sidecar
-```
-
-如果你两者都要：
-
-```bash
-uv run googleart-download "https://artsandculture.google.com/asset/..." --write-metadata --write-sidecar
-```
-
-控制拼图后端：
-
-```bash
-uv run googleart-download "https://artsandculture.google.com/asset/..." --stitch-backend auto
-uv run googleart-download "https://artsandculture.google.com/asset/..." --stitch-backend pillow
-uv run googleart-download "https://artsandculture.google.com/asset/..." --stitch-backend bigtiff
-uv run googleart-download "https://artsandculture.google.com/asset/..." --stitch-backend pyvips
-```
-
-日志和详细输出：
-
-```bash
-uv run googleart-download "https://artsandculture.google.com/asset/..." --log-file logs/run.log -v
-```
-
-## 说明
-
-- 需要完整的作品页 URL。你给的示例链接少了最后的作品 ID，正确格式通常是 `/asset/<slug>/<assetId>`。
-- 如果从终端或聊天窗口复制 URL 时混入了换行或空格，程序会先清理这些空白字符再继续解析。
-- 支持标准 Google Arts & Culture 作品页 URL，也支持 Google 官方短链接 `g.co/arts/...`。
-- 也支持直接输入作品的 asset id，例如 `3QFHLJgXCmQm2Q`，程序会自动解析到对应作品页。
-- 作品页 URL 里的查看参数（例如 `?ms=...`）会在内部规范化，不会影响缓存、元数据提取和正常下载。
-- 批量下载时，如果输入列表里包含指向同一作品的不同形式（例如长链接、带 `?ms=...` 的变体、`g.co/arts/...`、asset id），程序会先按作品身份去重，避免同一作品重复跑两次。
-- `--metadata-only` 的多 URL 输入也会使用同样的去重规则，避免同一作品的元信息被重复输出。
-- 程序当前面向单张作品页，不处理整个合集或故事页。
-- `--workers` 控制单张作品内部的 tile 下载并发数。默认值是自动计算的，通常不需要手动改；网络好、机器资源足够时可以适当调高，但过高可能触发限速、重试增多，甚至整体更慢。
-- 如果大图下载过程中出现单个 tile 的 SSL / EOF / timeout 之类网络错误，通常可以直接重跑；已下载 tile 会从缓存复用。此时优先尝试提高 `--retries`，必要时再适当降低 `--workers`。
-- `--filename` 只适用于单个 URL 下载；批量下载时不能和多个 URL 一起使用。
-- `--output-conflict` 控制目标文件已存在时的行为：
-  - `skip`：跳过，默认行为
-  - `overwrite`：覆盖已有输出
-  - `rename`：自动保存为 `.2`、`.3` 这类不冲突文件名
-- `--no-skip-existing` 是兼容旧写法，等价于 `--output-conflict overwrite`；不要和 `--output-conflict` 同时使用。
-- `--list-sizes` 只适用于单个 URL；它会读取页面和瓦片元数据后直接退出，不会开始图片下载。
-- `--metadata-only` 只抓作品页元信息并输出 JSON，不会下载 tile 或生成图片文件。
-- `--metadata-only` 不能和 `--list-sizes` 同时使用。
-- `--metadata-output` 可以把 `--metadata-only` 的结果写入 JSON 文件。
-- `--metadata-output` 必须和 `--metadata-only` 一起使用。
-- 单个 URL 使用 `--metadata-only` 且未指定 `--metadata-output` 时，会默认写出同名的 `.metadata.json` 文件。
-- 单个 URL 使用 `--metadata-only` 时，如果元信息里没有可用标题，会回退到 `google-art.metadata.json`。
-- 多个 URL 使用 `--metadata-only` 且未指定 `--metadata-output` 时，默认打印到标准输出。
-- 多个 URL 使用 `--metadata-only` 时，如果你希望落到文件而不是标准输出，请显式传 `--metadata-output path/to/file.json`。
-- 多个 URL 使用 `--metadata-only` 时，`--filename` 不生效，会直接报错。
-- `--log-file` 会把日志写入文件，`-v` 会开启更详细的日志输出。
-- `--tui` 会启用 richer terminal dashboard；如果你更喜欢纯 CLI 输出，可以不加它。
-- CLI 和 TUI 现在都会显示当前下载阶段的更多运行信息，包括 tile 下载速率、下载阶段 ETA、重试计数，以及当前处于 fetching / downloading / stitching 等阶段。
-- 下载时会把单张作品的 tile 临时缓存到输出目录下的 `.googleart-cache/`。如果下载过程中中断，下次运行会自动复用已经完成的 tile。
-- 单张作品成功写出后，会默认清理对应的 tile 缓存；失败时缓存会保留，便于恢复。
-- 批量下载还会把任务状态写到输出目录下的 `.googleart-batch-state.json`。这和 tile 缓存是两层恢复能力：tile 缓存负责单作品内的瓦片复用，batch state 负责整批 URL 的任务状态恢复。
-- `--resume-batch` 用于恢复一个被中断的整批任务：已成功/已跳过任务默认不再重跑，失败和待处理任务继续执行；上次中断时停在 `running` 的任务会回退成 `pending` 再执行。
-- `--rerun-failed` 用于从 batch state 文件里提取上次失败的任务，启动一个新的小批次；它不需要你重新提供整批 URL。
-- `--rerun-failed` 默认会把新的运行状态写到单独的 rerun state 文件，避免覆盖原始 batch state。
-- `--batch-state-file` 可以指定自定义状态文件路径；如果不传，默认使用 `<output-dir>/.googleart-batch-state.json`。
-- `--resume-batch` 和 `--rerun-failed` 不能一起使用；这两个参数也都不能和 `--list-sizes`、`--metadata-only` 一起使用。
-- `--rerun-failed` 会从 state 文件读取失败任务，因此不能再同时传入直接的 batch URL 或 `--url-file`。
-- 最终图片会先写到保留原扩展名的临时文件，再原子替换成目标文件，避免半成品污染正式输出。
-- `--size` 是用户友好的语义化尺寸预设；`--max-dimension` 则允许你直接控制最长边上限。
-- 默认仍然是 `--size max`，也就是下载当前可用的最大尺寸。
-- `--list-sizes` 不会开始下载图片，只会读取页面和瓦片元数据，列出当前作品可选的层级尺寸和 tile 数。
-- `--list-sizes` 现在还会显示每个层级的大致 raw canvas 内存占用，以及在 `--stitch-backend auto` 下默认会走 `JPG` 还是 `TIFF` 输出路径。
-- 输出文件命名规则：
-  - `--size max` 默认不加尺寸后缀
-  - 非 `max` 尺寸会自动加 `.preview` / `.medium` / `.large`
-  - `--max-dimension 8000` 会自动加 `.maxdim-8000`
-  - 如果显式传了 `--filename`，则完全尊重用户文件名
-- `--stitch-backend auto` 会优先使用 Pillow；当图像过大、不适合安全内存拼接时，会切到 `bigtiff` 流式拼图。
-- `bigtiff` 路径会先把 tile 流式写成 BigTIFF 成品；默认不再自动帮你转成 JPEG，这样比直接在内存里拼超大图更稳。
-- 当 `auto` 或 `bigtiff` 选中了流式大图路径时，默认输出文件扩展名会调整为 `.tif`。
-- 正常尺寸作品默认仍然输出 `.jpg`；只有超大图自动切到流式大图路径时，才会改成 `.tif`。
-- 这是一条有意为之的产品策略：先保证超大图能够稳定拼完，再把是否转 JPEG 交给用户自己决定。
-- 超大图的 JPEG 转换不属于默认下载流程的一部分。
-- 如果目录里遗留了旧版本失败下载留下的 `.part.jpg` 临时文件，切到 `bigtiff` 路径时程序会尽量清理这些不再相关的残留文件。
-- 当前 `bigtiff` 和 `pyvips` 路径都还不支持写 JPEG EXIF。超大图场景下如果需要元数据，优先使用 `--write-sidecar`。
-- 有些页面可能会被地区、权限或站点改版影响，如果 Google 改了瓦片签名规则，代码也需要跟着调整。
-- 目前的 TUI 是基于 `rich` 的 live dashboard，不是复杂的全屏交互应用。这是有意为之，因为当前任务流是单向下载任务，`rich` 方案更稳、更容易维护。
-- 包代码现在采用 `src/` 目录布局。根目录的 `main.py` 只是兼容入口。
+- Works on artwork pages, not full collections or story pages.
+- Large-image TIFF output is supported; automatic TIFF-to-JPEG conversion is intentionally not in the default flow.
+- Some richer metadata export ideas are planned, but the current metadata features remain intentionally conservative.
