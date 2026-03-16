@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from .image_writer import choose_stitch_backend, estimate_stitch_memory_bytes
 from ..errors import DownloadError
-from ..models import DownloadSize, PyramidLevel, SizeOption, TileInfo
+from ..models import DownloadSize, PyramidLevel, SizeOption, StitchBackend, TileInfo
 
 SIZE_TARGET_LONGEST_EDGE: dict[DownloadSize, int | None] = {
     DownloadSize.PREVIEW: 2_000,
@@ -13,15 +14,22 @@ SIZE_TARGET_LONGEST_EDGE: dict[DownloadSize, int | None] = {
 
 def list_size_options(tile_info: TileInfo) -> list[SizeOption]:
     return [
-        SizeOption(
-            label=f"level-{level.z}",
-            level=level,
-            width=tile_info.image_width_for(level),
-            height=tile_info.image_height_for(level),
-            tile_count=level.tile_count,
-        )
+        _build_size_option(tile_info, level)
         for level in tile_info.levels
     ]
+
+
+def _build_size_option(tile_info: TileInfo, level: PyramidLevel) -> SizeOption:
+    selected_tile_info = TileInfo(tile_width=tile_info.tile_width, tile_height=tile_info.tile_height, levels=[level])
+    return SizeOption(
+        label=f"level-{level.z}",
+        level=level,
+        width=tile_info.image_width_for(level),
+        height=tile_info.image_height_for(level),
+        tile_count=level.tile_count,
+        raw_memory_bytes=estimate_stitch_memory_bytes(selected_tile_info),
+        default_backend=choose_stitch_backend(selected_tile_info, StitchBackend.AUTO),
+    )
 
 
 def _select_by_max_dimension(tile_info: TileInfo, max_dimension: int) -> PyramidLevel:

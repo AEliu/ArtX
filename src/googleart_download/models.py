@@ -151,6 +151,8 @@ class SizeOption:
     width: int
     height: int
     tile_count: int
+    raw_memory_bytes: int
+    default_backend: "StitchBackend"
 
 
 @dataclass(frozen=True)

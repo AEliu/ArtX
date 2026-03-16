@@ -251,6 +251,7 @@ uv run googleart-download "https://artsandculture.google.com/asset/..." --log-fi
 - `--size` 是用户友好的语义化尺寸预设；`--max-dimension` 则允许你直接控制最长边上限。
 - 默认仍然是 `--size max`，也就是下载当前可用的最大尺寸。
 - `--list-sizes` 不会开始下载图片，只会读取页面和瓦片元数据，列出当前作品可选的层级尺寸和 tile 数。
+- `--list-sizes` 现在还会显示每个层级的大致 raw canvas 内存占用，以及在 `--stitch-backend auto` 下默认会走 `JPG` 还是 `TIFF` 输出路径。
 - 输出文件命名规则：
   - `--size max` 默认不加尺寸后缀
   - 非 `max` 尺寸会自动加 `.preview` / `.medium` / `.large`

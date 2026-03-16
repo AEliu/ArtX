@@ -16,6 +16,7 @@ The project currently supports:
 - batch state persistence and explicit resume via `--resume-batch`
 - user-friendly size selection via `--size` and `--max-dimension`
 - size inspection via `--list-sizes`
+- size inspection now includes raw canvas memory estimates and auto output-format hints
 - metadata-only inspection via `--metadata-only`
 - default metadata-only file output for single-url runs
 - official Google short links via `g.co/arts/...`
@@ -82,9 +83,7 @@ Metadata domain:
   - tile rate
   - retry counters
   - phase display
-- enrich `--list-sizes` output with:
-  - raw canvas memory estimates
-  - optional rough output-size estimates
+- enrich `--list-sizes` output further with optional rough output-size estimates
 - refine size preset thresholds if real-world usage suggests better defaults
 - expand test coverage for:
   - download flow integration

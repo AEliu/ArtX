@@ -20,6 +20,15 @@ from .models import BatchRunResult, DownloadSize, JsonObject, RetryConfig, SizeO
 from .reporters import build_reporter
 
 
+def _format_bytes(value: int) -> str:
+    size = float(value)
+    for unit in ("B", "KiB", "MiB", "GiB", "TiB"):
+        if size < 1024 or unit == "TiB":
+            return f"{size:.1f} {unit}"
+        size /= 1024
+    return f"{size:.1f} TiB"
+
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Download high-resolution Google Arts & Culture images by stitching tiles.",
@@ -232,17 +241,24 @@ def render_size_options(title: str, options: list[SizeOption]) -> None:
     table.add_column("Level")
     table.add_column("Size", justify="right")
     table.add_column("Tiles", justify="right")
-    table.add_column("Longest Edge", justify="right")
+    table.add_column("Raw Canvas", justify="right")
+    table.add_column("Auto Output", justify="right")
 
     for option in options:
         table.add_row(
             str(option.level.z),
             f"{option.width}x{option.height}",
             str(option.tile_count),
-            str(max(option.width, option.height)),
+            _format_bytes(option.raw_memory_bytes),
+            "TIFF" if option.default_backend is StitchBackend.BIGTIFF else "JPG",
         )
 
     console.print(table)
+    if any(option.default_backend is StitchBackend.BIGTIFF for option in options):
+        console.print(
+            "[cyan]Note:[/cyan] Rows marked TIFF will default to the streaming BigTIFF path in "
+            "`--stitch-backend auto` for large-image safety."
+        )
 
 
 def write_metadata_output_file(output_path: Path, payload: str) -> None:

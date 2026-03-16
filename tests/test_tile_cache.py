@@ -142,6 +142,22 @@ class TileCacheTests(unittest.TestCase):
         self.assertEqual([option.level.z for option in options], [0, 1])
         self.assertEqual(options[0].width, 512)
         self.assertEqual(options[1].tile_count, 12)
+        self.assertEqual(options[0].raw_memory_bytes, 512 * 256 * 3)
+        self.assertEqual(options[0].default_backend, StitchBackend.PILLOW)
+
+    def test_list_size_options_marks_large_levels_for_bigtiff(self) -> None:
+        tile_info = TileInfo(
+            tile_width=256,
+            tile_height=256,
+            levels=[PyramidLevel(z=0, num_tiles_x=10, num_tiles_y=10, empty_pels_x=0, empty_pels_y=0)],
+        )
+
+        from unittest.mock import patch
+
+        with patch("googleart_download.download.image_writer._read_available_memory_bytes", return_value=1024):
+            options = list_size_options(tile_info)
+
+        self.assertEqual(options[0].default_backend, StitchBackend.BIGTIFF)
 
     def test_resolve_output_path_adds_size_suffix_for_non_max(self) -> None:
         path = resolve_output_path(
