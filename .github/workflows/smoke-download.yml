@@ -44,7 +44,12 @@ jobs:
           from pathlib import Path
 
           output_dir = Path("/tmp/googleart-smoke")
-          files = sorted(path for path in output_dir.iterdir() if path.is_file())
+          artifact_suffixes = {".jpg", ".jpeg", ".tif", ".tiff"}
+          files = sorted(
+              path
+              for path in output_dir.iterdir()
+              if path.is_file() and path.suffix.lower() in artifact_suffixes
+          )
           if len(files) != 1:
               raise SystemExit(f"expected exactly one output file, found {len(files)}: {[p.name for p in files]}")
 
