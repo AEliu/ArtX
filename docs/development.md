@@ -74,6 +74,19 @@ The main CI workflow validates:
 
 The manual smoke workflow is separate and uses real Google Arts inputs.
 
+## Download Architecture Notes
+
+The current downloader is intentionally mixed-mode rather than fully async:
+
+- artwork page fetch and metadata fetch remain synchronous
+- tile downloads now use an internal async `httpx.AsyncClient` path
+- stitching, image writing, sidecar writing, and batch-state persistence remain synchronous
+
+This keeps async work focused on the most network-heavy stage without forcing a full rewrite of the rest of the pipeline.
+
+At the moment there is no separate user-facing switch for sync versus async tile download.
+The existing `--workers` flag still controls tile-download concurrency, but it now maps to the async download semaphore rather than a thread-pool size.
+
 ## Release Notes
 
 Release notes live under:

@@ -7,7 +7,7 @@ from ..models import RetryConfig
 from .constants import REQUEST_TIMEOUT, USER_AGENT
 
 
-class SyncClientKwargs(TypedDict):
+class ClientKwargs(TypedDict):
     headers: dict[str, str]
     timeout: int
     follow_redirects: bool
@@ -26,7 +26,13 @@ class TransportConfig:
     def trust_env(self) -> bool:
         return self.proxy_url is None
 
-    def sync_client_kwargs(self) -> SyncClientKwargs:
+    def sync_client_kwargs(self) -> ClientKwargs:
+        return self._client_kwargs()
+
+    def async_client_kwargs(self) -> ClientKwargs:
+        return self._client_kwargs()
+
+    def _client_kwargs(self) -> ClientKwargs:
         return {
             "headers": {"User-Agent": self.user_agent},
             "timeout": self.timeout,

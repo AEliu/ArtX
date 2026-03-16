@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import base64
 import hashlib
 import hmac
@@ -18,6 +19,10 @@ from .constants import AES_IV, AES_KEY, ENCRYPTION_MARKER, SIGNING_KEY
 
 class TileHttpClient(Protocol):
     def fetch_bytes(self, url: str, *, description: str) -> bytes: ...
+
+
+class AsyncTileHttpClient(Protocol):
+    async def fetch_bytes(self, url: str, *, description: str) -> bytes: ...
 
 
 def build_tile_url(page: PageInfo, x: int, y: int, z: int) -> str:
@@ -107,3 +112,67 @@ def download_tiles(
             reporter.tile_advanced(completed, total)
 
     return tiles
+
+
+async def download_tiles_async(
+    jobs: Iterable[TileJob],
+    workers: int,
+    reporter: Reporter,
+    http_client: AsyncTileHttpClient,
+    tiles_dir: Path,
+) -> dict[tuple[int, int], Path]:
+    tiles: dict[tuple[int, int], Path] = {}
+    job_list = list(jobs)
+    cached_jobs = [job for job in job_list if tile_cache_path(tiles_dir, job).exists()]
+    missing_jobs = [job for job in job_list if not tile_cache_path(tiles_dir, job).exists()]
+    total = len(job_list)
+    completed = 0
+
+    for job in cached_jobs:
+        cache_path = tile_cache_path(tiles_dir, job)
+        tiles[(job.x, job.y)] = cache_path
+        completed += 1
+
+    if cached_jobs:
+        reporter.log(f"Reusing {len(cached_jobs)} cached tile(s)")
+        reporter.tile_advanced(completed, total)
+
+    if not missing_jobs:
+        return tiles
+
+    semaphore = asyncio.Semaphore(workers)
+    tasks = [
+        asyncio.create_task(
+            _download_single_tile(job, semaphore=semaphore, http_client=http_client, tiles_dir=tiles_dir)
+        )
+        for job in missing_jobs
+    ]
+
+    try:
+        for task in asyncio.as_completed(tasks):
+            key, cache_path = await task
+            tiles[key] = cache_path
+            completed += 1
+            reporter.tile_advanced(completed, total)
+    except Exception:
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        raise
+
+    return tiles
+
+
+async def _download_single_tile(
+    job: TileJob,
+    *,
+    semaphore: asyncio.Semaphore,
+    http_client: AsyncTileHttpClient,
+    tiles_dir: Path,
+) -> tuple[tuple[int, int], Path]:
+    async with semaphore:
+        payload = await http_client.fetch_bytes(job.url, description=f"tile x={job.x} y={job.y}")
+    tile_data = decrypt_tile_if_needed(payload)
+    cache_path = tile_cache_path(tiles_dir, job)
+    await asyncio.to_thread(_write_tile_bytes, cache_path, tile_data)
+    return (job.x, job.y), cache_path

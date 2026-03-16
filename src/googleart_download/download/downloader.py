@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 
 from ..logging_utils import get_logger
@@ -15,10 +16,11 @@ from ..models import (
     SizeOption,
     StitchBackend,
     TileInfo,
+    TileJob,
 )
 from ..reporting import Reporter
 from .cache import clear_cache_dir, ensure_cache_layout, resolve_artwork_cache_dir, tile_cache_path, write_cache_state
-from .http_client import HttpClient
+from .http_client import AsyncHttpClient, HttpClient
 from .image_writer import (
     choose_stitch_backend,
     cleanup_stale_partial_outputs,
@@ -28,7 +30,7 @@ from .image_writer import (
     stitch_tiles,
 )
 from .size_selection import list_size_options, select_download_level
-from .tiles import build_jobs, download_tiles
+from .tiles import build_jobs, download_tiles_async
 
 
 def inspect_artwork_sizes(
@@ -172,7 +174,15 @@ def download_artwork(
             total_tiles=len(jobs),
             stage="downloading",
         )
-        tiles = download_tiles(jobs, workers=workers, reporter=reporter, http_client=http_client, tiles_dir=tiles_dir)
+        tiles = await_download_tiles(
+            jobs,
+            workers=workers,
+            reporter=reporter,
+            retry_config=retry_config,
+            timeout=http_client.timeout,
+            proxy_url=proxy_url,
+            tiles_dir=tiles_dir,
+        )
         write_cache_state(
             cache_dir,
             page=page,
@@ -208,3 +218,31 @@ def download_artwork(
             sidecar_path=sidecar_path,
             backend_used=selected_backend,
         )
+
+
+def await_download_tiles(
+    jobs: list[TileJob],
+    *,
+    workers: int,
+    reporter: Reporter,
+    retry_config: RetryConfig,
+    timeout: int,
+    proxy_url: str | None,
+    tiles_dir: Path,
+) -> dict[tuple[int, int], Path]:
+    async def _run() -> dict[tuple[int, int], Path]:
+        async with AsyncHttpClient(
+            retry_config=retry_config,
+            timeout=timeout,
+            proxy_url=proxy_url,
+            on_retry=reporter.retry_recorded,
+        ) as http_client:
+            return await download_tiles_async(
+                jobs,
+                workers=workers,
+                reporter=reporter,
+                http_client=http_client,
+                tiles_dir=tiles_dir,
+            )
+
+    return asyncio.run(_run())
