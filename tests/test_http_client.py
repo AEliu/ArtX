@@ -22,10 +22,13 @@ class HttpClientTests(unittest.TestCase):
 
         client = httpx.Client(transport=httpx.MockTransport(handler))
 
-        with patch("googleart_download.download.http_client.time.sleep"), HttpClient(
-            retry_config=RetryConfig(attempts=2, backoff_base_seconds=0),
-            client=client,
-        ) as http_client:
+        with (
+            patch("googleart_download.download.http_client.time.sleep"),
+            HttpClient(
+                retry_config=RetryConfig(attempts=2, backoff_base_seconds=0),
+                client=client,
+            ) as http_client,
+        ):
             payload = http_client.fetch_bytes("https://example.com/image", description="tile")
 
         self.assertEqual(payload, b"ok")
@@ -52,10 +55,13 @@ class HttpClientTests(unittest.TestCase):
 
         client = httpx.Client(transport=httpx.MockTransport(handler))
 
-        with patch("googleart_download.download.http_client.time.sleep"), HttpClient(
-            retry_config=RetryConfig(attempts=2, backoff_base_seconds=0),
-            client=client,
-        ) as http_client:
+        with (
+            patch("googleart_download.download.http_client.time.sleep"),
+            HttpClient(
+                retry_config=RetryConfig(attempts=2, backoff_base_seconds=0),
+                client=client,
+            ) as http_client,
+        ):
             payload = http_client.fetch_bytes("https://example.com/tile", description="tile x=0 y=0")
 
         self.assertEqual(payload, b"tile")

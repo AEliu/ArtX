@@ -7,8 +7,8 @@ from tempfile import TemporaryDirectory
 
 from googleart_download.cli import resolve_default_metadata_output_path
 from googleart_download.metadata import metadata_to_dict, write_metadata_sidecar
-from googleart_download.models import ArtworkMetadata, DownloadSize
 from googleart_download.metadata.parsers import normalize_asset_url, parse_artwork_metadata, parse_page_info
+from googleart_download.models import ArtworkMetadata, DownloadSize
 
 
 class MetadataOutputTests(unittest.TestCase):
@@ -70,9 +70,7 @@ class MetadataOutputTests(unittest.TestCase):
         )
 
     def test_normalize_asset_url_strips_query_and_fragment(self) -> None:
-        normalized = normalize_asset_url(
-            "https://artsandculture.google.com/asset/example/id?ms=%7B%7D#details"
-        )
+        normalized = normalize_asset_url("https://artsandculture.google.com/asset/example/id?ms=%7B%7D#details")
         self.assertEqual(normalized, "https://artsandculture.google.com/asset/example/id")
 
     def test_normalize_asset_url_accepts_bare_asset_id(self) -> None:

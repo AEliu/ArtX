@@ -8,8 +8,8 @@ from types import ModuleType
 from PIL import Image
 
 from ..errors import DownloadError
-from ..models import ArtworkMetadata, DownloadSize, StitchBackend, TileInfo
 from ..metadata.output import build_exif_bytes
+from ..models import ArtworkMetadata, DownloadSize, StitchBackend, TileInfo
 
 
 def sanitize_filename(name: str) -> str:
@@ -44,7 +44,9 @@ def resolve_backend_output_path(output_path: Path, backend: StitchBackend) -> Pa
     return output_path.with_suffix(".tif")
 
 
-def cleanup_stale_partial_outputs(original_output_path: Path, final_output_path: Path, backend: StitchBackend) -> list[Path]:
+def cleanup_stale_partial_outputs(
+    original_output_path: Path, final_output_path: Path, backend: StitchBackend
+) -> list[Path]:
     stale_paths: list[Path] = []
     if backend is StitchBackend.BIGTIFF and original_output_path != final_output_path:
         stale_paths.append(build_temp_output_path(original_output_path))
@@ -139,7 +141,7 @@ def ensure_stitch_memory_budget(tile_info: TileInfo) -> None:
 
 def _load_pyvips() -> ModuleType:
     try:
-        import pyvips  # type: ignore[import-not-found]
+        import pyvips  # type: ignore[import-not-found, import-untyped]
     except Exception as exc:
         raise DownloadError(
             "pyvips backend is not available. Install the optional dependency with "
@@ -160,8 +162,7 @@ def _load_streaming_tiff_modules() -> tuple[ModuleType, ModuleType]:
         import tifffile  # type: ignore[import-not-found]
     except Exception as exc:
         raise DownloadError(
-            "bigtiff backend is not available. Install the optional dependency set with "
-            "`uv sync --extra large-images`."
+            "bigtiff backend is not available. Install the optional dependency set with `uv sync --extra large-images`."
         ) from exc
     return numpy, tifffile
 
@@ -231,15 +232,16 @@ def _stitch_with_bigtiff(
     level = tile_info.highest_level
     output_path.parent.mkdir(parents=True, exist_ok=True)
     intermediate_path = build_bigtiff_temp_path(output_path)
-    canvas = tifffile.memmap(
-        str(intermediate_path),
-        shape=(tile_info.image_height, tile_info.image_width, 3),
-        dtype=numpy.uint8,
-        bigtiff=True,
-        photometric="rgb",
-    )
+    canvas = None
 
     try:
+        canvas = tifffile.memmap(
+            str(intermediate_path),
+            shape=(tile_info.image_height, tile_info.image_width, 3),
+            dtype=numpy.uint8,
+            bigtiff=True,
+            photometric="rgb",
+        )
         for y in range(level.num_tiles_y):
             top = y * tile_info.tile_height
             for x in range(level.num_tiles_x):
@@ -253,11 +255,13 @@ def _stitch_with_bigtiff(
                     canvas[top : top + height, left : left + width, :] = numpy.asarray(rgb_tile, dtype=numpy.uint8)
             canvas.flush()
     except Exception:
-        del canvas
+        if canvas is not None:
+            del canvas
         if intermediate_path.exists():
             intermediate_path.unlink()
         raise
 
+    assert canvas is not None
     del canvas
     intermediate_path.replace(output_path)
 

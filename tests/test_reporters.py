@@ -14,7 +14,7 @@ from googleart_download.models import (
     TaskState,
     TileInfo,
 )
-from googleart_download.reporters import RichCliReporter, RichTuiReporter
+from googleart_download.reporting import RichCliReporter, RichTuiReporter
 
 
 class ReporterTests(unittest.TestCase):
@@ -75,9 +75,10 @@ class ReporterTests(unittest.TestCase):
     def test_cli_reporter_includes_rate_eta_and_retries_during_download(self) -> None:
         reporter = RichCliReporter()
         reporter.batch_started(1)
-        with patch("googleart_download.reporters.monotonic", side_effect=[0.0, 1.0, 2.0, 2.0]), patch(
-            "googleart_download.reporters.datetime"
-        ) as mock_datetime:
+        with (
+            patch("googleart_download.reporting.telemetry.monotonic", side_effect=[0.0, 1.0, 2.0, 2.0]),
+            patch("googleart_download.reporting.telemetry.datetime") as mock_datetime,
+        ):
             mock_datetime.now.return_value = __import__("datetime").datetime(2026, 3, 16, 14, 30, 0)
             reporter.artwork_started(self.make_context())
             reporter.retry_recorded("tile x=0 y=0", "https://example.com/tile", 2, "timeout")

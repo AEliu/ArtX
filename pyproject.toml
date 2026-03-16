@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "googleart-download"
-version = "0.1.0"
+version = "0.2.0"
 description = "Download high-resolution Google Arts & Culture images by stitching tiles"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -27,3 +27,16 @@ large-images = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/googleart_download"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "ruff>=0.15.6",
+]

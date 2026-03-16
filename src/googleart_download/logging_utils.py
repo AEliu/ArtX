@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from .constants import LOGGER_NAME
+LOGGER_NAME = "googleart_download"
 
 
 def get_logger() -> logging.Logger:

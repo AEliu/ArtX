@@ -1,7 +1,7 @@
 # googleart-download
 
 [![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-3776AB.svg)](#install)
-[![Version 0.1.0](https://img.shields.io/badge/version-0.1.0-0f766e.svg)](pyproject.toml)
+[![Version 0.2.0](https://img.shields.io/badge/version-0.2.0-0f766e.svg)](pyproject.toml)
 
 [中文说明](README.zh-CN.md)
 

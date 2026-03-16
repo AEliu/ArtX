@@ -5,16 +5,19 @@ import hashlib
 import hmac
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Protocol
 
 from Crypto.Cipher import AES
 
-from ..constants import AES_IV, AES_KEY, ENCRYPTION_MARKER, SIGNING_KEY
 from ..errors import DownloadError
 from ..models import PageInfo, PyramidLevel, TileInfo, TileJob
-from ..reporters import Reporter
+from ..reporting import Reporter
 from .cache import tile_cache_path
-from .http_client import HttpClient
+from .constants import AES_IV, AES_KEY, ENCRYPTION_MARKER, SIGNING_KEY
+
+
+class TileHttpClient(Protocol):
+    def fetch_bytes(self, url: str, *, description: str) -> bytes: ...
 
 
 def build_tile_url(page: PageInfo, x: int, y: int, z: int) -> str:
@@ -69,7 +72,7 @@ def download_tiles(
     jobs: Iterable[TileJob],
     workers: int,
     reporter: Reporter,
-    http_client: HttpClient,
+    http_client: TileHttpClient,
     tiles_dir: Path,
 ) -> dict[tuple[int, int], Path]:
     tiles: dict[tuple[int, int], Path] = {}

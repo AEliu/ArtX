@@ -38,17 +38,18 @@ The project currently supports:
 
 ## Current code structure
 
-Application layer:
+Application and shared modules:
 
-- `src/googleart_download/cli.py`
-- `src/googleart_download/batch.py`
+- `src/googleart_download/cli/`
+- `src/googleart_download/batch/`
+- `src/googleart_download/reporting/`
 - `src/googleart_download/models.py`
-- `src/googleart_download/reporters.py`
 - `src/googleart_download/errors.py`
 - `src/googleart_download/logging_utils.py`
 
 Download domain:
 
+- `src/googleart_download/download/constants.py`
 - `src/googleart_download/download/http_client.py`
 - `src/googleart_download/download/downloader.py`
 - `src/googleart_download/download/tiles.py`
@@ -59,6 +60,12 @@ Metadata domain:
 - `src/googleart_download/metadata/parsers.py`
 - `src/googleart_download/metadata/output.py`
 
+Repo quality and automation:
+
+- `pyproject.toml` now configures `ruff`
+- `.github/workflows/ci.yml` runs format, lint, type-check, tests, and README asset freshness checks
+- `scripts/generate_readme_assets.py` is treated as a generated-doc asset source rather than a hand-maintained file
+
 ## Recent completed work
 
 - replaced the old monolithic `core.py` with grouped `download/` and `metadata/` packages
@@ -68,10 +75,17 @@ Metadata domain:
 - added optional sidecar JSON output
 - added tests and verified they pass
 - added batch input deduplication, targeted rerun, explicit output conflict policies, and richer size inspection
+- removed compatibility-shell leftovers after package reorganization
+- moved download-specific constants into the `download/` domain
+- added `ruff`, `mypy`, and GitHub Actions CI
+- added CI verification that generated README assets stay up to date
 
 ## Verified commands
 
-- `uv run python -m py_compile main.py src/googleart_download/*.py src/googleart_download/download/*.py src/googleart_download/metadata/*.py tests/*.py`
+- `uv run ruff format .`
+- `uv run ruff check .`
+- `uv run python -m mypy src tests scripts/generate_readme_assets.py`
+- `uv run python -m py_compile main.py src/googleart_download/*.py src/googleart_download/cli/*.py src/googleart_download/batch/*.py src/googleart_download/download/*.py src/googleart_download/metadata/*.py src/googleart_download/reporting/*.py scripts/generate_readme_assets.py tests/*.py`
 - `uv run python -m unittest discover -s tests -v`
 - `uv run googleart-download --help`
 
@@ -112,6 +126,10 @@ Metadata domain:
 - improve log and event verbosity controls
 - add EXIF support for the `bigtiff` and `pyvips` stitch backends
 - decide whether a separate explicit "convert TIFF to JPEG" command belongs in this project
+- reduce developer workflow friction for formatting and checks:
+  - add a single local command entry point for `fmt` and `check`
+  - keep the command layered on top of `uv`, not as a separate toolchain
+  - later consider pre-commit hooks only after the single-command workflow is in place
 - revisit README screenshot presentation:
   - current generated TUI and large-image previews are accurate but still not readable enough in some web and mobile layouts
   - refine the documentation visual strategy later instead of continuing ad hoc tweaks now

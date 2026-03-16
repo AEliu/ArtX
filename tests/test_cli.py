@@ -3,10 +3,10 @@ from __future__ import annotations
 import io
 import json
 import unittest
-from contextlib import redirect_stdout, redirect_stderr
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
 from googleart_download import cli
 from googleart_download.models import BatchRunResult, BatchSnapshot, DownloadResult, StitchBackend
@@ -32,7 +32,9 @@ class CliTests(unittest.TestCase):
 
         unique_urls, duplicate_messages = cli.canonicalize_batch_urls(urls, cli.RetryConfig(attempts=1))
 
-        self.assertEqual(unique_urls, ["https://artsandculture.google.com/asset/girl-with-a-pearl-earring/3QFHLJgXCmQm2Q"])
+        self.assertEqual(
+            unique_urls, ["https://artsandculture.google.com/asset/girl-with-a-pearl-earring/3QFHLJgXCmQm2Q"]
+        )
         self.assertEqual(len(duplicate_messages), 1)
         self.assertIn("Duplicate artwork input skipped", duplicate_messages[0])
 
@@ -179,7 +181,10 @@ class CliTests(unittest.TestCase):
 
     def test_single_url_metadata_only_writes_default_file(self) -> None:
         with TemporaryDirectory() as tmpdir:
-            with patch("googleart_download.cli.inspect_artwork_metadata", return_value={"title": "Artwork", "creator": "Artist"}):
+            with patch(
+                "googleart_download.cli.inspect_artwork_metadata",
+                return_value={"title": "Artwork", "creator": "Artist"},
+            ):
                 with patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
                     stderr = io.StringIO()
                     with redirect_stderr(stderr):
@@ -200,7 +205,9 @@ class CliTests(unittest.TestCase):
 
     def test_dash_prefixed_asset_id_is_treated_as_artwork_input(self) -> None:
         with TemporaryDirectory() as tmpdir:
-            with patch("googleart_download.cli.inspect_artwork_metadata", return_value={"title": "Artwork"}) as inspect_mock:
+            with patch(
+                "googleart_download.cli.inspect_artwork_metadata", return_value={"title": "Artwork"}
+            ) as inspect_mock:
                 with patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
                     stderr = io.StringIO()
                     with redirect_stderr(stderr):
@@ -216,7 +223,7 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 0)
         inspect_mock.assert_called_once_with(
             "https://artsandculture.google.com/asset/-wHFDKu7-mhjtQ",
-            unittest.mock.ANY,
+            ANY,
         )
 
     def test_single_url_metadata_only_falls_back_to_google_art_filename_when_title_missing(self) -> None:

@@ -4,10 +4,11 @@ import json
 from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import cast
 
-from .errors import DownloadError
-from .metadata.parsers import normalize_asset_url
-from .models import BatchStateLoadResult, BatchTask, DownloadResult, JsonObject, StitchBackend, TaskState
+from ..errors import DownloadError
+from ..metadata.parsers import normalize_asset_url
+from ..models import BatchStateLoadResult, BatchTask, DownloadResult, JsonObject, JsonValue, StitchBackend, TaskState
 
 DEFAULT_BATCH_STATE_FILENAME = ".googleart-batch-state.json"
 FAILED_RERUN_BATCH_STATE_FILENAME = ".googleart-batch-rerun-state.json"
@@ -110,7 +111,12 @@ def _parse_task(raw: object) -> BatchTask:
     state = raw.get("state")
     attempts = raw.get("attempts", 0)
     error = raw.get("error")
-    if not isinstance(index, int) or not isinstance(url, str) or not isinstance(state, str) or not isinstance(attempts, int):
+    if (
+        not isinstance(index, int)
+        or not isinstance(url, str)
+        or not isinstance(state, str)
+        or not isinstance(attempts, int)
+    ):
         raise DownloadError("batch state file is invalid: task entry is missing required fields")
     if error is not None and not isinstance(error, str):
         raise DownloadError("batch state file is invalid: task error must be a string")
@@ -154,9 +160,9 @@ class BatchStateStore:
             "version": STATE_VERSION,
             "created_at": created_at,
             "updated_at": _utc_now(),
-            "urls": normalized_urls,
-            "tasks": [_serialize_task(task) for task in tasks],
         }
+        payload["urls"] = cast("JsonValue", normalized_urls)
+        payload["tasks"] = cast("JsonValue", [_serialize_task(task) for task in tasks])
 
         self.path.parent.mkdir(parents=True, exist_ok=True)
         temp_path = self.path.with_suffix(f"{self.path.suffix}.tmp")
