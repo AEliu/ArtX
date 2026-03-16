@@ -146,6 +146,10 @@ Repo quality and automation:
 - multi-artwork parallel batch scheduling
 - packaging and release polish
 - consider limited support for third-party short links only when they can be resolved safely to a canonical Google Arts artwork URL
+- explore a future service-oriented mode for research teams or lightweight web frontends:
+  - keep the current CLI downloader as the stable core engine
+  - treat queue lifecycle, persistent job state, and artifact storage as prerequisites before any web UI
+  - prefer external object storage plus stable result links over committing downloaded artifacts into the repository
 
 ## Notes
 
