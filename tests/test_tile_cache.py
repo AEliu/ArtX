@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from PIL import Image
 
@@ -10,6 +11,7 @@ import json
 
 from googleart_download.download.cache import ensure_cache_layout, resolve_artwork_cache_dir
 from googleart_download.download.image_writer import (
+    _save_with_pillow,
     build_bigtiff_temp_path,
     build_temp_output_path,
     cleanup_stale_partial_outputs,
@@ -193,6 +195,27 @@ class TileCacheTests(unittest.TestCase):
     def test_build_temp_output_path_preserves_image_extension(self) -> None:
         path = build_temp_output_path(Path("/tmp/The Starry Night.preview.jpg"))
         self.assertEqual(path.name, "The Starry Night.preview.part.jpg")
+
+    def test_save_with_pillow_uses_configured_jpeg_quality(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "art.jpg"
+            image = Image.new("RGB", (8, 8), (255, 255, 255))
+            temp_output_path = build_temp_output_path(output_path)
+
+            def fake_save(*args, **kwargs):  # type: ignore[no-untyped-def]
+                temp_output_path.write_bytes(b"jpeg")
+
+            with patch.object(image, "save", side_effect=fake_save) as save_mock:
+                _save_with_pillow(
+                    image,
+                    output_path,
+                    metadata=None,
+                    write_metadata=False,
+                    jpeg_quality=82,
+                )
+
+            save_mock.assert_called_once()
+            self.assertEqual(save_mock.call_args.kwargs["quality"], 82)
 
     def test_build_bigtiff_temp_path_uses_tiff_extension(self) -> None:
         path = build_bigtiff_temp_path(Path("/tmp/The Starry Night.preview.jpg"))

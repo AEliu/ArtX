@@ -57,6 +57,7 @@ def download_artwork(
     output_dir: Path,
     filename: str | None,
     workers: int,
+    jpeg_quality: int,
     retry_config: RetryConfig,
     download_size: DownloadSize,
     max_dimension: int | None,
@@ -177,6 +178,7 @@ def download_artwork(
             output_path,
             metadata=page.metadata,
             write_metadata=write_metadata,
+            jpeg_quality=jpeg_quality,
             backend=stitch_backend,
         )
         reporter.log(f"Stitch backend: {selected_backend.value}")

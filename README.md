@@ -108,6 +108,13 @@ uv run googleart-download "3QFHLJgXCmQm2Q" --write-sidecar
 uv run googleart-download "3QFHLJgXCmQm2Q" --write-metadata
 ```
 
+Adjust JPEG quality for JPEG outputs:
+
+```bash
+uv run googleart-download "3QFHLJgXCmQm2Q" --jpeg-quality 85
+uv run googleart-download "3QFHLJgXCmQm2Q" --jpeg-preset balanced
+```
+
 ## Output Format Behavior
 
 Normal-sized artworks default to JPEG output.

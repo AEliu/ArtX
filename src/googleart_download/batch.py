@@ -28,6 +28,7 @@ class BatchDownloadManager:
         output_dir: Path,
         filename: str | None,
         workers: int,
+        jpeg_quality: int,
         retry_config: RetryConfig,
         reporter: Reporter,
         fail_fast: bool,
@@ -45,6 +46,7 @@ class BatchDownloadManager:
         self.output_dir = output_dir
         self.filename = filename
         self.workers = workers
+        self.jpeg_quality = jpeg_quality
         self.retry_config = retry_config
         self.reporter = reporter
         self.fail_fast = fail_fast
@@ -99,6 +101,7 @@ class BatchDownloadManager:
                         output_dir=self.output_dir,
                         filename=self.filename,
                         workers=self.workers,
+                        jpeg_quality=self.jpeg_quality,
                         retry_config=self.retry_config,
                         download_size=self.download_size,
                         max_dimension=self.max_dimension,
