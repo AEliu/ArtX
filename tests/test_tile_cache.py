@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import unittest
 from pathlib import Path
@@ -21,7 +22,7 @@ from googleart_download.download.image_writer import (
     resolve_output_path,
 )
 from googleart_download.download.size_selection import list_size_options, select_download_level
-from googleart_download.download.tiles import download_tiles
+from googleart_download.download.tiles import download_tiles, download_tiles_async
 from googleart_download.errors import DownloadError
 from googleart_download.models import DownloadSize, PyramidLevel, StitchBackend, TileInfo, TileJob
 from googleart_download.reporting import Reporter
@@ -37,6 +38,16 @@ class FakeHttpClient:
         self.calls: list[str] = []
 
     def fetch_bytes(self, url: str, *, description: str) -> bytes:
+        self.calls.append(url)
+        return self.payload
+
+
+class FakeAsyncHttpClient:
+    def __init__(self, payload: bytes) -> None:
+        self.payload = payload
+        self.calls: list[str] = []
+
+    async def fetch_bytes(self, url: str, *, description: str) -> bytes:
         self.calls.append(url)
         return self.payload
 
@@ -69,6 +80,33 @@ class TileCacheTests(unittest.TestCase):
                 reporter=SilentReporter(),
                 http_client=client,
                 tiles_dir=tiles_dir,
+            )
+
+            self.assertEqual(client.calls, ["https://example.com/1"])
+            self.assertEqual(result[(0, 0)].read_bytes(), cached_payload)
+            self.assertEqual(result[(1, 0)].read_bytes(), fetched_payload)
+
+    def test_download_tiles_async_reuses_existing_cache(self) -> None:
+        jobs = [
+            TileJob(z=0, x=0, y=0, url="https://example.com/0"),
+            TileJob(z=0, x=1, y=0, url="https://example.com/1"),
+        ]
+        cached_payload = build_png_bytes((255, 0, 0))
+        fetched_payload = build_png_bytes((0, 255, 0))
+
+        with TemporaryDirectory() as tmpdir:
+            tiles_dir = ensure_cache_layout(Path(tmpdir))
+            (tiles_dir / "0-0-0.tile").write_bytes(cached_payload)
+            client = FakeAsyncHttpClient(fetched_payload)
+
+            result = asyncio.run(
+                download_tiles_async(
+                    jobs,
+                    workers=2,
+                    reporter=SilentReporter(),
+                    http_client=client,
+                    tiles_dir=tiles_dir,
+                )
             )
 
             self.assertEqual(client.calls, ["https://example.com/1"])

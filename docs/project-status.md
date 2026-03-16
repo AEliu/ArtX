@@ -69,6 +69,8 @@ Repo quality and automation:
   - built-in named cases cover bare asset ids, query-string URLs, and `g.co` short links
   - the workflow still supports a manual custom artwork input override when needed
 - explicit CLI proxy support is available through `--proxy`, while standard proxy environment variables remain supported by default
+- tile downloads now use an internal async `httpx.AsyncClient` path while page fetch, stitching, and persistence remain synchronous
+- there is currently no separate user-facing sync/async engine flag; `--workers` still controls tile-download concurrency
 - `scripts/generate_readme_assets.py` is treated as a generated-doc asset source rather than a hand-maintained file
 
 ## Recent completed work
@@ -84,6 +86,7 @@ Repo quality and automation:
 - moved download-specific constants into the `download/` domain
 - added `ruff`, `mypy`, and GitHub Actions CI
 - added CI verification that generated README assets stay up to date
+- extracted shared transport configuration and switched tile downloads to an internal async path
 
 ## Verified commands
 
@@ -117,6 +120,7 @@ Repo quality and automation:
   - request counts by artwork
   - retry totals by artwork
   - basic phase timing breakdown for fetch / download / stitch / write
+- evaluate whether a separate user-facing sync/async tile engine switch is worth exposing after the current async tile path has settled
 - unify metadata output options into a clearer mode-based CLI design
 - enrich sidecar JSON with more operational metadata
 - add an opt-in richer metadata export path without breaking the current `--write-sidecar` behavior:
