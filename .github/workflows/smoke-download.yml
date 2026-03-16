@@ -3,17 +3,22 @@ name: Smoke Download
 on:
   workflow_dispatch:
     inputs:
-      artwork_input:
-        description: "Artwork URL, g.co short link, or bare asset id"
+      smoke_case:
+        description: "Named built-in smoke case"
         required: false
-        default: "3QFHLJgXCmQm2Q"
+        default: "girl_with_pearl_earring"
+      artwork_input:
+        description: "Optional override: artwork URL, g.co short link, or bare asset id"
+        required: false
+        default: ""
 
 jobs:
   smoke-download:
     runs-on: ubuntu-latest
 
     env:
-      ARTWORK_INPUT: ${{ inputs.artwork_input || '3QFHLJgXCmQm2Q' }}
+      SMOKE_CASE: ${{ inputs.smoke_case || 'girl_with_pearl_earring' }}
+      ARTWORK_INPUT_OVERRIDE: ${{ inputs.artwork_input || '' }}
       OUTPUT_DIR: /tmp/googleart-smoke
 
     steps:
@@ -31,12 +36,42 @@ jobs:
       - name: Sync dependencies
         run: uv sync --dev
 
+      - name: Resolve smoke artwork input
+        id: resolve
+        run: |
+          uv run python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          fixture_path = Path("tests/fixtures/smoke_assets.json")
+          payload = json.loads(fixture_path.read_text(encoding="utf-8"))
+          by_id = {item["id"]: item for item in payload}
+
+          override = os.environ["ARTWORK_INPUT_OVERRIDE"].strip()
+          if override:
+              artwork_input = override
+              selected_case = "custom"
+          else:
+              selected_case = os.environ["SMOKE_CASE"].strip() or "girl_with_pearl_earring"
+              if selected_case not in by_id:
+                  available = ", ".join(sorted(by_id))
+                  raise SystemExit(f"unknown smoke_case '{selected_case}'. Available cases: {available}")
+              artwork_input = by_id[selected_case]["input"]
+
+          github_output = os.environ["GITHUB_OUTPUT"]
+          with open(github_output, "a", encoding="utf-8") as handle:
+              handle.write(f"selected_case={selected_case}\n")
+              handle.write(f"artwork_input={artwork_input}\n")
+          PY
+
       - name: Run lightweight smoke download
         run: |
-          uv run googleart-download "$ARTWORK_INPUT" \
+          uv run googleart-download "${{ steps.resolve.outputs.artwork_input }}" \
             -o "$OUTPUT_DIR" \
             --max-dimension 1024 \
             --jpeg-preset web
+        id: download
 
       - name: Verify smoke output
         run: |

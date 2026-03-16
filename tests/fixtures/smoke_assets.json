@@ -1,0 +1,44 @@
+[
+  {
+    "id": "girl_with_pearl_earring",
+    "label": "Girl with a Pearl Earring",
+    "input": "3QFHLJgXCmQm2Q",
+    "kind": "bare_asset_id",
+    "notes": "Stable default smoke case that exercises bare asset id resolution."
+  },
+  {
+    "id": "great_wave_query_url",
+    "label": "The Great Wave (query URL)",
+    "input": "https://artsandculture.google.com/asset/thirty-six-views-of-mount-fuji-the-great-wave-off-the-coast-of-kanagawa-0029/3gF011oIXv3kcQ?ms=%7B%22x%22%3A0.5%2C%22y%22%3A0.5%2C%22z%22%3A10.001583478973725%2C%22size%22%3A%7B%22width%22%3A1.796006445883593%2C%22height%22%3A1.2500000000000002%7D%7D",
+    "kind": "query_url",
+    "notes": "Exercises query-string normalization for real Google Arts URLs."
+  },
+  {
+    "id": "girl_with_pearl_gco",
+    "label": "Girl with a Pearl Earring (g.co short link)",
+    "input": "https://g.co/arts/Qfd8qwjbwKsC417o8",
+    "kind": "gco_short_link",
+    "notes": "Exercises Google-hosted short-link resolution."
+  },
+  {
+    "id": "leonardo_fetus_query_url",
+    "label": "Leonardo fetus drawing (query URL)",
+    "input": "https://artsandculture.google.com/asset/recto-the-fetus-in-the-womb-verso-notes-on-reproduction-with-sketches-of-a-fetus-in-utero-etc-0003/qgFUAw5Zc1wsbw?ms=%7B%22x%22%3A0.6342022252882863%2C%22y%22%3A0.586641306949732%2C%22z%22%3A11.433766298945514%2C%22size%22%3A%7B%22width%22%3A0.4945869576310698%2C%22height%22%3A0.3093442260578228%7D%7D",
+    "kind": "query_url",
+    "notes": "Extra real-world query URL sample from user validation."
+  },
+  {
+    "id": "self_portrait_straw_hat",
+    "label": "Self-Portrait in a Straw Hat",
+    "input": "JAFbllxZpx5e-g",
+    "kind": "bare_asset_id",
+    "notes": "Alternate bare asset id sample for manual smoke checks."
+  },
+  {
+    "id": "ugly_duchess_query_url",
+    "label": "An Old Woman / The Ugly Duchess (query URL)",
+    "input": "https://artsandculture.google.com/asset/an-old-woman-the-ugly-duchess/pgHyo_q4XgQKNw?ms=%7B%22x%22%3A0.5551159207729597%2C%22y%22%3A0.5291786574662696%2C%22z%22%3A9.474867557353058%2C%22size%22%3A%7B%22width%22%3A2.3604783870213035%2C%22height%22%3A0.922922994653592%7D%7D",
+    "kind": "query_url",
+    "notes": "Extra real-world query URL sample from user validation."
+  }
+]
