@@ -131,6 +131,11 @@ Repo quality and automation:
   - add a single local command entry point for `fmt` and `check`
   - keep the command layered on top of `uv`, not as a separate toolchain
   - later consider pre-commit hooks only after the single-command workflow is in place
+- extend GitHub Actions download workflows beyond local artifacts:
+  - keep the current artifact-based workflow as the default safe path
+  - evaluate optional external storage backends for downloaded outputs, such as Cloudflare R2
+  - avoid committing downloaded artworks back into the main repository by default
+  - keep any remote-storage integration opt-in and secret-driven
 - revisit README screenshot presentation:
   - current generated TUI and large-image previews are accurate but still not readable enough in some web and mobile layouts
   - refine the documentation visual strategy later instead of continuing ad hoc tweaks now
