@@ -174,6 +174,27 @@ class CliTests(unittest.TestCase):
             self.assertEqual(payload, [{"title": "Artwork", "creator": "Artist"}])
             self.assertIn("Metadata saved", stderr.getvalue())
 
+    def test_dash_prefixed_asset_id_is_treated_as_artwork_input(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            with patch("googleart_download.cli.inspect_artwork_metadata", return_value={"title": "Artwork"}) as inspect_mock:
+                with patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+                    stderr = io.StringIO()
+                    with redirect_stderr(stderr):
+                        code = cli.main(
+                            [
+                                "-wHFDKu7-mhjtQ",
+                                "--metadata-only",
+                                "-o",
+                                tmpdir,
+                            ]
+                        )
+
+        self.assertEqual(code, 0)
+        inspect_mock.assert_called_once_with(
+            "https://artsandculture.google.com/asset/-wHFDKu7-mhjtQ",
+            unittest.mock.ANY,
+        )
+
     def test_single_url_metadata_only_falls_back_to_google_art_filename_when_title_missing(self) -> None:
         fallback_payloads = [
             {},

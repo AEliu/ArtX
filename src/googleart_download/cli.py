@@ -3,6 +3,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
+import sys
 from pathlib import Path
 from typing import Sequence
 
@@ -21,6 +23,9 @@ from .models import BatchRunResult, DownloadSize, JsonObject, OutputConflictPoli
 from .reporters import Reporter, build_reporter
 
 
+BARE_ASSET_ID_PATTERN = re.compile(r"^-?[A-Za-z0-9_][A-Za-z0-9_-]{9,}$")
+
+
 def _format_bytes(value: int) -> str:
     size = float(value)
     for unit in ("B", "KiB", "MiB", "GiB", "TiB"):
@@ -30,7 +35,26 @@ def _format_bytes(value: int) -> str:
     return f"{size:.1f} TiB"
 
 
+def _preprocess_argv(argv: Sequence[str] | None) -> list[str]:
+    raw_args = list(sys.argv[1:] if argv is None else argv)
+    processed: list[str] = []
+    for token in raw_args:
+        if token.startswith("-") and not token.startswith("--") and BARE_ASSET_ID_PATTERN.fullmatch(token):
+            if token.startswith("-w") and len(token) > 2:
+                try:
+                    int(token[2:])
+                except ValueError:
+                    processed.append(normalize_asset_url(token))
+                    continue
+            elif not token.startswith(("-o", "-f")):
+                processed.append(normalize_asset_url(token))
+                continue
+        processed.append(token)
+    return processed
+
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    argv = _preprocess_argv(argv)
     parser = argparse.ArgumentParser(
         description="Download high-resolution Google Arts & Culture images by stitching tiles.",
     )
