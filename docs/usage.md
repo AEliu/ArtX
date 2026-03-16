@@ -13,6 +13,12 @@ You can also pass:
 - an official `g.co/arts/...` short link
 - a bare asset id such as `3QFHLJgXCmQm2Q`
 
+Download tiles only without stitching:
+
+```bash
+uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
+```
+
 ## Input Files
 
 Read one URL per line:
@@ -118,6 +124,19 @@ Example:
 
 If you pass `--filename`, that explicit filename wins.
 
+With `--tile-only`, the visible output becomes a directory ending in `.tiles` instead of a stitched image file.
+
+Examples:
+
+- `The Starry Night.tiles/`
+- `The Starry Night.preview.tiles/`
+- `The Starry Night.maxdim-8000.tiles/`
+
+Each tile-only directory contains:
+
+- `tiles/*.tile`
+- `state.json`
+
 ## Output Conflict Policies
 
 ```bash
@@ -131,6 +150,12 @@ Behavior:
 - `skip`: default
 - `overwrite`: replace existing output
 - `rename`: write `.2`, `.3`, and so on
+
+For `--tile-only`, these policies apply to the `.tiles` directory:
+
+- `skip`: if the directory already contains a complete tile set for the same artwork, report it as skipped
+- `overwrite`: remove the existing `.tiles` directory and download again
+- `rename`: create a new sibling directory such as `The Starry Night.2.tiles`
 
 `--no-skip-existing` is kept as a compatibility flag and is equivalent to `--output-conflict overwrite`.
 
@@ -170,3 +195,4 @@ The CLI can show:
 - `--filename` is only valid for a single download target.
 - `--resume-batch` and `--rerun-failed` cannot be combined.
 - `--metadata-only` cannot be combined with `--list-sizes`.
+- `--tile-only` cannot be combined with `--metadata-only`, `--list-sizes`, `--write-metadata`, `--write-sidecar`, or an explicit non-`auto` `--stitch-backend`.

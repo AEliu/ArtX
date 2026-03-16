@@ -21,6 +21,7 @@ Download high-resolution images from Google Arts & Culture artwork pages.
 - Reuses cached tiles after interruption instead of starting over.
 - Supports batch resume and rerun of only failed tasks.
 - Lets you inspect available download sizes before downloading.
+- Supports `--tile-only` when you want raw downloaded tiles without stitching.
 - Automatically switches very large artworks to TIFF/BigTIFF output for safer streaming stitch.
 - Supports metadata-only export and optional sidecar / EXIF metadata output.
 
@@ -115,6 +116,12 @@ uv run googleart-download "3QFHLJgXCmQm2Q" --write-sidecar
 uv run googleart-download "3QFHLJgXCmQm2Q" --write-metadata
 ```
 
+Download tiles only without stitching:
+
+```bash
+uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
+```
+
 Adjust JPEG quality for JPEG outputs:
 
 ```bash
@@ -137,6 +144,17 @@ Normal-sized artworks default to JPEG output.
 Very large artworks automatically switch to TIFF/BigTIFF output. This is intentional. The project uses a safer streaming stitch path for large outputs instead of trying to build the full image in memory and then write a JPEG.
 
 Large-image JPEG conversion is not part of the default path. If you need a JPEG from a very large TIFF result, convert it yourself as a separate post-process step.
+
+`--tile-only` skips stitching entirely and writes a visible tile directory such as `The Great Wave.tiles/`. That directory contains:
+
+- `tiles/*.tile` downloaded tile files
+- `state.json` describing the tile-only download state
+
+When `--tile-only` is used with `--output-conflict`:
+
+- `skip` reuses a complete existing tile directory for the same artwork and reports it as skipped
+- `overwrite` removes the existing tile directory before downloading again
+- `rename` writes a new sibling directory such as `The Great Wave.2.tiles`
 
 <a href="docs/assets/large-image-tiff.svg">
   <img src="docs/assets/large-image-overview.svg" alt="Large artwork TIFF path" />
