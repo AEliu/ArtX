@@ -193,6 +193,19 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("--tile-only cannot be used together with an explicit --stitch-backend", stderr.getvalue())
 
+    def test_pipeline_artworks_conflicts_with_tile_only(self) -> None:
+        stderr = io.StringIO()
+        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+            code = cli.main(
+                [
+                    "https://artsandculture.google.com/asset/example/id",
+                    "--pipeline-artworks",
+                    "--tile-only",
+                ]
+            )
+        self.assertEqual(code, 1)
+        self.assertIn("--pipeline-artworks cannot be used together with --tile-only", stderr.getvalue())
+
     def test_stitch_from_tiles_conflicts_with_artwork_urls(self) -> None:
         stderr = io.StringIO()
         with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
@@ -218,6 +231,31 @@ class CliTests(unittest.TestCase):
             )
         self.assertEqual(code, 1)
         self.assertIn("--stitch-from-tiles does not support --write-sidecar yet", stderr.getvalue())
+
+    def test_pipeline_artworks_conflicts_with_stitch_from_tiles(self) -> None:
+        stderr = io.StringIO()
+        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+            code = cli.main(
+                [
+                    "--stitch-from-tiles",
+                    "downloads/example.tiles",
+                    "--pipeline-artworks",
+                ]
+            )
+        self.assertEqual(code, 1)
+        self.assertIn("--pipeline-artworks cannot be used together with --stitch-from-tiles", stderr.getvalue())
+
+    def test_pipeline_artworks_requires_batch_with_at_least_two_urls(self) -> None:
+        stderr = io.StringIO()
+        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+            code = cli.main(
+                [
+                    "https://artsandculture.google.com/asset/example/id",
+                    "--pipeline-artworks",
+                ]
+            )
+        self.assertEqual(code, 1)
+        self.assertIn("--pipeline-artworks requires at least two artwork URLs in the batch", stderr.getvalue())
 
     def test_list_sizes_passes_explicit_proxy_to_inspection(self) -> None:
         stdout = io.StringIO()

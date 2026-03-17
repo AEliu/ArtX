@@ -114,6 +114,14 @@ uv run artx --rerun-failed
 
 `--resume-batch` 适合“上一次批量任务中途中断，现在想接着跑”；`--rerun-failed` 适合“重新开一个新批次，只重跑上一次失败项”。
 
+让批量下载在相邻作品之间重叠下载和拼接：
+
+```bash
+uv run googleart-download --url-file urls.txt --pipeline-artworks
+```
+
+`--pipeline-artworks` 是一个只对 batch 生效的吞吐量选项。它不会改变现有批量结果语义，但当第 N 张作品在拼接时，第 N+1 张作品可以提前开始下载 tile。当前实现固定为“一个下载阶段 + 一个拼接阶段”的重叠，不是完全的多作品并行执行。
+
 写 sidecar 或 EXIF 元数据：
 
 ```bash
@@ -189,6 +197,8 @@ uv run artx "3QFHLJgXCmQm2Q" --proxy http://127.0.0.1:7890
 如果现有 `.tiles` 目录属于别的作品，tile-only 会继续下载，而不是直接记为 skipped。
 
 当使用 `--stitch-from-tiles` 时，CLI 会直接读取现有 `.tiles` 目录里的 `state.json` 和 `tiles/*.tile`，并按所选 stitch backend 生成最终图片。当前实现暂不从这条路径恢复 sidecar 或 EXIF 元数据。
+
+`--pipeline-artworks` 只适用于至少包含两个作品 URL 的批量任务，不能与 `--tile-only` 或 `--stitch-from-tiles` 一起使用。
 
 <a href="assets/large-image-tiff.svg">
   <img src="assets/large-image-overview.svg" alt="Large artwork TIFF path" />

@@ -70,6 +70,13 @@ class _DownloadWorkspace:
     removed_partials: list[Path]
 
 
+@dataclass(frozen=True)
+class PreparedArtworkDownload:
+    data: _ArtworkDownloadData
+    workspace: _DownloadWorkspace
+    tiles: dict[tuple[int, int], Path]
+
+
 def inspect_artwork_sizes(
     url: str, retry_config: RetryConfig, *, proxy_url: str | None = None
 ) -> tuple[str, list[SizeOption]]:
@@ -395,6 +402,123 @@ def _finalize_stitched_output(
     )
 
 
+def prepare_artwork_download(
+    url: str,
+    output_dir: Path,
+    filename: str | None,
+    workers: int,
+    jpeg_quality: int,
+    retry_config: RetryConfig,
+    download_size: DownloadSize,
+    max_dimension: int | None,
+    output_conflict_policy: OutputConflictPolicy,
+    write_metadata: bool,
+    write_sidecar: bool,
+    stitch_backend: StitchBackend,
+    reporter: Reporter | None,
+    index: int,
+    total: int,
+    proxy_url: str | None = None,
+    tile_only: bool = False,
+) -> DownloadResult | PreparedArtworkDownload:
+    active_reporter = Reporter() if reporter is None else reporter
+    logger = get_logger()
+    with HttpClient(
+        retry_config=retry_config,
+        proxy_url=proxy_url,
+        on_retry=active_reporter.retry_recorded,
+    ) as http_client:
+        data = _resolve_artwork_download_data(
+            url=url,
+            output_dir=output_dir,
+            filename=filename,
+            download_size=download_size,
+            max_dimension=max_dimension,
+            stitch_backend=stitch_backend,
+            http_client=http_client,
+            reporter=active_reporter,
+            logger=logger,
+        )
+        workspace = _prepare_download_workspace(
+            data=data,
+            output_dir=output_dir,
+            output_conflict_policy=output_conflict_policy,
+            tile_only=tile_only,
+            reporter=active_reporter,
+        )
+        existing_result = _handle_existing_output(
+            data=data,
+            workspace=workspace,
+            output_conflict_policy=output_conflict_policy,
+            write_sidecar=write_sidecar,
+            tile_only=tile_only,
+            reporter=active_reporter,
+        )
+        if existing_result is not None:
+            return existing_result
+
+        _report_artwork_ready(
+            data=data,
+            workspace=workspace,
+            index=index,
+            total=total,
+            reporter=active_reporter,
+            logger=logger,
+        )
+        tiles = _download_tile_phase(
+            data=data,
+            workspace=workspace,
+            workers=workers,
+            retry_config=retry_config,
+            timeout=http_client.timeout,
+            proxy_url=proxy_url,
+            reporter=active_reporter,
+        )
+        write_cache_state(
+            workspace.cache_dir,
+            asset_url=data.canonical_asset_url,
+            page=data.page,
+            tile_info=data.selected_tile_info,
+            output_path=workspace.output_path,
+            completed_tiles=len(tiles),
+            total_tiles=len(data.jobs),
+            stage="downloaded" if tile_only else "stitching",
+        )
+        if tile_only:
+            return _finalize_tile_only_output(
+                data=data,
+                workspace=workspace,
+                reporter=active_reporter,
+            )
+        return PreparedArtworkDownload(
+            data=data,
+            workspace=workspace,
+            tiles=tiles,
+        )
+
+
+def finalize_artwork_download(
+    prepared: PreparedArtworkDownload,
+    *,
+    jpeg_quality: int,
+    write_metadata: bool,
+    write_sidecar: bool,
+    stitch_backend: StitchBackend,
+    reporter: Reporter | None,
+) -> DownloadResult:
+    active_reporter = Reporter() if reporter is None else reporter
+    return _finalize_stitched_output(
+        data=prepared.data,
+        workspace=prepared.workspace,
+        tiles=prepared.tiles,
+        jpeg_quality=jpeg_quality,
+        write_metadata=write_metadata,
+        write_sidecar=write_sidecar,
+        stitch_backend=stitch_backend,
+        reporter=active_reporter,
+    )
+
+
 def download_artwork(
     url: str,
     output_dir: Path,
@@ -414,84 +538,35 @@ def download_artwork(
     proxy_url: str | None = None,
     tile_only: bool = False,
 ) -> DownloadResult:
-    logger = get_logger()
-    with HttpClient(
+    prepared = prepare_artwork_download(
+        url=url,
+        output_dir=output_dir,
+        filename=filename,
+        workers=workers,
+        jpeg_quality=jpeg_quality,
         retry_config=retry_config,
+        download_size=download_size,
+        max_dimension=max_dimension,
+        output_conflict_policy=output_conflict_policy,
+        write_metadata=write_metadata,
+        write_sidecar=write_sidecar,
+        stitch_backend=stitch_backend,
+        reporter=reporter,
+        index=index,
+        total=total,
         proxy_url=proxy_url,
-        on_retry=reporter.retry_recorded,
-    ) as http_client:
-        data = _resolve_artwork_download_data(
-            url=url,
-            output_dir=output_dir,
-            filename=filename,
-            download_size=download_size,
-            max_dimension=max_dimension,
-            stitch_backend=stitch_backend,
-            http_client=http_client,
-            reporter=reporter,
-            logger=logger,
-        )
-        workspace = _prepare_download_workspace(
-            data=data,
-            output_dir=output_dir,
-            output_conflict_policy=output_conflict_policy,
-            tile_only=tile_only,
-            reporter=reporter,
-        )
-        existing_result = _handle_existing_output(
-            data=data,
-            workspace=workspace,
-            output_conflict_policy=output_conflict_policy,
-            write_sidecar=write_sidecar,
-            tile_only=tile_only,
-            reporter=reporter,
-        )
-        if existing_result is not None:
-            return existing_result
-
-        _report_artwork_ready(
-            data=data,
-            workspace=workspace,
-            index=index,
-            total=total,
-            reporter=reporter,
-            logger=logger,
-        )
-        tiles = _download_tile_phase(
-            data=data,
-            workspace=workspace,
-            workers=workers,
-            retry_config=retry_config,
-            timeout=http_client.timeout,
-            proxy_url=proxy_url,
-            reporter=reporter,
-        )
-        write_cache_state(
-            workspace.cache_dir,
-            asset_url=data.canonical_asset_url,
-            page=data.page,
-            tile_info=data.selected_tile_info,
-            output_path=workspace.output_path,
-            completed_tiles=len(tiles),
-            total_tiles=len(data.jobs),
-            stage="downloaded" if tile_only else "stitching",
-        )
-        if tile_only:
-            return _finalize_tile_only_output(
-                data=data,
-                workspace=workspace,
-                reporter=reporter,
-            )
-        return _finalize_stitched_output(
-            data=data,
-            workspace=workspace,
-            tiles=tiles,
-            jpeg_quality=jpeg_quality,
-            write_metadata=write_metadata,
-            write_sidecar=write_sidecar,
-            stitch_backend=stitch_backend,
-            reporter=reporter,
-        )
+        tile_only=tile_only,
+    )
+    if isinstance(prepared, DownloadResult):
+        return prepared
+    return finalize_artwork_download(
+        prepared,
+        jpeg_quality=jpeg_quality,
+        write_metadata=write_metadata,
+        write_sidecar=write_sidecar,
+        stitch_backend=stitch_backend,
+        reporter=reporter,
+    )
 
 
 def await_download_tiles(

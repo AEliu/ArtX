@@ -133,6 +133,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="start a new batch using only the tasks that failed in the previous state file",
     )
     parser.add_argument(
+        "--pipeline-artworks",
+        action="store_true",
+        help="during batch runs, overlap tile download for the next artwork with stitching for the previous artwork",
+    )
+    parser.add_argument(
         "--batch-state-file",
         help="custom path for the batch state JSON file used by --resume-batch or --rerun-failed",
     )

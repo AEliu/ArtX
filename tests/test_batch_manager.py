@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import json
+import threading
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from googleart_download.batch import BatchDownloadManager, BatchStateStore
+from googleart_download.download.downloader import PreparedArtworkDownload
 from googleart_download.errors import DownloadError
 from googleart_download.models import DownloadResult, DownloadSize, OutputConflictPolicy, RetryConfig, TaskState
 from googleart_download.reporting import Reporter
@@ -278,6 +280,96 @@ class BatchManagerTests(unittest.TestCase):
                 rerun_failures=2,
             )
             with patch("googleart_download.batch.download_artwork", side_effect=fake_download_artwork):
+                result = manager.run()
+
+        self.assertEqual(calls, [first_url])
+        self.assertEqual(result.snapshot.failed, 1)
+        self.assertEqual(result.snapshot.pending, 1)
+
+    def test_pipeline_artworks_overlaps_next_download_with_previous_finalize(self) -> None:
+        first_url = "https://artsandculture.google.com/asset/example/one"
+        second_url = "https://artsandculture.google.com/asset/example/two"
+        finalize_started = threading.Event()
+        second_download_started = threading.Event()
+        allow_finalize = threading.Event()
+        prepared_by_url: dict[str, PreparedArtworkDownload] = {}
+
+        def fake_prepare(task):  # type: ignore[no-untyped-def]
+            prepared = PreparedArtworkDownload(data=MagicMock(), workspace=MagicMock(), tiles={})
+            prepared_by_url[task.url] = prepared
+            if task.url == second_url:
+                second_download_started.set()
+                self.assertTrue(finalize_started.is_set())
+            return prepared
+
+        def fake_finalize(prepared):  # type: ignore[no-untyped-def]
+            finalize_started.set()
+            allow_finalize.wait(timeout=2)
+            matched_url = next(url for url, candidate in prepared_by_url.items() if candidate is prepared)
+            return DownloadResult(
+                url=matched_url,
+                output_path=Path("/tmp/out.jpg"),
+                title=matched_url.rsplit("/", 1)[-1],
+                size=(10, 10),
+                tile_count=1,
+            )
+
+        with TemporaryDirectory() as tmpdir:
+            manager = BatchDownloadManager(
+                urls=[first_url, second_url],
+                output_dir=Path(tmpdir),
+                filename=None,
+                workers=1,
+                jpeg_quality=95,
+                retry_config=RetryConfig(attempts=1),
+                reporter=SilentReporter(),
+                fail_fast=False,
+                download_size=DownloadSize.MAX,
+                max_dimension=None,
+                output_conflict_policy=OutputConflictPolicy.OVERWRITE,
+                write_metadata=False,
+                write_sidecar=False,
+                pipeline_artworks=True,
+            )
+            with (
+                patch.object(manager, "_run_download_phase_for_task", side_effect=fake_prepare),
+                patch.object(manager, "_run_finalize_phase_for_prepared", side_effect=fake_finalize),
+            ):
+                runner = threading.Thread(target=manager.run)
+                runner.start()
+                self.assertTrue(finalize_started.wait(timeout=2))
+                self.assertTrue(second_download_started.wait(timeout=2))
+                allow_finalize.set()
+                runner.join(timeout=2)
+                self.assertFalse(runner.is_alive())
+
+    def test_pipeline_artworks_fail_fast_stops_launching_new_downloads(self) -> None:
+        first_url = "https://artsandculture.google.com/asset/example/one"
+        second_url = "https://artsandculture.google.com/asset/example/two"
+        calls: list[str] = []
+
+        def fake_prepare(task):  # type: ignore[no-untyped-def]
+            calls.append(task.url)
+            raise DownloadError("boom")
+
+        with TemporaryDirectory() as tmpdir:
+            manager = BatchDownloadManager(
+                urls=[first_url, second_url],
+                output_dir=Path(tmpdir),
+                filename=None,
+                workers=1,
+                jpeg_quality=95,
+                retry_config=RetryConfig(attempts=1),
+                reporter=SilentReporter(),
+                fail_fast=True,
+                download_size=DownloadSize.MAX,
+                max_dimension=None,
+                output_conflict_policy=OutputConflictPolicy.OVERWRITE,
+                write_metadata=False,
+                write_sidecar=False,
+                pipeline_artworks=True,
+            )
+            with patch.object(manager, "_run_download_phase_for_task", side_effect=fake_prepare):
                 result = manager.run()
 
         self.assertEqual(calls, [first_url])

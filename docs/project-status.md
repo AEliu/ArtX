@@ -15,6 +15,7 @@ The project currently supports:
 - batch-level failed task reruns via `--rerun-failures`
 - batch state persistence and explicit resume via `--resume-batch`
 - targeted rerun support via `--rerun-failed`
+- conservative batch download/stitch overlap via `--pipeline-artworks`
 - user-friendly size selection via `--size` and `--max-dimension`
 - size inspection via `--list-sizes`
 - size inspection now includes raw canvas memory estimates and auto output-format hints
@@ -27,6 +28,8 @@ The project currently supports:
 - explicit output conflict handling via `--output-conflict skip|overwrite|rename`
 - compatibility override via `--no-skip-existing`
 - single-artwork tile cache reuse across reruns
+- explicit `--tile-only` visible tile output with hidden stable cache retention
+- explicit `--stitch-from-tiles` support for assembling a final image later from a completed `.tiles` directory
 - conservative memory guard before stitching extremely large images
 - optional `bigtiff` streaming stitch backend for very large images
 - optional `pyvips` direct stitch backend for experiments and explicit use
@@ -82,6 +85,8 @@ Repo quality and automation:
 - added optional sidecar JSON output
 - added tests and verified they pass
 - added batch input deduplication, targeted rerun, explicit output conflict policies, and richer size inspection
+- added explicit tile-only and stitch-from-tiles workflows
+- added conservative batch download/stitch pipelining for adjacent artworks
 - removed compatibility-shell leftovers after package reorganization
 - moved download-specific constants into the `download/` domain
 - added `ruff`, `mypy`, and GitHub Actions CI
@@ -101,7 +106,6 @@ Repo quality and automation:
 
 ### High priority
 
-- add an explicit stitch-from-tiles workflow for users who downloaded a complete `.tiles` directory and want to assemble the final image later
 - later evaluate a separate `--keep-tiles` mode so successful stitched runs can preserve tile caches on purpose
 - enrich `--list-sizes` output further with optional rough output-size estimates
 - refine size preset thresholds if real-world usage suggests better defaults
@@ -158,7 +162,7 @@ Repo quality and automation:
 ### Low priority
 
 - full interactive TUI
-- multi-artwork parallel batch scheduling
+- broader multi-artwork parallel batch scheduling beyond the current one-download-plus-one-stitch pipeline
 - packaging and release polish
 - consider limited support for third-party short links only when they can be resolved safely to a canonical Google Arts artwork URL
 - explore a future service-oriented mode for research teams or lightweight web frontends:

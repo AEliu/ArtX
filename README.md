@@ -112,6 +112,14 @@ uv run artx --rerun-failed
 
 Use `--resume-batch` when a batch stopped partway through and you want to continue it. Use `--rerun-failed` when you want a fresh batch containing only the tasks that failed last time.
 
+Overlap batch download and stitching for adjacent artworks:
+
+```bash
+uv run googleart-download --url-file urls.txt --pipeline-artworks
+```
+
+`--pipeline-artworks` is a batch-only throughput option. It keeps the current batch semantics, but while artwork N is stitching the downloader may already fetch tiles for artwork N+1. In the current implementation this overlap is fixed to one download phase plus one stitch phase, not full multi-artwork parallelism.
+
 Write metadata sidecars or EXIF:
 
 ```bash
@@ -187,6 +195,8 @@ When `--tile-only` is used with `--output-conflict`:
 When `--tile-only` sees an existing `.tiles` directory for a different artwork, it continues the download instead of reporting skipped.
 
 When `--stitch-from-tiles` is used, the CLI reads `state.json` and `tiles/*.tile` from the existing `.tiles` directory, then writes a final image using the selected stitch backend. In the current implementation this path does not restore metadata sidecars or EXIF from the earlier tile-only download.
+
+`--pipeline-artworks` is only for batch runs with at least two artwork URLs. It cannot be combined with `--tile-only` or `--stitch-from-tiles`.
 
 <a href="docs/assets/large-image-tiff.svg">
   <img src="docs/assets/large-image-overview.svg" alt="Large artwork TIFF path" />

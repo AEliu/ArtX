@@ -193,6 +193,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 reporter.log(
                     f"Batch input normalized from {len(urls)} URL(s) to {len(canonical_urls)} unique artwork(s)"
                 )
+        if args.pipeline_artworks and len(canonical_urls) < 2:
+            raise DownloadError("--pipeline-artworks requires at least two artwork URLs in the batch")
         from . import BatchDownloadManager
 
         manager = BatchDownloadManager(
@@ -216,6 +218,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             stitch_backend=StitchBackend(args.stitch_backend),
             rerun_failures=args.rerun_failures,
             resume_batch=args.resume_batch,
+            pipeline_artworks=args.pipeline_artworks,
             batch_state_file=batch_state_file,
         )
         run_result = manager.run()

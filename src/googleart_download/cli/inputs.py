@@ -61,6 +61,9 @@ def validate_cli_args(args: argparse.Namespace, urls: list[str]) -> None:
     if args.stitch_from_tiles and args.tile_only:
         raise DownloadError("--stitch-from-tiles cannot be used together with --tile-only")
 
+    if args.stitch_from_tiles and args.pipeline_artworks:
+        raise DownloadError("--pipeline-artworks cannot be used together with --stitch-from-tiles")
+
     if args.stitch_from_tiles and args.write_metadata:
         raise DownloadError("--stitch-from-tiles does not support --write-metadata yet")
 
@@ -122,6 +125,9 @@ def validate_cli_args(args: argparse.Namespace, urls: list[str]) -> None:
 
     if args.tile_only and args.stitch_backend != "auto":
         raise DownloadError("--tile-only cannot be used together with an explicit --stitch-backend")
+
+    if args.tile_only and args.pipeline_artworks:
+        raise DownloadError("--pipeline-artworks cannot be used together with --tile-only")
 
     if args.list_sizes and len(urls) != 1:
         raise DownloadError("--list-sizes requires exactly one artwork URL")

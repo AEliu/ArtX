@@ -69,6 +69,14 @@ Use a custom batch state file:
 uv run artx --url-file urls.txt --batch-state-file state/downloads.json
 ```
 
+Overlap download and stitching across adjacent artworks:
+
+```bash
+uv run googleart-download --url-file urls.txt --pipeline-artworks
+```
+
+`--pipeline-artworks` is a batch-only throughput option. While artwork N is stitching, artwork N+1 may already be downloading its tiles. In the current implementation this overlap is fixed to one download phase plus one stitch phase rather than general multi-artwork parallel execution.
+
 ## Retry And Parallelism
 
 Adjust request retries:
@@ -229,6 +237,8 @@ The CLI can show:
 
 - `--filename` is only valid for a single download target.
 - `--resume-batch` and `--rerun-failed` cannot be combined.
+- `--pipeline-artworks` requires a batch with at least two artwork URLs.
+- `--pipeline-artworks` cannot be combined with `--tile-only` or `--stitch-from-tiles`.
 - `--metadata-only` cannot be combined with `--list-sizes`.
 - `--tile-only` cannot be combined with `--metadata-only`, `--list-sizes`, `--write-metadata`, `--write-sidecar`, or an explicit non-`auto` `--stitch-backend`.
 - `--stitch-from-tiles` cannot be combined with artwork URLs, `--url-file`, batch resume/rerun flags, `--metadata-only`, `--list-sizes`, `--tile-only`, `--write-metadata`, or `--write-sidecar`.
