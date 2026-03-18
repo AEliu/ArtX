@@ -114,6 +114,7 @@ def _read_available_memory_bytes() -> int | None:
     # Windows or unknown: try psutil if available
     try:
         import psutil  # type: ignore[import-not-found]
+
         return int(psutil.virtual_memory().available)
     except Exception:
         return None

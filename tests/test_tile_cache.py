@@ -375,7 +375,6 @@ class TileCacheTests(unittest.TestCase):
             self.assertTrue((resolved / "tiles" / "7-0-0.tile").exists())
             self.assertNotEqual(resolved.name, "legacy-random")
 
-
     def test_auto_backend_prefers_bigtiff_when_memory_unknown_and_large_canvas(self) -> None:
         tile_info = TileInfo(
             tile_width=256,
