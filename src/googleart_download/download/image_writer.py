@@ -110,8 +110,9 @@ def _read_available_memory_bytes() -> int | None:
                     return int(parts[1]) * 1024
     if hasattr(os, "sysconf"):
         names = getattr(os, "sysconf_names", {})
-        if "SC_AVPHYS_PAGES" in names and "SC_PAGE_SIZE" in names:
-            return int(os.sysconf("SC_AVPHYS_PAGES")) * int(os.sysconf("SC_PAGE_SIZE"))
+        sysconf = getattr(os, "sysconf", None)
+        if callable(sysconf) and "SC_AVPHYS_PAGES" in names and "SC_PAGE_SIZE" in names:
+            return int(sysconf("SC_AVPHYS_PAGES")) * int(sysconf("SC_PAGE_SIZE"))
     # Windows or unknown: try psutil if available
     try:
         import psutil  # type: ignore[import-untyped, import-not-found]
