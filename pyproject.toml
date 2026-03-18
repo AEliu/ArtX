@@ -3,8 +3,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "googleart-download"
-version = "0.3.1"
+name = "artx"
+version = "0.4.0"
 description = "Download high-resolution Google Arts & Culture images by stitching tiles"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
-googleart-download = "googleart_download.cli:main"
+artx = "googleart_download.cli:main"
 
 [project.optional-dependencies]
 large-images = [

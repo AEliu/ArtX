@@ -1,7 +1,7 @@
-# Google art download
+# ArtX
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-3776AB.svg)](#install)
-[![Version 0.3.0](https://img.shields.io/badge/version-0.3.0-0f766e.svg)](pyproject.toml)
+[![Version 0.4.0](https://img.shields.io/badge/version-0.3.0-0f766e.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0f766e.svg)](LICENSE)
 
 [中文说明](docs/README.zh-CN.md)
@@ -46,7 +46,7 @@ uv sync
 Run the CLI:
 
 ```bash
-uv run googleart-download --help
+uv run artx --help
 ```
 
 If you want optional large-image extras:
@@ -60,25 +60,25 @@ uv sync --extra large-images
 Download one artwork:
 
 ```bash
-uv run googleart-download "https://artsandculture.google.com/asset/girl-with-a-pearl-earring/3QFHLJgXCmQm2Q" -o downloads
+uv run artx "https://artsandculture.google.com/asset/girl-with-a-pearl-earring/3QFHLJgXCmQm2Q" -o downloads
 ```
 
 Use a short asset id instead of a long URL:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --size preview
+uv run artx "3QFHLJgXCmQm2Q" --size preview
 ```
 
 Inspect sizes before downloading:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --list-sizes
+uv run artx "3QFHLJgXCmQm2Q" --list-sizes
 ```
 
 Export artwork metadata only:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --metadata-only
+uv run artx "3QFHLJgXCmQm2Q" --metadata-only
 ```
 
 <a href="docs/assets/tui-preview.svg">
@@ -92,22 +92,22 @@ _Screenshot generated from the current TUI output._
 Choose a user-friendly download size:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --size preview
-uv run googleart-download "3QFHLJgXCmQm2Q" --size medium
-uv run googleart-download "3QFHLJgXCmQm2Q" --size large
-uv run googleart-download "3QFHLJgXCmQm2Q" --size max
+uv run artx "3QFHLJgXCmQm2Q" --size preview
+uv run artx "3QFHLJgXCmQm2Q" --size medium
+uv run artx "3QFHLJgXCmQm2Q" --size large
+uv run artx "3QFHLJgXCmQm2Q" --size max
 ```
 
 Resume an interrupted batch:
 
 ```bash
-uv run googleart-download --url-file urls.txt --resume-batch
+uv run artx --url-file urls.txt --resume-batch
 ```
 
 Rerun only failed tasks from the previous batch:
 
 ```bash
-uv run googleart-download --rerun-failed
+uv run artx --rerun-failed
 ```
 
 Use `--resume-batch` when a batch stopped partway through and you want to continue it. Use `--rerun-failed` when you want a fresh batch containing only the tasks that failed last time.
@@ -115,40 +115,40 @@ Use `--resume-batch` when a batch stopped partway through and you want to contin
 Write metadata sidecars or EXIF:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --write-sidecar
-uv run googleart-download "3QFHLJgXCmQm2Q" --write-metadata
+uv run artx "3QFHLJgXCmQm2Q" --write-sidecar
+uv run artx "3QFHLJgXCmQm2Q" --write-metadata
 ```
 
 Download tiles only without stitching:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
+uv run artx "3QFHLJgXCmQm2Q" --tile-only
 ```
 
 Create the final image later from an existing tile directory:
 
 ```bash
-uv run googleart-download --stitch-from-tiles "downloads/The Great Wave.tiles"
+uv run artx --stitch-from-tiles "downloads/The Great Wave.tiles"
 ```
 
 Recommended tile workflow:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
-uv run googleart-download --stitch-from-tiles "downloads/The Great Wave.tiles"
+uv run artx "3QFHLJgXCmQm2Q" --tile-only
+uv run artx --stitch-from-tiles "downloads/The Great Wave.tiles"
 ```
 
 Adjust JPEG quality for JPEG outputs:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --jpeg-quality 85
-uv run googleart-download "3QFHLJgXCmQm2Q" --jpeg-preset balanced
+uv run artx "3QFHLJgXCmQm2Q" --jpeg-quality 85
+uv run artx "3QFHLJgXCmQm2Q" --jpeg-preset balanced
 ```
 
 Use an explicit proxy when Google Arts is blocked or unstable from your network:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --proxy http://127.0.0.1:7890
+uv run artx "3QFHLJgXCmQm2Q" --proxy http://127.0.0.1:7890
 ```
 
 If you prefer environment variables, standard proxy variables such as `HTTPS_PROXY` and `ALL_PROXY` also work. An explicit `--proxy` takes precedence over environment proxy settings.

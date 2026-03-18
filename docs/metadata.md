@@ -5,7 +5,7 @@
 Export artwork metadata without downloading image tiles:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --metadata-only
+uv run artx "3QFHLJgXCmQm2Q" --metadata-only
 ```
 
 Single URL behavior:
@@ -21,7 +21,7 @@ Multiple URL behavior:
 Example:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --metadata-only --metadata-output metadata.json
+uv run artx "3QFHLJgXCmQm2Q" --metadata-only --metadata-output metadata.json
 ```
 
 ## Metadata Deduplication
@@ -40,7 +40,7 @@ That means equivalent inputs for the same artwork are merged before metadata exp
 Write a simple JSON sidecar next to the downloaded image:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --write-sidecar
+uv run artx "3QFHLJgXCmQm2Q" --write-sidecar
 ```
 
 This does not replace the image output. It adds a structured metadata file for the downloaded artwork.
@@ -50,7 +50,7 @@ This does not replace the image output. It adds a structured metadata file for t
 Write artwork metadata into JPEG EXIF:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --write-metadata
+uv run artx "3QFHLJgXCmQm2Q" --write-metadata
 ```
 
 This is opt-in and only applies where the current output path supports it well.

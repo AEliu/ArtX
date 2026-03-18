@@ -1,6 +1,6 @@
 # Development Guide
 
-This document describes the day-to-day development workflow for `googleart-download`.
+This document describes the day-to-day development workflow for `ArtX`.
 
 ## Tooling
 
@@ -32,7 +32,7 @@ uv run python -m unittest discover -s tests -v
 Show CLI help:
 
 ```bash
-uv run googleart-download --help
+uv run artx --help
 ```
 
 ## Branching

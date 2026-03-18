@@ -67,7 +67,7 @@ jobs:
 
       - name: Run lightweight smoke download
         run: |
-          uv run googleart-download "${{ steps.resolve.outputs.artwork_input }}" \
+          uv run artx "${{ steps.resolve.outputs.artwork_input }}" \
             -o "$OUTPUT_DIR" \
             --max-dimension 1024 \
             --jpeg-preset web

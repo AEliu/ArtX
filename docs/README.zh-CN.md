@@ -1,7 +1,7 @@
-# googleart-download
+# ArtX
 
-[![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-3776AB.svg)](#安装)
-[![Version 0.3.0](https://img.shields.io/badge/version-0.3.0-0f766e.svg)](../pyproject.toml)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-3776AB.svg)](#安装)
+[![Version 0.4.0](https://img.shields.io/badge/version-0.3.0-0f766e.svg)](../pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0f766e.svg)](../LICENSE)
 
 [English README](../README.md)
@@ -48,7 +48,7 @@ uv sync
 查看 CLI 帮助：
 
 ```bash
-uv run googleart-download --help
+uv run artx --help
 ```
 
 如果你需要大图相关的可选增强依赖：
@@ -62,25 +62,25 @@ uv sync --extra large-images
 下载一张作品：
 
 ```bash
-uv run googleart-download "https://artsandculture.google.com/asset/girl-with-a-pearl-earring/3QFHLJgXCmQm2Q" -o downloads
+uv run artx "https://artsandculture.google.com/asset/girl-with-a-pearl-earring/3QFHLJgXCmQm2Q" -o downloads
 ```
 
 直接使用较短的 asset id：
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --size preview
+uv run artx "3QFHLJgXCmQm2Q" --size preview
 ```
 
 先查看可选尺寸：
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --list-sizes
+uv run artx "3QFHLJgXCmQm2Q" --list-sizes
 ```
 
 只导出作品元数据：
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --metadata-only
+uv run artx "3QFHLJgXCmQm2Q" --metadata-only
 ```
 
 <a href="assets/tui-preview.svg">
@@ -94,22 +94,22 @@ _截图来自当前 TUI 的真实渲染输出。_
 使用更友好的尺寸预设：
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --size preview
-uv run googleart-download "3QFHLJgXCmQm2Q" --size medium
-uv run googleart-download "3QFHLJgXCmQm2Q" --size large
-uv run googleart-download "3QFHLJgXCmQm2Q" --size max
+uv run artx "3QFHLJgXCmQm2Q" --size preview
+uv run artx "3QFHLJgXCmQm2Q" --size medium
+uv run artx "3QFHLJgXCmQm2Q" --size large
+uv run artx "3QFHLJgXCmQm2Q" --size max
 ```
 
 恢复被中断的批量任务：
 
 ```bash
-uv run googleart-download --url-file urls.txt --resume-batch
+uv run artx --url-file urls.txt --resume-batch
 ```
 
 只重跑上一次失败的任务：
 
 ```bash
-uv run googleart-download --rerun-failed
+uv run artx --rerun-failed
 ```
 
 `--resume-batch` 适合“上一次批量任务中途中断，现在想接着跑”；`--rerun-failed` 适合“重新开一个新批次，只重跑上一次失败项”。
@@ -117,40 +117,40 @@ uv run googleart-download --rerun-failed
 写 sidecar 或 EXIF 元数据：
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --write-sidecar
-uv run googleart-download "3QFHLJgXCmQm2Q" --write-metadata
+uv run artx "3QFHLJgXCmQm2Q" --write-sidecar
+uv run artx "3QFHLJgXCmQm2Q" --write-metadata
 ```
 
 只下载 tile，不做拼接：
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
+uv run artx "3QFHLJgXCmQm2Q" --tile-only
 ```
 
 从已有 tile 目录稍后再生成最终图片：
 
 ```bash
-uv run googleart-download --stitch-from-tiles "downloads/The Great Wave.tiles"
+uv run artx --stitch-from-tiles "downloads/The Great Wave.tiles"
 ```
 
 推荐的 tile 工作流：
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
-uv run googleart-download --stitch-from-tiles "downloads/The Great Wave.tiles"
+uv run artx "3QFHLJgXCmQm2Q" --tile-only
+uv run artx --stitch-from-tiles "downloads/The Great Wave.tiles"
 ```
 
 控制 JPEG 质量：
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --jpeg-quality 85
-uv run googleart-download "3QFHLJgXCmQm2Q" --jpeg-preset balanced
+uv run artx "3QFHLJgXCmQm2Q" --jpeg-quality 85
+uv run artx "3QFHLJgXCmQm2Q" --jpeg-preset balanced
 ```
 
 如果你的网络无法直接访问 Google Arts，也可以显式指定代理：
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --proxy http://127.0.0.1:7890
+uv run artx "3QFHLJgXCmQm2Q" --proxy http://127.0.0.1:7890
 ```
 
 如果你更习惯环境变量，也可以使用标准的 `HTTPS_PROXY`、`ALL_PROXY` 等变量。显式 `--proxy` 的优先级高于环境变量代理设置。

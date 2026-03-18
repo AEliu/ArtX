@@ -43,14 +43,14 @@ You do not have to download the largest available output.
 Use:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --list-sizes
+uv run artx "3QFHLJgXCmQm2Q" --list-sizes
 ```
 
 Then choose:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --size large
-uv run googleart-download "3QFHLJgXCmQm2Q" --max-dimension 8000
+uv run artx "3QFHLJgXCmQm2Q" --size large
+uv run artx "3QFHLJgXCmQm2Q" --max-dimension 8000
 ```
 
 The size inspection output is intended to help you avoid:

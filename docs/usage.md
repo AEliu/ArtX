@@ -3,7 +3,7 @@
 ## Basic Download
 
 ```bash
-uv run googleart-download "https://artsandculture.google.com/asset/girl-with-a-pearl-earring/3QFHLJgXCmQm2Q" -o downloads
+uv run artx "https://artsandculture.google.com/asset/girl-with-a-pearl-earring/3QFHLJgXCmQm2Q" -o downloads
 ```
 
 You can also pass:
@@ -16,20 +16,20 @@ You can also pass:
 Download tiles only without stitching:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
+uv run artx "3QFHLJgXCmQm2Q" --tile-only
 ```
 
 Create the final image later from an existing tile directory:
 
 ```bash
-uv run googleart-download --stitch-from-tiles "downloads/The Great Wave.tiles"
+uv run artx --stitch-from-tiles "downloads/The Great Wave.tiles"
 ```
 
 Recommended tile workflow:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --tile-only
-uv run googleart-download --stitch-from-tiles "downloads/The Great Wave.tiles"
+uv run artx "3QFHLJgXCmQm2Q" --tile-only
+uv run artx --stitch-from-tiles "downloads/The Great Wave.tiles"
 ```
 
 ## Input Files
@@ -37,7 +37,7 @@ uv run googleart-download --stitch-from-tiles "downloads/The Great Wave.tiles"
 Read one URL per line:
 
 ```bash
-uv run googleart-download --url-file urls.txt --tui
+uv run artx --url-file urls.txt --tui
 ```
 
 Equivalent artwork inputs are deduplicated before a batch starts. This applies to:
@@ -52,13 +52,13 @@ Equivalent artwork inputs are deduplicated before a batch starts. This applies t
 Resume a previously interrupted batch:
 
 ```bash
-uv run googleart-download --url-file urls.txt --resume-batch
+uv run artx --url-file urls.txt --resume-batch
 ```
 
 Rerun only failed tasks from the previous batch state:
 
 ```bash
-uv run googleart-download --rerun-failed
+uv run artx --rerun-failed
 ```
 
 Use `--resume-batch` when a batch stopped partway through and you want to continue it. Use `--rerun-failed` when you want a fresh batch containing only the tasks that failed last time.
@@ -66,7 +66,7 @@ Use `--resume-batch` when a batch stopped partway through and you want to contin
 Use a custom batch state file:
 
 ```bash
-uv run googleart-download --url-file urls.txt --batch-state-file state/downloads.json
+uv run artx --url-file urls.txt --batch-state-file state/downloads.json
 ```
 
 ## Retry And Parallelism
@@ -74,13 +74,13 @@ uv run googleart-download --url-file urls.txt --batch-state-file state/downloads
 Adjust request retries:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --retries 5 --retry-backoff 1.0
+uv run artx "3QFHLJgXCmQm2Q" --retries 5 --retry-backoff 1.0
 ```
 
 Adjust tile download concurrency:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --workers 32
+uv run artx "3QFHLJgXCmQm2Q" --workers 32
 ```
 
 `--workers` controls tile download concurrency inside one artwork. Higher values can help on good networks, but may also increase rate limiting or retry pressure.
@@ -88,8 +88,8 @@ uv run googleart-download "3QFHLJgXCmQm2Q" --workers 32
 Adjust JPEG quality for JPEG outputs:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --jpeg-quality 85
-uv run googleart-download "3QFHLJgXCmQm2Q" --jpeg-preset balanced
+uv run artx "3QFHLJgXCmQm2Q" --jpeg-quality 85
+uv run artx "3QFHLJgXCmQm2Q" --jpeg-preset balanced
 ```
 
 `--jpeg-quality` applies to JPEG writes only. It does not force large artworks back to JPEG if the safe default path has switched them to TIFF/BigTIFF.
@@ -108,13 +108,13 @@ Note on memory/backends (Windows and non-POSIX): when the system cannot report a
 Use an explicit proxy:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --proxy http://127.0.0.1:7890
+uv run artx "3QFHLJgXCmQm2Q" --proxy http://127.0.0.1:7890
 ```
 
 SOCKS proxies are also supported when your environment and dependencies support them:
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --proxy socks5://127.0.0.1:7890
+uv run artx "3QFHLJgXCmQm2Q" --proxy socks5://127.0.0.1:7890
 ```
 
 You can also rely on standard proxy environment variables such as:
@@ -163,9 +163,9 @@ Tile-only also uses a hidden stable cache under `.googleart-cache/`, keyed by ar
 ## Output Conflict Policies
 
 ```bash
-uv run googleart-download --url-file urls.txt --output-conflict skip
-uv run googleart-download --url-file urls.txt --output-conflict overwrite
-uv run googleart-download --url-file urls.txt --output-conflict rename
+uv run artx --url-file urls.txt --output-conflict skip
+uv run artx --url-file urls.txt --output-conflict overwrite
+uv run artx --url-file urls.txt --output-conflict rename
 ```
 
 `--output-conflict` applies to the output that the current command would write:
@@ -195,7 +195,7 @@ For `--stitch-from-tiles`, the same conflict policies apply to the final stitche
 ## Inspect Sizes Before Download
 
 ```bash
-uv run googleart-download "3QFHLJgXCmQm2Q" --list-sizes
+uv run artx "3QFHLJgXCmQm2Q" --list-sizes
 ```
 
 Size inspection reports:
@@ -210,7 +210,7 @@ If a row defaults to TIFF/BigTIFF, that is still the normal safe success path fo
 ## TUI And Logging
 
 ```bash
-uv run googleart-download --url-file urls.txt --tui --log-file logs/run.log -v
+uv run artx --url-file urls.txt --tui --log-file logs/run.log -v
 ```
 
 <a href="assets/tui-preview.svg">
