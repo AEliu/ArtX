@@ -32,6 +32,23 @@ If you need optional large-image extras:
 uv sync --extra large-images
 ```
 
+## Branch protection and required checks
+
+To keep `master` green and avoid accidental merges before CI finishes:
+- Enable branch protection on `master` and require status checks to pass before merging (Settings → Branches → Branch protection rules)
+- Required checks (CI job):
+  - Ruff format check
+  - Ruff lint
+  - Mypy strict on `src/artx`
+  - Pytest
+- Optional but recommended:
+  - Require branches to be up to date before merging
+  - Dismiss stale approvals when new commits are pushed
+
+## Pull request rules
+- Do not enable auto-merge before CI is green.
+- Prefer squash merges.
+
 ## Required Checks Before Commit
 
 Run the full local check chain before committing Python changes:
@@ -39,8 +56,8 @@ Run the full local check chain before committing Python changes:
 ```bash
 uv run ruff format .
 uv run ruff check .
-uv run python -m mypy src tests scripts/generate_readme_assets.py
-uv run python -m unittest discover -s tests -v
+uv run mypy --hide-error-context --pretty --strict src/artx
+uv run python -m pytest -q
 ```
 
 ## Testing Expectations
