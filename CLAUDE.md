@@ -24,6 +24,7 @@ Notes:
 ## Git & PR conventions
 - Conventional commits (type: scope): use `feat`, `fix`, `docs`, `chore`, `refactor`, etc.
 - Prefer squash merge for PRs.
+- Do NOT enable auto-merge before CI finishes. Only merge when CI is green. If CI is required checks, this is enforced; if not, enforce manually.
 - Automated pushes should use GitHub noreply email for author/committer.
 
 ## Quick commands
