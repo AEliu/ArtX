@@ -4,7 +4,7 @@ import argparse
 import os
 import re
 import sys
-from typing import Sequence
+from typing import Sequence, cast
 
 from ..models import DownloadSize, OutputConflictPolicy, StitchBackend
 
@@ -50,7 +50,7 @@ def resolve_jpeg_quality(args: argparse.Namespace) -> int:
     if args.jpeg_preset is not None:
         return JPEG_PRESET_QUALITIES[args.jpeg_preset]
     if args.jpeg_quality is not None:
-        return args.jpeg_quality
+        return cast(int, args.jpeg_quality)
     return 95
 
 

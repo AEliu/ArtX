@@ -115,7 +115,7 @@ def _read_available_memory_bytes() -> int | None:
             return int(sysconf("SC_AVPHYS_PAGES")) * int(sysconf("SC_PAGE_SIZE"))
     # Windows or unknown: try psutil if available
     try:
-        import psutil  # type: ignore[import-untyped, import-not-found]
+        import psutil  # type: ignore[import-untyped]
 
         return int(psutil.virtual_memory().available)
     except Exception:
@@ -161,13 +161,13 @@ def ensure_stitch_memory_budget(tile_info: TileInfo) -> None:
 
 def _load_pyvips() -> ModuleType:
     try:
-        import pyvips  # type: ignore[import-not-found, import-untyped]
+        import pyvips  # type: ignore[import-not-found]
     except Exception as exc:
         raise DownloadError(
             "pyvips backend is not available. Install the optional dependency with "
             "`uv sync --extra large-images` and ensure libvips is installed on the system."
         ) from exc
-    return pyvips
+    return pyvips  # type: ignore[no-any-return]
 
 
 def choose_stitch_backend(tile_info: TileInfo, requested_backend: StitchBackend) -> StitchBackend:
