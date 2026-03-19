@@ -48,6 +48,14 @@ uv run artx "3QFHLJgXCmQm2Q" --tile-only
 uv run artx --stitch-from-tiles "downloads/The Great Wave.tiles"
 ```
 
+### Download multiple artworks
+
+```bash
+uv run artx qgFUAw5Zc1wsbw AgF2VQEfnrL8vg -o downloads
+```
+
+You can pass multiple artwork inputs (mix full URLs, short links, or bare asset ids) in a single command. Equivalent inputs are normalized and deduplicated before the batch starts.
+
 ## Input Files
 
 Read one URL per line:

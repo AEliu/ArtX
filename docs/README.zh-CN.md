@@ -75,6 +75,14 @@ from artx import ...
 
 ## 快速开始
 
+一次下载多张作品：
+
+```bash
+uv run artx qgFUAw5Zc1wsbw AgF2VQEfnrL8vg -o downloads
+```
+
+同一命令可以同时传入多个输入（完整 URL、短链接或裸 asset id），在开始批量任务前会先做统一规范化并去重。
+
 下载一张作品：
 
 ```bash

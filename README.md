@@ -73,6 +73,14 @@ from artx import ...
 
 ## Quick Start
 
+Download multiple artworks at once:
+
+```bash
+uv run artx qgFUAw5Zc1wsbw AgF2VQEfnrL8vg -o downloads
+```
+
+You may mix full URLs, short links, or bare asset ids. Inputs are normalized and deduplicated before the batch begins.
+
 Download one artwork:
 
 ```bash
