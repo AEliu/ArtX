@@ -35,10 +35,10 @@ jobs:
         run: uv run ruff check .
 
       - name: Type check
-        run: uv run python -m mypy src tests scripts/generate_readme_assets.py
+        run: uv run mypy --hide-error-context --pretty --strict src/artx
 
       - name: Test
-        run: uv run python -m unittest discover -s tests -v
+        run: uv run python -m pytest -q
 
       - name: Regenerate README assets
         run: uv run python scripts/generate_readme_assets.py
