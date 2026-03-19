@@ -1,3 +1,7 @@
-from .downloader import download_artwork
+from __future__ import annotations
 
-__all__ = ["download_artwork"]
+import warnings as _warnings
+
+from artx.download import *  # noqa: F401,F403
+
+_warnings.warn("'googleart_download.download' is deprecated; use 'artx.download'", DeprecationWarning, stacklevel=2)

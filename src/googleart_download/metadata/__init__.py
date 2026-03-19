@@ -1,11 +1,7 @@
-from .output import build_exif_bytes, metadata_to_dict, write_metadata_sidecar
-from .parsers import parse_artwork_metadata, parse_page_info, parse_tile_info
+from __future__ import annotations
 
-__all__ = [
-    "build_exif_bytes",
-    "metadata_to_dict",
-    "parse_artwork_metadata",
-    "parse_page_info",
-    "parse_tile_info",
-    "write_metadata_sidecar",
-]
+import warnings as _warnings
+
+from artx.metadata import *  # noqa: F401,F403
+
+_warnings.warn("'googleart_download.metadata' is deprecated; use 'artx.metadata'", DeprecationWarning, stacklevel=2)

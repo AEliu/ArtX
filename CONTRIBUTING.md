@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for contributing to `googleart-download`.
+Thanks for contributing to `ArtX`.
 
 ## Workflow
 
@@ -23,7 +23,7 @@ Use `uv` for dependency management, environment sync, and commands.
 
 ```bash
 uv sync --dev
-uv run googleart-download --help
+uv run artx --help
 ```
 
 If you need optional large-image extras:

@@ -9,8 +9,8 @@ from unittest.mock import patch
 
 from PIL import Image
 
-from googleart_download.download.cache import ensure_cache_layout, resolve_artwork_cache_dir
-from googleart_download.download.image_writer import (
+from artx.download.cache import ensure_cache_layout, resolve_artwork_cache_dir
+from artx.download.image_writer import (
     _save_with_pillow,
     build_bigtiff_temp_path,
     build_temp_output_path,
@@ -22,11 +22,11 @@ from googleart_download.download.image_writer import (
     resolve_output_path,
     resolve_tile_output_path,
 )
-from googleart_download.download.size_selection import list_size_options, select_download_level
-from googleart_download.download.tiles import download_tiles, download_tiles_async
-from googleart_download.errors import DownloadError
-from googleart_download.models import DownloadSize, PyramidLevel, StitchBackend, TileInfo, TileJob
-from googleart_download.reporting import Reporter
+from artx.download.size_selection import list_size_options, select_download_level
+from artx.download.tiles import download_tiles, download_tiles_async
+from artx.errors import DownloadError
+from artx.models import DownloadSize, PyramidLevel, StitchBackend, TileInfo, TileJob
+from artx.reporting import Reporter
 
 
 class SilentReporter(Reporter):
@@ -123,7 +123,7 @@ class TileCacheTests(unittest.TestCase):
 
         from unittest.mock import patch
 
-        with patch("googleart_download.download.image_writer._read_available_memory_bytes", return_value=1024):
+        with patch("artx.download.image_writer._read_available_memory_bytes", return_value=1024):
             with self.assertRaises(DownloadError):
                 ensure_stitch_memory_budget(tile_info)
 
@@ -136,7 +136,7 @@ class TileCacheTests(unittest.TestCase):
 
         from unittest.mock import patch
 
-        with patch("googleart_download.download.image_writer._read_available_memory_bytes", return_value=1024):
+        with patch("artx.download.image_writer._read_available_memory_bytes", return_value=1024):
             self.assertEqual(choose_stitch_backend(tile_info, StitchBackend.AUTO), StitchBackend.BIGTIFF)
 
     def test_select_download_level_uses_size_presets(self) -> None:
@@ -195,7 +195,7 @@ class TileCacheTests(unittest.TestCase):
 
         from unittest.mock import patch
 
-        with patch("googleart_download.download.image_writer._read_available_memory_bytes", return_value=1024):
+        with patch("artx.download.image_writer._read_available_memory_bytes", return_value=1024):
             options = list_size_options(tile_info)
 
         self.assertEqual(options[0].default_backend, StitchBackend.BIGTIFF)
@@ -383,7 +383,7 @@ class TileCacheTests(unittest.TestCase):
         )
         from unittest.mock import patch
 
-        with patch("googleart_download.download.image_writer._read_available_memory_bytes", return_value=None):
+        with patch("artx.download.image_writer._read_available_memory_bytes", return_value=None):
             self.assertEqual(choose_stitch_backend(tile_info, StitchBackend.AUTO), StitchBackend.BIGTIFF)
 
     def test_auto_backend_prefers_pillow_when_memory_unknown_and_small_canvas(self) -> None:
@@ -394,7 +394,7 @@ class TileCacheTests(unittest.TestCase):
         )
         from unittest.mock import patch
 
-        with patch("googleart_download.download.image_writer._read_available_memory_bytes", return_value=None):
+        with patch("artx.download.image_writer._read_available_memory_bytes", return_value=None):
             self.assertEqual(choose_stitch_backend(tile_info, StitchBackend.AUTO), StitchBackend.PILLOW)
 
 

@@ -8,8 +8,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import ANY, MagicMock, patch
 
-from googleart_download import cli
-from googleart_download.models import BatchRunResult, BatchSnapshot, DownloadResult, StitchBackend
+from artx import cli
+from artx.models import BatchRunResult, BatchSnapshot, DownloadResult, StitchBackend
 
 
 class DummyReporter:
@@ -46,7 +46,7 @@ class CliTests(unittest.TestCase):
         mock_client.__enter__.return_value = mock_client
         mock_client.__exit__.return_value = None
 
-        with patch("googleart_download.cli.HttpClient", return_value=mock_client):
+        with patch("artx.cli.HttpClient", return_value=mock_client):
             unique_urls, duplicate_messages = cli.canonicalize_batch_urls(
                 [
                     "https://g.co/arts/Qfd8qwjbwKsC417o8",
@@ -64,7 +64,7 @@ class CliTests(unittest.TestCase):
 
     def test_resume_batch_conflicts_with_metadata_only(self) -> None:
         stderr = io.StringIO()
-        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+        with redirect_stderr(stderr), patch("artx.cli.build_reporter", return_value=DummyReporter()):
             code = cli.main(
                 [
                     "https://artsandculture.google.com/asset/example/id",
@@ -77,7 +77,7 @@ class CliTests(unittest.TestCase):
 
     def test_resume_batch_conflicts_with_rerun_failed(self) -> None:
         stderr = io.StringIO()
-        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+        with redirect_stderr(stderr), patch("artx.cli.build_reporter", return_value=DummyReporter()):
             code = cli.main(
                 [
                     "--resume-batch",
@@ -89,7 +89,7 @@ class CliTests(unittest.TestCase):
 
     def test_batch_state_file_conflicts_with_list_sizes(self) -> None:
         stderr = io.StringIO()
-        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+        with redirect_stderr(stderr), patch("artx.cli.build_reporter", return_value=DummyReporter()):
             code = cli.main(
                 [
                     "https://artsandculture.google.com/asset/example/id",
@@ -103,7 +103,7 @@ class CliTests(unittest.TestCase):
 
     def test_metadata_only_with_multiple_urls_rejects_filename(self) -> None:
         stderr = io.StringIO()
-        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+        with redirect_stderr(stderr), patch("artx.cli.build_reporter", return_value=DummyReporter()):
             code = cli.main(
                 [
                     "https://artsandculture.google.com/asset/example/one",
@@ -118,7 +118,7 @@ class CliTests(unittest.TestCase):
 
     def test_metadata_output_requires_metadata_only(self) -> None:
         stderr = io.StringIO()
-        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+        with redirect_stderr(stderr), patch("artx.cli.build_reporter", return_value=DummyReporter()):
             code = cli.main(
                 [
                     "https://artsandculture.google.com/asset/example/id",
@@ -155,7 +155,7 @@ class CliTests(unittest.TestCase):
 
     def test_metadata_only_conflicts_with_list_sizes(self) -> None:
         stderr = io.StringIO()
-        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+        with redirect_stderr(stderr), patch("artx.cli.build_reporter", return_value=DummyReporter()):
             code = cli.main(
                 [
                     "https://artsandculture.google.com/asset/example/id",
@@ -168,7 +168,7 @@ class CliTests(unittest.TestCase):
 
     def test_tile_only_conflicts_with_write_metadata(self) -> None:
         stderr = io.StringIO()
-        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+        with redirect_stderr(stderr), patch("artx.cli.build_reporter", return_value=DummyReporter()):
             code = cli.main(
                 [
                     "https://artsandculture.google.com/asset/example/id",
@@ -181,7 +181,7 @@ class CliTests(unittest.TestCase):
 
     def test_tile_only_conflicts_with_explicit_stitch_backend(self) -> None:
         stderr = io.StringIO()
-        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+        with redirect_stderr(stderr), patch("artx.cli.build_reporter", return_value=DummyReporter()):
             code = cli.main(
                 [
                     "https://artsandculture.google.com/asset/example/id",
@@ -195,7 +195,7 @@ class CliTests(unittest.TestCase):
 
     def test_pipeline_artworks_conflicts_with_tile_only(self) -> None:
         stderr = io.StringIO()
-        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+        with redirect_stderr(stderr), patch("artx.cli.build_reporter", return_value=DummyReporter()):
             code = cli.main(
                 [
                     "https://artsandculture.google.com/asset/example/id",
@@ -208,7 +208,7 @@ class CliTests(unittest.TestCase):
 
     def test_stitch_from_tiles_conflicts_with_artwork_urls(self) -> None:
         stderr = io.StringIO()
-        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+        with redirect_stderr(stderr), patch("artx.cli.build_reporter", return_value=DummyReporter()):
             code = cli.main(
                 [
                     "https://artsandculture.google.com/asset/example/id",
@@ -221,7 +221,7 @@ class CliTests(unittest.TestCase):
 
     def test_stitch_from_tiles_rejects_metadata_flags(self) -> None:
         stderr = io.StringIO()
-        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+        with redirect_stderr(stderr), patch("artx.cli.build_reporter", return_value=DummyReporter()):
             code = cli.main(
                 [
                     "--stitch-from-tiles",
@@ -234,7 +234,7 @@ class CliTests(unittest.TestCase):
 
     def test_pipeline_artworks_conflicts_with_stitch_from_tiles(self) -> None:
         stderr = io.StringIO()
-        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+        with redirect_stderr(stderr), patch("artx.cli.build_reporter", return_value=DummyReporter()):
             code = cli.main(
                 [
                     "--stitch-from-tiles",
@@ -247,7 +247,7 @@ class CliTests(unittest.TestCase):
 
     def test_pipeline_artworks_requires_batch_with_at_least_two_urls(self) -> None:
         stderr = io.StringIO()
-        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+        with redirect_stderr(stderr), patch("artx.cli.build_reporter", return_value=DummyReporter()):
             code = cli.main(
                 [
                     "https://artsandculture.google.com/asset/example/id",
@@ -259,9 +259,9 @@ class CliTests(unittest.TestCase):
 
     def test_list_sizes_passes_explicit_proxy_to_inspection(self) -> None:
         stdout = io.StringIO()
-        with patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+        with patch("artx.cli.build_reporter", return_value=DummyReporter()):
             with patch(
-                "googleart_download.cli.inspect_artwork_sizes",
+                "artx.cli.inspect_artwork_sizes",
                 return_value=("Artwork", []),
             ) as inspect_mock:
                 with redirect_stdout(stdout):
@@ -283,7 +283,7 @@ class CliTests(unittest.TestCase):
 
     def test_rerun_failed_rejects_direct_urls(self) -> None:
         stderr = io.StringIO()
-        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+        with redirect_stderr(stderr), patch("artx.cli.build_reporter", return_value=DummyReporter()):
             code = cli.main(
                 [
                     "https://artsandculture.google.com/asset/example/id",
@@ -297,10 +297,10 @@ class CliTests(unittest.TestCase):
     def test_single_url_metadata_only_writes_default_file(self) -> None:
         with TemporaryDirectory() as tmpdir:
             with patch(
-                "googleart_download.cli.inspect_artwork_metadata",
+                "artx.cli.inspect_artwork_metadata",
                 return_value={"title": "Artwork", "creator": "Artist"},
             ):
-                with patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+                with patch("artx.cli.build_reporter", return_value=DummyReporter()):
                     stderr = io.StringIO()
                     with redirect_stderr(stderr):
                         code = cli.main(
@@ -320,10 +320,8 @@ class CliTests(unittest.TestCase):
 
     def test_dash_prefixed_asset_id_is_treated_as_artwork_input(self) -> None:
         with TemporaryDirectory() as tmpdir:
-            with patch(
-                "googleart_download.cli.inspect_artwork_metadata", return_value={"title": "Artwork"}
-            ) as inspect_mock:
-                with patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+            with patch("artx.cli.inspect_artwork_metadata", return_value={"title": "Artwork"}) as inspect_mock:
+                with patch("artx.cli.build_reporter", return_value=DummyReporter()):
                     stderr = io.StringIO()
                     with redirect_stderr(stderr):
                         code = cli.main(
@@ -352,8 +350,8 @@ class CliTests(unittest.TestCase):
         for payload in fallback_payloads:
             with self.subTest(payload=payload):
                 with TemporaryDirectory() as tmpdir:
-                    with patch("googleart_download.cli.inspect_artwork_metadata", return_value=payload):
-                        with patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+                    with patch("artx.cli.inspect_artwork_metadata", return_value=payload):
+                        with patch("artx.cli.build_reporter", return_value=DummyReporter()):
                             stderr = io.StringIO()
                             with redirect_stderr(stderr):
                                 code = cli.main(
@@ -375,10 +373,10 @@ class CliTests(unittest.TestCase):
         stdout = io.StringIO()
         stderr = io.StringIO()
         with patch(
-            "googleart_download.cli.inspect_artwork_metadata",
+            "artx.cli.inspect_artwork_metadata",
             side_effect=[{"title": "One"}, {"title": "Two"}],
         ):
-            with patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+            with patch("artx.cli.build_reporter", return_value=DummyReporter()):
                 with redirect_stdout(stdout), redirect_stderr(stderr):
                     code = cli.main(
                         [
@@ -397,17 +395,17 @@ class CliTests(unittest.TestCase):
         stderr = io.StringIO()
         with TemporaryDirectory() as tmpdir:
             with patch(
-                "googleart_download.cli.canonicalize_batch_urls",
+                "artx.cli.canonicalize_batch_urls",
                 return_value=(
                     ["https://artsandculture.google.com/asset/example/canonical"],
                     ["Duplicate artwork input skipped: duplicate"],
                 ),
             ):
                 with patch(
-                    "googleart_download.cli.inspect_artwork_metadata",
+                    "artx.cli.inspect_artwork_metadata",
                     return_value={"title": "One"},
                 ) as inspect_mock:
-                    with patch("googleart_download.cli.build_reporter", return_value=reporter):
+                    with patch("artx.cli.build_reporter", return_value=reporter):
                         with redirect_stderr(stderr):
                             code = cli.main(
                                 [
@@ -433,8 +431,8 @@ class CliTests(unittest.TestCase):
             output_path = Path(tmpdir) / "nested" / "metadata.json"
             stdout = io.StringIO()
             stderr = io.StringIO()
-            with patch("googleart_download.cli.inspect_artwork_metadata", return_value={"title": "Artwork"}):
-                with patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+            with patch("artx.cli.inspect_artwork_metadata", return_value={"title": "Artwork"}):
+                with patch("artx.cli.build_reporter", return_value=DummyReporter()):
                     with redirect_stdout(stdout), redirect_stderr(stderr):
                         code = cli.main(
                             [
@@ -453,7 +451,7 @@ class CliTests(unittest.TestCase):
 
     def test_no_skip_existing_conflicts_with_output_conflict(self) -> None:
         stderr = io.StringIO()
-        with redirect_stderr(stderr), patch("googleart_download.cli.build_reporter", return_value=DummyReporter()):
+        with redirect_stderr(stderr), patch("artx.cli.build_reporter", return_value=DummyReporter()):
             code = cli.main(
                 [
                     "https://artsandculture.google.com/asset/example/id",
@@ -470,16 +468,16 @@ class CliTests(unittest.TestCase):
         fake_manager = MagicMock()
         fake_manager.run.return_value = BatchRunResult(snapshot=BatchSnapshot(tasks=[]), succeeded=[], failed=[])
 
-        with patch("googleart_download.cli.build_reporter", return_value=reporter):
+        with patch("artx.cli.build_reporter", return_value=reporter):
             with patch(
-                "googleart_download.cli.canonicalize_batch_urls",
+                "artx.cli.canonicalize_batch_urls",
                 return_value=(
                     ["https://artsandculture.google.com/asset/example/id"],
                     ["Duplicate artwork input skipped: duplicate"],
                 ),
             ):
-                with patch("googleart_download.cli.BatchDownloadManager", return_value=fake_manager):
-                    with patch("googleart_download.cli.render_summary"):
+                with patch("artx.cli.BatchDownloadManager", return_value=fake_manager):
+                    with patch("artx.cli.render_summary"):
                         code = cli.main(
                             [
                                 "https://artsandculture.google.com/asset/example/id",
@@ -496,9 +494,9 @@ class CliTests(unittest.TestCase):
         fake_manager = MagicMock()
         fake_manager.run.return_value = BatchRunResult(snapshot=BatchSnapshot(tasks=[]), succeeded=[], failed=[])
 
-        with patch("googleart_download.cli.build_reporter", return_value=reporter):
+        with patch("artx.cli.build_reporter", return_value=reporter):
             with patch(
-                "googleart_download.cli.load_failed_batch_urls",
+                "artx.cli.load_failed_batch_urls",
                 return_value=(
                     [
                         "https://artsandculture.google.com/asset/example/failed-one",
@@ -508,8 +506,8 @@ class CliTests(unittest.TestCase):
                     Path("downloads/.googleart-batch-rerun-state.json"),
                 ),
             ):
-                with patch("googleart_download.cli.BatchDownloadManager", return_value=fake_manager) as manager_cls:
-                    with patch("googleart_download.cli.render_summary"):
+                with patch("artx.cli.BatchDownloadManager", return_value=fake_manager) as manager_cls:
+                    with patch("artx.cli.render_summary"):
                         code = cli.main(["--rerun-failed"])
 
         self.assertEqual(code, 0)
@@ -531,13 +529,13 @@ class CliTests(unittest.TestCase):
         fake_manager = MagicMock()
         fake_manager.run.return_value = BatchRunResult(snapshot=BatchSnapshot(tasks=[]), succeeded=[], failed=[])
 
-        with patch("googleart_download.cli.build_reporter", return_value=reporter):
+        with patch("artx.cli.build_reporter", return_value=reporter):
             with patch(
-                "googleart_download.cli.canonicalize_batch_urls",
+                "artx.cli.canonicalize_batch_urls",
                 return_value=(["https://artsandculture.google.com/asset/example/id"], []),
             ) as canonicalize_mock:
-                with patch("googleart_download.cli.BatchDownloadManager", return_value=fake_manager) as manager_cls:
-                    with patch("googleart_download.cli.render_summary"):
+                with patch("artx.cli.BatchDownloadManager", return_value=fake_manager) as manager_cls:
+                    with patch("artx.cli.render_summary"):
                         code = cli.main(
                             [
                                 "https://artsandculture.google.com/asset/example/id",
@@ -561,16 +559,16 @@ class CliTests(unittest.TestCase):
     def test_rerun_failed_exits_cleanly_when_no_failed_tasks_exist(self) -> None:
         reporter = MagicMock()
 
-        with patch("googleart_download.cli.build_reporter", return_value=reporter):
+        with patch("artx.cli.build_reporter", return_value=reporter):
             with patch(
-                "googleart_download.cli.load_failed_batch_urls",
+                "artx.cli.load_failed_batch_urls",
                 return_value=(
                     [],
                     Path("downloads/.googleart-batch-state.json"),
                     Path("downloads/.googleart-batch-rerun-state.json"),
                 ),
             ):
-                with patch("googleart_download.cli.BatchDownloadManager") as manager_cls:
+                with patch("artx.cli.BatchDownloadManager") as manager_cls:
                     code = cli.main(["--rerun-failed"])
 
         self.assertEqual(code, 0)

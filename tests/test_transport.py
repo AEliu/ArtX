@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import unittest
 
-from googleart_download.download.constants import REQUEST_TIMEOUT, USER_AGENT
-from googleart_download.download.transport import TransportConfig, retry_delay_seconds, should_retry_http
-from googleart_download.models import RetryConfig
+from artx.download.constants import REQUEST_TIMEOUT, USER_AGENT
+from artx.download.transport import TransportConfig, retry_delay_seconds, should_retry_http
+from artx.models import RetryConfig
 
 
 class TransportTests(unittest.TestCase):

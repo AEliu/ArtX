@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from googleart_download.models import (
+from artx.models import (
     ArtworkContext,
     ArtworkMetadata,
     BatchTask,
@@ -14,7 +14,7 @@ from googleart_download.models import (
     TaskState,
     TileInfo,
 )
-from googleart_download.reporting import RichCliReporter, RichTuiReporter
+from artx.reporting import RichCliReporter, RichTuiReporter
 
 
 class ReporterTests(unittest.TestCase):
@@ -76,8 +76,8 @@ class ReporterTests(unittest.TestCase):
         reporter = RichCliReporter()
         reporter.batch_started(1)
         with (
-            patch("googleart_download.reporting.telemetry.monotonic", side_effect=[0.0, 1.0, 2.0, 2.0]),
-            patch("googleart_download.reporting.telemetry.datetime") as mock_datetime,
+            patch("artx.reporting.telemetry.monotonic", side_effect=[0.0, 1.0, 2.0, 2.0]),
+            patch("artx.reporting.telemetry.datetime") as mock_datetime,
         ):
             mock_datetime.now.return_value = __import__("datetime").datetime(2026, 3, 16, 14, 30, 0)
             reporter.artwork_started(self.make_context())

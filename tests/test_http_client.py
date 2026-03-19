@@ -6,15 +6,15 @@ from unittest.mock import patch
 
 import httpx
 
-from googleart_download.download.http_client import HttpClient
-from googleart_download.errors import DownloadError
-from googleart_download.models import RetryConfig
+from artx.download.http_client import HttpClient
+from artx.errors import DownloadError
+from artx.models import RetryConfig
 
 
 class HttpClientTests(unittest.TestCase):
     def test_explicit_proxy_config_disables_environment_proxy_lookup(self) -> None:
         with patch.dict(os.environ, {"HTTPS_PROXY": "http://env-proxy:8080"}, clear=False):
-            with patch("googleart_download.download.http_client.httpx.Client") as client_cls:
+            with patch("artx.download.http_client.httpx.Client") as client_cls:
                 HttpClient(
                     retry_config=RetryConfig(attempts=1, backoff_base_seconds=0),
                     proxy_url="http://cli-proxy:7890",
@@ -25,7 +25,7 @@ class HttpClientTests(unittest.TestCase):
         self.assertFalse(client_cls.call_args.kwargs["trust_env"])
 
     def test_default_client_uses_environment_proxy_support(self) -> None:
-        with patch("googleart_download.download.http_client.httpx.Client") as client_cls:
+        with patch("artx.download.http_client.httpx.Client") as client_cls:
             HttpClient(retry_config=RetryConfig(attempts=1, backoff_base_seconds=0))
 
         client_cls.assert_called_once()
@@ -44,7 +44,7 @@ class HttpClientTests(unittest.TestCase):
         client = httpx.Client(transport=httpx.MockTransport(handler))
 
         with (
-            patch("googleart_download.download.http_client.time.sleep"),
+            patch("artx.download.http_client.time.sleep"),
             HttpClient(
                 retry_config=RetryConfig(attempts=2, backoff_base_seconds=0),
                 client=client,
@@ -77,7 +77,7 @@ class HttpClientTests(unittest.TestCase):
         client = httpx.Client(transport=httpx.MockTransport(handler))
 
         with (
-            patch("googleart_download.download.http_client.time.sleep"),
+            patch("artx.download.http_client.time.sleep"),
             HttpClient(
                 retry_config=RetryConfig(attempts=2, backoff_base_seconds=0),
                 client=client,

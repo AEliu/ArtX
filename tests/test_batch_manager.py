@@ -7,11 +7,11 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, patch
 
-from googleart_download.batch import BatchDownloadManager, BatchStateStore
-from googleart_download.download.downloader import PreparedArtworkDownload
-from googleart_download.errors import DownloadError
-from googleart_download.models import DownloadResult, DownloadSize, OutputConflictPolicy, RetryConfig, TaskState
-from googleart_download.reporting import Reporter
+from artx.batch import BatchDownloadManager, BatchStateStore
+from artx.download.downloader import PreparedArtworkDownload
+from artx.errors import DownloadError
+from artx.models import DownloadResult, DownloadSize, OutputConflictPolicy, RetryConfig, TaskState
+from artx.reporting import Reporter
 
 
 class SilentReporter(Reporter):
@@ -89,7 +89,7 @@ class BatchManagerTests(unittest.TestCase):
                 write_metadata=False,
                 write_sidecar=False,
             )
-            with patch("googleart_download.batch.download_artwork", side_effect=fake_download_artwork):
+            with patch("artx.batch.download_artwork", side_effect=fake_download_artwork):
                 result = manager.run()
 
             state_path = Path(tmpdir) / ".googleart-batch-state.json"
@@ -135,7 +135,7 @@ class BatchManagerTests(unittest.TestCase):
                 write_sidecar=False,
                 rerun_failures=1,
             )
-            with patch("googleart_download.batch.download_artwork", side_effect=fake_download_artwork):
+            with patch("artx.batch.download_artwork", side_effect=fake_download_artwork):
                 result = manager.run()
 
         self.assertEqual(calls.count(bad_url), 2)
@@ -221,7 +221,7 @@ class BatchManagerTests(unittest.TestCase):
                 write_sidecar=False,
                 resume_batch=True,
             )
-            with patch("googleart_download.batch.download_artwork", side_effect=fake_download_artwork):
+            with patch("artx.batch.download_artwork", side_effect=fake_download_artwork):
                 result = manager.run()
 
             self.assertEqual(calls, ["https://artsandculture.google.com/asset/example/two"])
@@ -279,7 +279,7 @@ class BatchManagerTests(unittest.TestCase):
                 write_sidecar=False,
                 rerun_failures=2,
             )
-            with patch("googleart_download.batch.download_artwork", side_effect=fake_download_artwork):
+            with patch("artx.batch.download_artwork", side_effect=fake_download_artwork):
                 result = manager.run()
 
         self.assertEqual(calls, [first_url])

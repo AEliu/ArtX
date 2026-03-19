@@ -1,11 +1,7 @@
-from ..download.downloader import download_artwork
-from .manager import BatchDownloadManager
-from .state import BatchStateStore, resolve_batch_state_path, resolve_failed_rerun_state_path
+from __future__ import annotations
 
-__all__ = [
-    "BatchDownloadManager",
-    "BatchStateStore",
-    "download_artwork",
-    "resolve_batch_state_path",
-    "resolve_failed_rerun_state_path",
-]
+import warnings as _warnings
+
+from artx.batch import *  # noqa: F401,F403
+
+_warnings.warn("'googleart_download.batch' is deprecated; use 'artx.batch'", DeprecationWarning, stacklevel=2)

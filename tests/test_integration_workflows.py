@@ -10,10 +10,10 @@ from unittest.mock import patch
 
 from PIL import Image
 
-from googleart_download import cli
-from googleart_download.download.cache import resolve_artwork_cache_dir
-from googleart_download.download.downloader import download_artwork
-from googleart_download.models import (
+from artx import cli
+from artx.download.cache import resolve_artwork_cache_dir
+from artx.download.downloader import download_artwork
+from artx.models import (
     ArtworkMetadata,
     DownloadResult,
     DownloadSize,
@@ -26,7 +26,7 @@ from googleart_download.models import (
     TileInfo,
     TileJob,
 )
-from googleart_download.reporting import Reporter
+from artx.reporting import Reporter
 
 
 class SilentReporter(Reporter):
@@ -65,17 +65,17 @@ class CliIntegrationWorkflowTests(unittest.TestCase):
 
             fake_client = SilentReporter()
 
-            with patch("googleart_download.download.downloader.HttpClient") as client_cls:
+            with patch("artx.download.downloader.HttpClient") as client_cls:
                 client = client_cls.return_value.__enter__.return_value
                 client.fetch_text_with_url.return_value = ("<html></html>", page.asset_url)
                 client.fetch_bytes.return_value = b"tile-metadata"
 
-                with patch("googleart_download.download.downloader.AsyncHttpClient"):
-                    with patch("googleart_download.download.downloader.parse_page_info", return_value=page):
-                        with patch("googleart_download.download.downloader.parse_tile_info", return_value=tile_info):
-                            with patch("googleart_download.download.downloader.build_jobs", return_value=jobs):
+                with patch("artx.download.downloader.AsyncHttpClient"):
+                    with patch("artx.download.downloader.parse_page_info", return_value=page):
+                        with patch("artx.download.downloader.parse_tile_info", return_value=tile_info):
+                            with patch("artx.download.downloader.build_jobs", return_value=jobs):
                                 with patch(
-                                    "googleart_download.download.downloader.await_download_tiles",
+                                    "artx.download.downloader.await_download_tiles",
                                     return_value={(0, 0): tile_path},
                                 ):
                                     result = download_artwork(
@@ -131,17 +131,17 @@ class CliIntegrationWorkflowTests(unittest.TestCase):
             tile_path = output_dir / "tile.png"
             Image.new("RGB", (8, 8), (0, 128, 255)).save(tile_path, format="PNG")
 
-            with patch("googleart_download.download.downloader.HttpClient") as client_cls:
+            with patch("artx.download.downloader.HttpClient") as client_cls:
                 client = client_cls.return_value.__enter__.return_value
                 client.fetch_text_with_url.return_value = ("<html></html>", page.asset_url)
                 client.fetch_bytes.return_value = b"tile-metadata"
 
-                with patch("googleart_download.download.downloader.AsyncHttpClient"):
-                    with patch("googleart_download.download.downloader.parse_page_info", return_value=page):
-                        with patch("googleart_download.download.downloader.parse_tile_info", return_value=tile_info):
-                            with patch("googleart_download.download.downloader.build_jobs", return_value=jobs):
+                with patch("artx.download.downloader.AsyncHttpClient"):
+                    with patch("artx.download.downloader.parse_page_info", return_value=page):
+                        with patch("artx.download.downloader.parse_tile_info", return_value=tile_info):
+                            with patch("artx.download.downloader.build_jobs", return_value=jobs):
                                 with patch(
-                                    "googleart_download.download.downloader.await_download_tiles",
+                                    "artx.download.downloader.await_download_tiles",
                                     return_value={(0, 0): tile_path},
                                 ) as await_download_tiles_mock:
                                     download_artwork(
@@ -200,19 +200,19 @@ class CliIntegrationWorkflowTests(unittest.TestCase):
                 hidden_tile_path.write_bytes(b"tile")
                 return {(0, 0): hidden_tile_path}
 
-            with patch("googleart_download.download.downloader.HttpClient") as client_cls:
+            with patch("artx.download.downloader.HttpClient") as client_cls:
                 client = client_cls.return_value.__enter__.return_value
                 client.fetch_text_with_url.return_value = ("<html></html>", page.asset_url)
                 client.fetch_bytes.return_value = b"tile-metadata"
 
-                with patch("googleart_download.download.downloader.parse_page_info", return_value=page):
-                    with patch("googleart_download.download.downloader.parse_tile_info", return_value=tile_info):
-                        with patch("googleart_download.download.downloader.build_jobs", return_value=jobs):
+                with patch("artx.download.downloader.parse_page_info", return_value=page):
+                    with patch("artx.download.downloader.parse_tile_info", return_value=tile_info):
+                        with patch("artx.download.downloader.build_jobs", return_value=jobs):
                             with patch(
-                                "googleart_download.download.downloader.await_download_tiles",
+                                "artx.download.downloader.await_download_tiles",
                                 side_effect=fake_await_download_tiles,
                             ):
-                                with patch("googleart_download.download.downloader.stitch_tiles") as stitch_mock:
+                                with patch("artx.download.downloader.stitch_tiles") as stitch_mock:
                                     result = download_artwork(
                                         url=page.asset_url,
                                         output_dir=output_dir,
@@ -282,16 +282,16 @@ class CliIntegrationWorkflowTests(unittest.TestCase):
                 hidden_tile_path.write_bytes(b"fresh-tile")
                 return {(0, 0): hidden_tile_path}
 
-            with patch("googleart_download.download.downloader.HttpClient") as client_cls:
+            with patch("artx.download.downloader.HttpClient") as client_cls:
                 client = client_cls.return_value.__enter__.return_value
                 client.fetch_text_with_url.return_value = ("<html></html>", page.asset_url)
                 client.fetch_bytes.return_value = b"tile-metadata"
 
-                with patch("googleart_download.download.downloader.parse_page_info", return_value=page):
-                    with patch("googleart_download.download.downloader.parse_tile_info", return_value=tile_info):
-                        with patch("googleart_download.download.downloader.build_jobs", return_value=jobs):
+                with patch("artx.download.downloader.parse_page_info", return_value=page):
+                    with patch("artx.download.downloader.parse_tile_info", return_value=tile_info):
+                        with patch("artx.download.downloader.build_jobs", return_value=jobs):
                             with patch(
-                                "googleart_download.download.downloader.await_download_tiles",
+                                "artx.download.downloader.await_download_tiles",
                                 side_effect=fake_await_download_tiles,
                             ):
                                 result = download_artwork(
@@ -367,16 +367,16 @@ class CliIntegrationWorkflowTests(unittest.TestCase):
                 self.assertTrue((hidden_cache_dir / "tiles" / "0-0-0.tile").exists())
                 return {(0, 0): hidden_cache_dir / "tiles" / "0-0-0.tile"}
 
-            with patch("googleart_download.download.downloader.HttpClient") as client_cls:
+            with patch("artx.download.downloader.HttpClient") as client_cls:
                 client = client_cls.return_value.__enter__.return_value
                 client.fetch_text_with_url.return_value = ("<html></html>", page.asset_url)
                 client.fetch_bytes.return_value = b"tile-metadata"
 
-                with patch("googleart_download.download.downloader.parse_page_info", return_value=page):
-                    with patch("googleart_download.download.downloader.parse_tile_info", return_value=tile_info):
-                        with patch("googleart_download.download.downloader.build_jobs", return_value=jobs):
+                with patch("artx.download.downloader.parse_page_info", return_value=page):
+                    with patch("artx.download.downloader.parse_tile_info", return_value=tile_info):
+                        with patch("artx.download.downloader.build_jobs", return_value=jobs):
                             with patch(
-                                "googleart_download.download.downloader.await_download_tiles",
+                                "artx.download.downloader.await_download_tiles",
                                 side_effect=fake_await_download_tiles,
                             ):
                                 result = download_artwork(
@@ -438,17 +438,15 @@ class CliIntegrationWorkflowTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            with patch("googleart_download.download.downloader.HttpClient") as client_cls:
+            with patch("artx.download.downloader.HttpClient") as client_cls:
                 client = client_cls.return_value.__enter__.return_value
                 client.fetch_text_with_url.return_value = ("<html></html>", page.asset_url)
                 client.fetch_bytes.return_value = b"tile-metadata"
 
-                with patch("googleart_download.download.downloader.parse_page_info", return_value=page):
-                    with patch("googleart_download.download.downloader.parse_tile_info", return_value=tile_info):
-                        with patch("googleart_download.download.downloader.build_jobs", return_value=jobs):
-                            with patch(
-                                "googleart_download.download.downloader.await_download_tiles"
-                            ) as await_download_tiles_mock:
+                with patch("artx.download.downloader.parse_page_info", return_value=page):
+                    with patch("artx.download.downloader.parse_tile_info", return_value=tile_info):
+                        with patch("artx.download.downloader.build_jobs", return_value=jobs):
+                            with patch("artx.download.downloader.await_download_tiles") as await_download_tiles_mock:
                                 result = download_artwork(
                                     url=page.asset_url,
                                     output_dir=output_dir,
@@ -500,7 +498,7 @@ class CliIntegrationWorkflowTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            with patch("googleart_download.cli.build_reporter", return_value=SilentReporter()):
+            with patch("artx.cli.build_reporter", return_value=SilentReporter()):
                 code = cli.main(["--stitch-from-tiles", str(tile_dir), "-o", tmpdir])
 
             self.assertEqual(code, 0)
@@ -565,8 +563,8 @@ class CliIntegrationWorkflowTests(unittest.TestCase):
                     tile_count=1,
                 )
 
-            with patch("googleart_download.cli.build_reporter", return_value=SilentReporter()):
-                with patch("googleart_download.batch.download_artwork", side_effect=fake_download_artwork):
+            with patch("artx.cli.build_reporter", return_value=SilentReporter()):
+                with patch("artx.batch.download_artwork", side_effect=fake_download_artwork):
                     code = cli.main([first_url, second_url, "-o", tmpdir, "--resume-batch"])
 
             self.assertEqual(code, 0)
@@ -600,7 +598,7 @@ class CliIntegrationWorkflowTests(unittest.TestCase):
                     )
                 if url == flaky_url and failure_count["flaky"] == 0:
                     failure_count["flaky"] += 1
-                    from googleart_download.errors import DownloadError
+                    from artx.errors import DownloadError
 
                     raise DownloadError("boom")
                 return DownloadResult(
@@ -611,8 +609,8 @@ class CliIntegrationWorkflowTests(unittest.TestCase):
                     tile_count=1,
                 )
 
-            with patch("googleart_download.batch.download_artwork", side_effect=fake_download_artwork):
-                from googleart_download.batch import BatchDownloadManager
+            with patch("artx.batch.download_artwork", side_effect=fake_download_artwork):
+                from artx.batch import BatchDownloadManager
 
                 manager = BatchDownloadManager(
                     urls=[skipped_url, flaky_url],
@@ -656,8 +654,8 @@ class CliIntegrationWorkflowTests(unittest.TestCase):
                     tile_only=True,
                 )
 
-            with patch("googleart_download.batch.download_artwork", side_effect=fake_download_artwork):
-                from googleart_download.batch import BatchDownloadManager
+            with patch("artx.batch.download_artwork", side_effect=fake_download_artwork):
+                from artx.batch import BatchDownloadManager
 
                 manager = BatchDownloadManager(
                     urls=[skipped_url],
@@ -752,8 +750,8 @@ class CliIntegrationWorkflowTests(unittest.TestCase):
                     tile_count=1,
                 )
 
-            with patch("googleart_download.cli.build_reporter", return_value=SilentReporter()):
-                with patch("googleart_download.batch.download_artwork", side_effect=fake_download_artwork):
+            with patch("artx.cli.build_reporter", return_value=SilentReporter()):
+                with patch("artx.batch.download_artwork", side_effect=fake_download_artwork):
                     code = cli.main(["--rerun-failed", "-o", tmpdir])
 
             self.assertEqual(code, 0)
@@ -786,8 +784,8 @@ class CliIntegrationWorkflowTests(unittest.TestCase):
                             tile_count=1,
                         )
 
-                    with patch("googleart_download.cli.build_reporter", return_value=SilentReporter()):
-                        with patch("googleart_download.batch.download_artwork", side_effect=fake_download_artwork):
+                    with patch("artx.cli.build_reporter", return_value=SilentReporter()):
+                        with patch("artx.batch.download_artwork", side_effect=fake_download_artwork):
                             code = cli.main([url, "-o", tmpdir, *extra_args])
 
                 self.assertEqual(code, 0)
@@ -811,8 +809,8 @@ class CliIntegrationWorkflowTests(unittest.TestCase):
                     backend_used=StitchBackend.BIGTIFF,
                 )
 
-            with patch("googleart_download.cli.build_reporter", return_value=SilentReporter()):
-                with patch("googleart_download.batch.download_artwork", side_effect=fake_download_artwork):
+            with patch("artx.cli.build_reporter", return_value=SilentReporter()):
+                with patch("artx.batch.download_artwork", side_effect=fake_download_artwork):
                     with redirect_stdout(stdout):
                         code = cli.main([url, "-o", tmpdir])
 

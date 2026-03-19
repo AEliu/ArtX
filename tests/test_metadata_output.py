@@ -5,10 +5,10 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from googleart_download.cli import resolve_default_metadata_output_path
-from googleart_download.metadata import metadata_to_dict, write_metadata_sidecar
-from googleart_download.metadata.parsers import normalize_asset_url, parse_artwork_metadata, parse_page_info
-from googleart_download.models import ArtworkMetadata, DownloadSize
+from artx.cli import resolve_default_metadata_output_path
+from artx.metadata import metadata_to_dict, write_metadata_sidecar
+from artx.metadata.parsers import normalize_asset_url, parse_artwork_metadata, parse_page_info
+from artx.models import ArtworkMetadata, DownloadSize
 
 
 class MetadataOutputTests(unittest.TestCase):

@@ -1,17 +1,7 @@
-from .base import Reporter
-from .cli import RichCliReporter
-from .telemetry import ArtworkProgressTelemetry
-from .tui import RichTuiReporter
+from __future__ import annotations
 
+import warnings as _warnings
 
-def build_reporter(use_tui: bool) -> Reporter:
-    return RichTuiReporter() if use_tui else RichCliReporter()
+from artx.reporting import *  # noqa: F401,F403
 
-
-__all__ = [
-    "ArtworkProgressTelemetry",
-    "Reporter",
-    "RichCliReporter",
-    "RichTuiReporter",
-    "build_reporter",
-]
+_warnings.warn("'googleart_download.reporting' is deprecated; use 'artx.reporting'", DeprecationWarning, stacklevel=2)

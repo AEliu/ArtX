@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from googleart_download.errors import build_error_guidance
+from artx.errors import build_error_guidance
 
 
 class ErrorGuidanceTests(unittest.TestCase):
