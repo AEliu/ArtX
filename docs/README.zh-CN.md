@@ -57,6 +57,22 @@ uv run artx --help
 uv sync --extra large-images
 ```
 
+## 迁移说明
+
+库导入路径已从 `googleart_download` 更名为 `artx`。
+
+- 旧的 `googleart_download` 作为兼容层保留两个小版本
+- 导入旧包会发出 `DeprecationWarning`
+- 如果你把本项目作为库使用，请将导入改为 `artx`
+
+```python
+# 旧
+from googleart_download import ...
+
+# 新
+from artx import ...
+```
+
 ## 快速开始
 
 下载一张作品：

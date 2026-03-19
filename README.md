@@ -55,6 +55,22 @@ If you want optional large-image extras:
 uv sync --extra large-images
 ```
 
+## Migration note
+
+The import path has been renamed from `googleart_download` to `artx`.
+
+- `googleart_download` remains as a compatibility shim for two minor releases
+- it emits a `DeprecationWarning` on import
+- if you use this project as a library, update your imports:
+
+```python
+# Old
+from googleart_download import ...
+
+# New
+from artx import ...
+```
+
 ## Quick Start
 
 Download one artwork:

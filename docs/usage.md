@@ -1,5 +1,21 @@
 # Usage
 
+## Migration note
+
+The library import path changed: `googleart_download` → `artx`.
+
+- The old `googleart_download` package remains as a forwarder for two minor versions
+- Importing it will emit a `DeprecationWarning`
+- If you embed this project as a library, switch your imports to `artx`
+
+```python
+# before
+from googleart_download import ...
+
+# after
+from artx import ...
+```
+
 ## Basic Download
 
 ```bash
