@@ -62,6 +62,23 @@ def build_png_bytes(color: tuple[int, int, int]) -> bytes:
 
 
 class TileCacheTests(unittest.TestCase):
+    def test_download_tiles_rejects_malformed_encrypted_payload(self) -> None:
+        jobs = [TileJob(z=0, x=0, y=0, url="https://example.com/0")]
+        malformed_encrypted = b"\x0a\x0a\x0a\x0a\x01\x00\x00\x00"
+
+        with TemporaryDirectory() as tmpdir:
+            tiles_dir = ensure_cache_layout(Path(tmpdir))
+            client = FakeHttpClient(malformed_encrypted)
+
+            with self.assertRaises(DownloadError):
+                download_tiles(
+                    jobs,
+                    workers=1,
+                    reporter=SilentReporter(),
+                    http_client=client,
+                    tiles_dir=tiles_dir,
+                )
+
     def test_download_tiles_reuses_existing_cache(self) -> None:
         jobs = [
             TileJob(z=0, x=0, y=0, url="https://example.com/0"),

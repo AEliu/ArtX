@@ -43,25 +43,25 @@ The project currently supports:
 
 Application and shared modules:
 
-- `src/googleart_download/cli/`
-- `src/googleart_download/batch/`
-- `src/googleart_download/reporting/`
-- `src/googleart_download/models.py`
-- `src/googleart_download/errors.py`
-- `src/googleart_download/logging_utils.py`
+- `src/artx/cli/`
+- `src/artx/batch/`
+- `src/artx/reporting/`
+- `src/artx/models.py`
+- `src/artx/errors.py`
+- `src/artx/logging_utils.py`
 
 Download domain:
 
-- `src/googleart_download/download/constants.py`
-- `src/googleart_download/download/http_client.py`
-- `src/googleart_download/download/downloader.py`
-- `src/googleart_download/download/tiles.py`
-- `src/googleart_download/download/image_writer.py`
+- `src/artx/download/constants.py`
+- `src/artx/download/http_client.py`
+- `src/artx/download/downloader.py`
+- `src/artx/download/tiles.py`
+- `src/artx/download/image_writer.py`
 
 Metadata domain:
 
-- `src/googleart_download/metadata/parsers.py`
-- `src/googleart_download/metadata/output.py`
+- `src/artx/metadata/parsers.py`
+- `src/artx/metadata/output.py`
 
 Repo quality and automation:
 
@@ -87,7 +87,7 @@ Repo quality and automation:
 - added batch input deduplication, targeted rerun, explicit output conflict policies, and richer size inspection
 - added explicit tile-only and stitch-from-tiles workflows
 - added conservative batch download/stitch pipelining for adjacent artworks
-- removed compatibility-shell leftovers after package reorganization
+- removed compatibility-shim leftovers after package reorganization
 - moved download-specific constants into the `download/` domain
 - added `ruff`, `mypy`, and GitHub Actions CI
 - added CI verification that generated README assets stay up to date
