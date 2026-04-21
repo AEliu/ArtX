@@ -42,10 +42,18 @@ def decrypt_tile_if_needed(data: bytes) -> bytes:
 
     header_size = int.from_bytes(data[-4:], "little")
     encrypted_size_offset = 4 + header_size
+    footer_end = len(data) - 4
+
+    if encrypted_size_offset + 4 > footer_end:
+        raise DownloadError("encrypted tile header metadata is malformed")
+
     encrypted_size = int.from_bytes(data[encrypted_size_offset : encrypted_size_offset + 4], "little")
     encrypted_start = encrypted_size_offset + 4
     encrypted_end = encrypted_start + encrypted_size
-    footer_end = len(data) - 4
+
+    if encrypted_end > footer_end:
+        raise DownloadError("encrypted tile payload length is malformed")
+
 
     header = data[4 : 4 + header_size]
     encrypted = data[encrypted_start:encrypted_end]
