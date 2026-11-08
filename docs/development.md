@@ -9,7 +9,7 @@ The repository uses:
 - `uv` for dependency management and command execution
 - `ruff` for formatting and linting
 - `mypy` for static type checking
-- `unittest` for the default test suite
+- `pytest` to run both the ArtX unittest-style tests and the local compatibility tests
 - Python 3.12+ (CI uses 3.12)
 
 ## Common Commands
@@ -25,8 +25,8 @@ Run the full local check chain:
 ```bash
 uv run ruff format .
 uv run ruff check .
-uv run python -m mypy src tests scripts/generate_readme_assets.py
-uv run python -m unittest discover -s tests -v
+uv run mypy --hide-error-context --pretty --strict src/artx
+uv run python -m pytest -q
 ```
 
 Show CLI help:
@@ -34,6 +34,14 @@ Show CLI help:
 ```bash
 uv run artx --help
 ```
+
+## Package and compatibility boundaries
+
+`src/artx/` contains the primary implementation. `src/googleart_download/` forwards historical upstream imports to it. `src/google_art/` preserves the earlier local API and command; it is an independent compatibility implementation rather than another alias for ArtX.
+
+The wheel includes all three packages and both `artx` and `google-art` entry points. `main.py` starts ArtX. See [migration.md](migration.md) before moving code between these boundaries or translating CLI options.
+
+Run strict type checks against `src/artx`; formatting and linting cover the whole repository. Run `pytest` for the full suite: `unittest discover` alone does not execute the function-based compatibility tests.
 
 ## Branching
 
@@ -86,7 +94,7 @@ The current downloader is intentionally mixed-mode rather than fully async:
 This keeps async work focused on the most network-heavy stage without forcing a full rewrite of the rest of the pipeline.
 
 At the moment there is no separate user-facing switch for sync versus async tile download.
-The existing `--workers` flag still controls tile-download concurrency, but it now maps to the async download semaphore rather than a thread-pool size.
+The existing `--workers` flag still controls tile-download concurrency, and bounds the number of tile workers, including their download and cache-write work. Workers are cancelled and awaited together; in-progress thread writes finish before cancellation returns.
 
 ## Release Notes
 

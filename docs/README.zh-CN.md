@@ -1,7 +1,7 @@
 # ArtX
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-3776AB.svg)](#安装)
-[![Version 0.4.1](https://img.shields.io/badge/version-0.4.1-0f766e.svg)](../pyproject.toml)
+[![Version 0.4.2.dev0](https://img.shields.io/badge/version-0.4.2.dev0-0f766e.svg)](../pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0f766e.svg)](../LICENSE)
 
 [English README](../README.md)
@@ -57,21 +57,19 @@ uv run artx --help
 uv sync --extra large-images
 ```
 
-## 迁移说明
+## 迁移与兼容
 
-库导入路径已从 `googleart_download` 更名为 `artx`。
+当前工作版本为 `0.4.2.dev0`，基于 ArtX `0.4.1` 整合，尚未发布。主命令为 `artx`；原本地 `google-art` 命令和 `google_art` Python API 继续保留原有行为。
 
-- 旧的 `googleart_download` 作为兼容层保留两个小版本
-- 导入旧包会发出 `DeprecationWarning`
-- 如果你把本项目作为库使用，请将导入改为 `artx`
+| 名称 | 职责 |
+| --- | --- |
+| `artx` 命令和 Python 包 | 主应用：缓存恢复、元数据、尺寸查看、tile 工作流和大图输出 |
+| `googleart_download` Python 包 | 上游兼容层，转发至 `artx`，导入时提示弃用 |
+| `google-art` 命令和 `google_art` Python 包 | 保留的本地实现，支持旧调用、PNG/WebP 和按最长边精确缩放 |
 
-```python
-# 旧
-from googleart_download import ...
+`google_art` 与 `googleart_download` 是两个不同的包。两个 CLI 的选项也不能直接互换：例如 `artx --size` 接受尺寸预设，而 `google-art --size` 接受像素整数。
 
-# 新
-from artx import ...
-```
+[迁移与仓库历史](migration.md)记录了已核实的更名过程、命令对照和整合边界。旧命令和 Python 调用示例见[原 Google Art 使用说明](legacy-google-art.md)。
 
 ## 快速开始
 
@@ -232,6 +230,7 @@ _截图来自当前 TUI 的真实渲染输出。_
 
 ## 更多文档
 
+- [迁移说明](migration.md)：仓库历史、命令区别与兼容范围
 - [用法说明](usage.md)：CLI 用法、批量下载、恢复、重跑、冲突策略
 - [大图说明](large-images.md)：大图行为、TIFF/BigTIFF、安全拼接、缓存复用
 - [元数据说明](metadata.md)：`metadata-only`、sidecar、EXIF

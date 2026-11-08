@@ -8,7 +8,7 @@ if str(SRC) not in sys.path:
 
 
 def run() -> int:
-    from googleart_download.cli import main
+    from artx.cli import main
 
     return main()
 
