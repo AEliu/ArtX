@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib
+import re
 import subprocess
 import sys
 import warnings
@@ -49,5 +50,6 @@ def test_module_entry_points_show_their_own_cli(arguments, expected_option):
         timeout=20,
     )
     assert result.returncode == 0, result.stderr
-    assert expected_option in result.stdout
+    plain_output = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", result.stdout)
+    assert expected_option in plain_output
     assert "DeprecationWarning" not in result.stderr
