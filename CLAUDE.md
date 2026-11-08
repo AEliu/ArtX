@@ -11,15 +11,17 @@ Project working agreements for Claude Code and contributors.
 Notes:
 - Keep editor/static warnings clean. Fix E/F/I classes from ruff; do not ignore obvious issues.
 - Type hints: avoid returning `Any` from typed functions; prefer narrow casts when needed.
-- Optional deps: missing stubs for `psutil`/`pyvips` are handled via module-specific mypy config (no global `ignore_missing_imports`).
+- Optional image dependencies are loaded dynamically at the backend boundary (no global `ignore_missing_imports`).
 
 ## Tooling
 - Python: 3.12+
-- Packaging: hatchling; wheel includes `src/artx` and deprecation shims in `src/googleart_download`.
-- CLI entry point: `artx = artx.cli:main`
+- Packaging: hatchling; wheel includes `src/artx`, deprecation shims in `src/googleart_download`, and retained local APIs in `src/google_art`.
+- Primary CLI entry point: `artx = artx.cli:main`; compatibility CLI: `google-art = google_art.cli:app`.
 
 ## Deprecation policy
 - Import path `googleart_download` remains as a shim for 2 minor versions, emits `DeprecationWarning`, and forwards to `artx`.
+
+The separate `google_art` package retains its local API and does not forward to ArtX. Preserve its CLI option semantics and tests; see `docs/migration.md` for the distinction.
 
 ## Git & PR conventions
 - Conventional commits (type: scope): use `feat`, `fix`, `docs`, `chore`, `refactor`, etc.

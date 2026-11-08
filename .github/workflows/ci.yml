@@ -7,6 +7,7 @@ on:
       - "feat/**"
       - "fix/**"
       - "refactor/**"
+      - "codex/**"
   pull_request:
 
 jobs:
@@ -28,7 +29,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
 
       - name: Sync dependencies
-        run: uv sync --dev
+        run: uv sync --locked --dev
 
       - name: Ruff format check
         run: uv run ruff format --check .
@@ -41,6 +42,15 @@ jobs:
 
       - name: Test
         run: uv run python -m pytest -q
+
+      - name: Check both CLI entry points
+        run: |
+          uv run artx --help
+          uv run google-art --help
+          uv run python -m artx --help
+
+      - name: Build distribution
+        run: uv build
 
       - name: Regenerate README assets
         run: uv run python scripts/generate_readme_assets.py

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import os
 import re
+from contextlib import ExitStack, closing
+from importlib import import_module
 from pathlib import Path
 from types import ModuleType
 
@@ -115,8 +117,7 @@ def _read_available_memory_bytes() -> int | None:
             return int(sysconf("SC_AVPHYS_PAGES")) * int(sysconf("SC_PAGE_SIZE"))
     # Windows or unknown: try psutil if available
     try:
-        import psutil  # type: ignore[import-untyped]
-
+        psutil = import_module("psutil")
         return int(psutil.virtual_memory().available)
     except Exception:
         return None
@@ -161,13 +162,12 @@ def ensure_stitch_memory_budget(tile_info: TileInfo) -> None:
 
 def _load_pyvips() -> ModuleType:
     try:
-        import pyvips  # type: ignore[import-not-found]
+        return import_module("pyvips")
     except Exception as exc:
         raise DownloadError(
             "pyvips backend is not available. Install the optional dependency with "
             "`uv sync --extra large-images` and ensure libvips is installed on the system."
         ) from exc
-    return pyvips  # type: ignore[no-any-return]
 
 
 def choose_stitch_backend(tile_info: TileInfo, requested_backend: StitchBackend) -> StitchBackend:
@@ -178,13 +178,11 @@ def choose_stitch_backend(tile_info: TileInfo, requested_backend: StitchBackend)
 
 def _load_streaming_tiff_modules() -> tuple[ModuleType, ModuleType]:
     try:
-        import numpy  # type: ignore[import-not-found]
-        import tifffile  # type: ignore[import-not-found]
+        return import_module("numpy"), import_module("tifffile")
     except Exception as exc:
         raise DownloadError(
             "bigtiff backend is not available. Install the optional dependency set with `uv sync --extra large-images`."
         ) from exc
-    return numpy, tifffile
 
 
 def _save_with_pillow(
@@ -217,22 +215,22 @@ def _stitch_with_pillow(
     jpeg_quality: int,
 ) -> None:
     ensure_stitch_memory_budget(tile_info)
-    image = Image.new("RGB", (tile_info.image_width, tile_info.image_height))
     level = tile_info.highest_level
 
-    for y in range(level.num_tiles_y):
-        for x in range(level.num_tiles_x):
-            with Image.open(tiles[(x, y)]) as tile:
-                tile.load()
-                left = x * tile_info.tile_width
-                top = y * tile_info.tile_height
-                right = min(left + tile.width, tile_info.image_width)
-                bottom = min(top + tile.height, tile_info.image_height)
-                cropped = tile.crop((0, 0, right - left, bottom - top))
-                image.paste(cropped, (left, top))
+    with closing(Image.new("RGB", (tile_info.image_width, tile_info.image_height))) as image:
+        for y in range(level.num_tiles_y):
+            for x in range(level.num_tiles_x):
+                with closing(Image.open(tiles[(x, y)])) as tile:
+                    tile.load()
+                    left = x * tile_info.tile_width
+                    top = y * tile_info.tile_height
+                    right = min(left + tile.width, tile_info.image_width)
+                    bottom = min(top + tile.height, tile_info.image_height)
+                    with closing(tile.crop((0, 0, right - left, bottom - top))) as cropped:
+                        image.paste(cropped, (left, top))
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    _save_with_pillow(image, output_path, metadata, write_metadata, jpeg_quality)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        _save_with_pillow(image, output_path, metadata, write_metadata, jpeg_quality)
 
 
 def _stitch_with_bigtiff(
@@ -266,24 +264,25 @@ def _stitch_with_bigtiff(
             top = y * tile_info.tile_height
             for x in range(level.num_tiles_x):
                 left = x * tile_info.tile_width
-                with Image.open(tiles[(x, y)]) as tile:
-                    rgb_tile = tile.convert("RGB")
+                with ExitStack() as images:
+                    tile = images.enter_context(closing(Image.open(tiles[(x, y)])))
+                    rgb_tile = images.enter_context(closing(tile.convert("RGB")))
                     width = min(rgb_tile.width, tile_info.image_width - left)
                     height = min(rgb_tile.height, tile_info.image_height - top)
                     if width != rgb_tile.width or height != rgb_tile.height:
-                        rgb_tile = rgb_tile.crop((0, 0, width, height))
+                        rgb_tile = images.enter_context(closing(rgb_tile.crop((0, 0, width, height))))
                     canvas[top : top + height, left : left + width, :] = numpy.asarray(rgb_tile, dtype=numpy.uint8)
             canvas.flush()
+        # Release the mapping before rename, particularly on Windows.
+        del canvas
+        canvas = None
+        intermediate_path.replace(output_path)
     except Exception:
         if canvas is not None:
             del canvas
         if intermediate_path.exists():
             intermediate_path.unlink()
         raise
-
-    assert canvas is not None
-    del canvas
-    intermediate_path.replace(output_path)
 
 
 def _stitch_with_pyvips(
@@ -321,7 +320,13 @@ def _stitch_with_pyvips(
     final_image = pyvips.Image.arrayjoin(rows, across=1, shim=0)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     try:
-        final_image.write_to_file(str(temp_output_path), Q=jpeg_quality, optimize_coding=True, strip=False)
+        save_options: dict[str, int | bool] = {}
+        suffix = output_path.suffix.lower()
+        if suffix in {".jpg", ".jpeg"}:
+            save_options.update(Q=jpeg_quality, optimize_coding=True, strip=False)
+        elif suffix == ".webp":
+            save_options["Q"] = jpeg_quality
+        final_image.write_to_file(str(temp_output_path), **save_options)
         temp_output_path.replace(output_path)
     except Exception:
         if temp_output_path.exists():

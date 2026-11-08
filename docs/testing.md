@@ -31,9 +31,13 @@ Before committing Python changes, run:
 ```bash
 uv run ruff format .
 uv run ruff check .
-uv run python -m mypy src tests scripts/generate_readme_assets.py
-uv run python -m unittest discover -s tests -v
+uv run mypy --hide-error-context --pretty --strict src/artx
+uv run python -m pytest -q
 ```
+
+The imported ArtX tests use the `tests/test_artx_*.py` prefix to avoid collisions with the retained local test modules. The original `tests/test_*.py` files cover `google_art`, including shared network limits, cancellation, thread lifetime, atomic publication, and the legacy CLI. New ArtX lifecycle tests cover bounded workers and image-resource cleanup.
+
+The default suite uses mocks and local fixtures. Passing it does not establish that a real Google Arts endpoint is reachable or that a native libvips installation works. Optional backends need separate integration checks with their dependencies installed.
 
 ## CI Coverage
 

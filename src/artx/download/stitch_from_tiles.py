@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import re
-import shutil
 from pathlib import Path
 from typing import cast
 
@@ -193,9 +192,8 @@ def stitch_from_tile_directory(
     if output_conflict_policy is OutputConflictPolicy.OVERWRITE and output_path.exists():
         reporter.log(f"Overwriting existing output: {output_path}")
         if output_path.is_dir():
-            shutil.rmtree(output_path)
-        else:
-            output_path.unlink()
+            raise DownloadError(f"Image output path is a directory: {output_path}")
+        # The image writer replaces the old file only after encoding succeeds.
 
     context = ArtworkContext(
         index=1,

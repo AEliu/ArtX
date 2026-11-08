@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from logging import Logger
 from pathlib import Path
 
+from ..errors import DownloadError
 from ..logging_utils import get_logger
 from ..metadata.output import metadata_to_dict, write_metadata_sidecar
 from ..metadata.parsers import normalize_asset_url, parse_page_info, parse_tile_info
@@ -245,10 +246,14 @@ def _handle_existing_output(
     if output_conflict_policy is OutputConflictPolicy.OVERWRITE:
         if workspace.output_path.exists():
             reporter.log(f"Overwriting existing output: {workspace.output_path}")
-            if workspace.output_path.is_dir():
-                shutil.rmtree(workspace.output_path)
-            else:
-                workspace.output_path.unlink()
+            if tile_only:
+                if workspace.output_path.is_dir():
+                    shutil.rmtree(workspace.output_path)
+                else:
+                    workspace.output_path.unlink()
+            elif workspace.output_path.is_dir():
+                raise DownloadError(f"Image output path is a directory: {workspace.output_path}")
+            # Keep an existing image until the writer atomically replaces it.
         if tile_only and workspace.cache_dir.exists():
             clear_cache_dir(workspace.cache_dir)
             ensure_cache_layout(workspace.cache_dir)

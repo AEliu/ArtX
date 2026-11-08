@@ -1,7 +1,7 @@
 # ArtX
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-3776AB.svg)](#install)
-[![Version 0.4.1](https://img.shields.io/badge/version-0.4.1-0f766e.svg)](pyproject.toml)
+[![Version 0.4.2.dev0](https://img.shields.io/badge/version-0.4.2.dev0-0f766e.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0f766e.svg)](LICENSE)
 
 [中文说明](docs/README.zh-CN.md)
@@ -55,21 +55,19 @@ If you want optional large-image extras:
 uv sync --extra large-images
 ```
 
-## Migration note
+## Migration and compatibility
 
-The import path has been renamed from `googleart_download` to `artx`.
+This working version is `0.4.2.dev0`, an unreleased integration based on ArtX `0.4.1`. The primary command is `artx`; the earlier local `google-art` command and `google_art` Python API remain available with their existing behavior.
 
-- `googleart_download` remains as a compatibility shim for two minor releases
-- it emits a `DeprecationWarning` on import
-- if you use this project as a library, update your imports:
+| Name | Role |
+| --- | --- |
+| `artx` command and Python package | Primary application: cache/resume, metadata, size inspection, tile workflows, and large-image output |
+| `googleart_download` Python package | Upstream compatibility shim forwarding to `artx`; emits `DeprecationWarning` |
+| `google-art` command and `google_art` Python package | Retained local implementation for existing callers, including PNG/WebP and exact longest-edge resizing |
 
-```python
-# Old
-from googleart_download import ...
+`google_art` and `googleart_download` are different packages. The old `google-art` options are not interchangeable with `artx` options: for example, `artx --size` accepts presets, whereas `google-art --size` accepts a pixel count.
 
-# New
-from artx import ...
-```
+See [Migration and repository history](docs/migration.md) for the verified rename timeline, command mapping, and integration boundaries. Existing local callers can use the [legacy Google Art guide](docs/legacy-google-art.md).
 
 ## Quick Start
 
@@ -230,6 +228,7 @@ _Screenshot generated from the current TUI output._
 
 ## More Documentation
 
+- [Migration Guide](docs/migration.md): repository history, command differences, and compatibility
 - [Usage Guide](docs/usage.md): CLI usage, batch workflows, resume, rerun, conflict handling
 - [Large Images](docs/large-images.md): large artwork behavior, TIFF/BigTIFF path, cache reuse, size inspection
 - [Metadata Guide](docs/metadata.md): metadata-only export, sidecars, EXIF behavior

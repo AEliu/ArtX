@@ -1,6 +1,8 @@
 # Project Status
 
-Updated: 2026-03-16
+Updated: 2026-11-08
+
+Working version: `0.4.2.dev0` (unreleased), integrating upstream ArtX `0.4.1` with the retained local `google_art` API. See [migration.md](migration.md) for the source revision and verified rename history.
 
 ## Current state
 
@@ -43,25 +45,25 @@ The project currently supports:
 
 Application and shared modules:
 
-- `src/googleart_download/cli/`
-- `src/googleart_download/batch/`
-- `src/googleart_download/reporting/`
-- `src/googleart_download/models.py`
-- `src/googleart_download/errors.py`
-- `src/googleart_download/logging_utils.py`
+- `src/artx/cli/`
+- `src/artx/batch/`
+- `src/artx/reporting/`
+- `src/artx/models.py`
+- `src/artx/errors.py`
+- `src/artx/logging_utils.py`
 
 Download domain:
 
-- `src/googleart_download/download/constants.py`
-- `src/googleart_download/download/http_client.py`
-- `src/googleart_download/download/downloader.py`
-- `src/googleart_download/download/tiles.py`
-- `src/googleart_download/download/image_writer.py`
+- `src/artx/download/constants.py`
+- `src/artx/download/http_client.py`
+- `src/artx/download/downloader.py`
+- `src/artx/download/tiles.py`
+- `src/artx/download/image_writer.py`
 
 Metadata domain:
 
-- `src/googleart_download/metadata/parsers.py`
-- `src/googleart_download/metadata/output.py`
+- `src/artx/metadata/parsers.py`
+- `src/artx/metadata/output.py`
 
 Repo quality and automation:
 
@@ -73,10 +75,17 @@ Repo quality and automation:
   - the workflow still supports a manual custom artwork input override when needed
 - explicit CLI proxy support is available through `--proxy`, while standard proxy environment variables remain supported by default
 - tile downloads now use an internal async `httpx.AsyncClient` path while page fetch, stitching, and persistence remain synchronous
-- there is currently no separate user-facing sync/async engine flag; `--workers` still controls tile-download concurrency
+- there is currently no separate user-facing sync/async engine flag; `--workers` bounds download and cache-write workers
 - `scripts/generate_readme_assets.py` is treated as a generated-doc asset source rather than a hand-maintained file
 
 ## Recent completed work
+
+- integrated the ArtX source snapshot while preserving `google-art` and `google_art` compatibility
+- bounded async tile workers and synchronous future submission, including cache-write backpressure
+- cancellation waits for active disk writes; failed tile publications remove partial files
+- explicitly close Pillow/BigTIFF image resources and choose pyvips encoding options by format
+- preserve existing images until replacement succeeds when overwrite is selected
+- run both test suites and package all three Python namespaces; see [testing.md](testing.md)
 
 - replaced the old monolithic `core.py` with grouped `download/` and `metadata/` packages
 - added batch queue state tracking
@@ -97,9 +106,9 @@ Repo quality and automation:
 
 - `uv run ruff format .`
 - `uv run ruff check .`
-- `uv run python -m mypy src tests scripts/generate_readme_assets.py`
-- `uv run python -m py_compile main.py src/googleart_download/*.py src/googleart_download/cli/*.py src/googleart_download/batch/*.py src/googleart_download/download/*.py src/googleart_download/metadata/*.py src/googleart_download/reporting/*.py scripts/generate_readme_assets.py tests/*.py`
-- `uv run python -m unittest discover -s tests -v`
+- `uv run mypy --hide-error-context --pretty --strict src/artx`
+- `uv run python -m py_compile main.py src/artx/*.py src/artx/cli/*.py src/artx/batch/*.py src/artx/download/*.py src/artx/metadata/*.py src/artx/reporting/*.py scripts/generate_readme_assets.py tests/*.py`
+- `uv run python -m pytest -q`
 - `uv run artx --help`
 
 ## Next TODO

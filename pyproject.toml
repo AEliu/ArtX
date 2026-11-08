@@ -1,23 +1,27 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
 name = "artx"
-version = "0.4.1"
-description = "Download high-resolution Google Arts & Culture images by stitching tiles"
+version = "0.4.2.dev0"
+description = "Download high-resolution artwork images with resumable tile downloads and local stitching"
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
 dependencies = [
     "httpx>=0.28,<0.29",
-    "pillow>=11.1.0,<12",
-    "pycryptodome>=3.23.0,<4",
-    "rich>=14.1.0,<15",
+    "typer>=0.12",
+    "pillow>=11.1,<12",
+    "rich>=14.1,<15",
+    "json5>=0.9",
+    "pycryptodome>=3.23,<4",
+    "artfetch>=0.1.0",
 ]
 
 [project.scripts]
 artx = "artx.cli:main"
+google-art = "google_art.cli:app"
+
+[project.urls]
+Repository = "https://github.com/AEliu/ArtX"
+Issues = "https://github.com/AEliu/ArtX/issues"
 
 [project.optional-dependencies]
 large-images = [
@@ -26,12 +30,35 @@ large-images = [
     "tifffile>=2026.3.3",
 ]
 
+[dependency-groups]
+dev = [
+    "pytest>=8.1",
+    "pytest-httpx>=0.30",
+    "ruff>=0.15.6",
+    "mypy>=1.19.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "src",
+]
+
+[build-system]
+requires = ["hatchling>=1.23"]
+build-backend = "hatchling.build"
+
 [tool.hatch.build.targets.wheel]
-packages = ["src/artx", "src/googleart_download"]
+packages = ["src/artx", "src/googleart_download", "src/google_art"]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/art.jpg", "/art.png"]
 
 [tool.ruff]
 target-version = "py312"
 line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
 
 [tool.mypy]
 python_version = "3.12"
@@ -43,18 +70,5 @@ check_untyped_defs = true
 no_implicit_optional = true
 show_error_codes = true
 
-[tool.mypy-pyvips]
-ignore_missing_imports = true
-
-[tool.mypy-psutil]
-ignore_missing_imports = true
-
-[tool.ruff.lint]
-select = ["E", "F", "I"]
-
-[dependency-groups]
-dev = [
-    "mypy>=1.19.1",
-    "ruff>=0.15.6",
-    "pytest>=8.0.0",
-]
+[tool.uv]
+package = true
