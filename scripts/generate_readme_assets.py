@@ -13,7 +13,7 @@ ASSETS_DIR = Path("docs/assets")
 
 
 def export_svg(output_path: Path, renderable: object, *, width: int = 160) -> None:
-    console = Console(record=True, width=width, file=StringIO())
+    console = Console(record=True, width=width, file=StringIO(), legacy_windows=False, safe_box=False)
     console.print(renderable)
     svg = console.export_svg(title="ArtX", unique_id=f"artx-{output_path.stem}")
     output_path.write_text(svg, encoding="utf-8", newline="\n")
